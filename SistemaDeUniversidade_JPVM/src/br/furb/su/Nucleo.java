@@ -1,6 +1,3 @@
-/**
- * SU - Sistema Universitário 
- */
 package br.furb.su;
 
 import java.io.File;
@@ -41,13 +38,21 @@ import br.furb.su.modelo.dados.SituacaoDisciplina;
 import br.furb.su.modelo.dados.SolicitacaoDiploma;
 import br.furb.su.modelo.dados.SolicitacaoMatricula;
 
+/**
+ * Ofere as funções de manipulação sobre os dados.
+ * 
+ * @author wseefeld
+ * 
+ */
 public class Nucleo {
 
 	private static final String VERIFICACAO_MENSALIDADES = "verificação de mensalidades";
 	private static final String EMISSAO_DIPLOMA = "emissão de diploma";
 	private static final String SOLICITACAO_MATRICULA = "solicitação de matrícula";
 
+	@Deprecated
 	public static void main(String[] args) throws IOException {
+		System.err.println("Ponto de entrada desatualizado: Nucleo.main()\nExecute via JPVM.\n");
 		carregarDados();
 		InDataset inDataset = Sistema.inDataset();
 		OutDataset outDataset = Sistema.outDataset();
@@ -278,7 +283,8 @@ public class Nucleo {
 	private static void gravarDados(OutDataset outDataset) throws IOException {
 		Sistema.debug("iniciando gravacao de dados");
 		File pastaSaida = Sistema.getPastaSaida();
-		DataWriter<?>[] gravadores = new DataWriter[] { new MensagensWriter(pastaSaida), //
+		DataWriter<?>[] gravadores = new DataWriter[] { // 
+		/* ****/new MensagensWriter(pastaSaida), //
 				new MensalidadesWriter(pastaSaida), //
 				new DiplomasWriter(pastaSaida), //
 				new EstatisticasWriter(pastaSaida), //
@@ -286,13 +292,24 @@ public class Nucleo {
 		};
 
 		for (int i = 0; i < gravadores.length; i++) {
-			gravadores[i].write(outDataset);
+			gravadores[i].gravarDados(outDataset);
 		}
 		Sistema.debug("dados gravados");
 	}
 
-	private static String formatarData(Calendar data) {
-		return String.valueOf(data.get(Calendar.YEAR)).concat("/").concat(String.valueOf(data.get(Calendar.MONDAY)));
+	/**
+	 * Converte um objeto de {@code Calendar} em uma string contendo:
+	 * {@code dia/mes/ano}
+	 * 
+	 * @param date
+	 *            data a ser convertida.
+	 * @return representação da data informada em string.
+	 */
+	public static String formatarData(Calendar date) {
+		int dia = date.get(Calendar.DAY_OF_MONTH);
+		int mes = date.get(Calendar.MONTH) + 1;
+		int ano = date.get(Calendar.YEAR);
+		return String.valueOf(dia).concat("/").concat(String.valueOf(mes)).concat("/").concat(String.valueOf(ano));
 	}
 
 	private static Calendar converterData(String string) {

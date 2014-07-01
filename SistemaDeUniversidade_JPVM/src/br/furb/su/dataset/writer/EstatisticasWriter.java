@@ -16,7 +16,7 @@ public class EstatisticasWriter extends DataWriter<String> {
 	}
 
 	@Override
-	protected void gravar(String registro) throws IOException {
+	protected void gravarRegistro(String registro) throws IOException {
 		pis.println(registro);
 	}
 
