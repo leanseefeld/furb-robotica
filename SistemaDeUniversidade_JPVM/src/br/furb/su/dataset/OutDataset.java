@@ -3,10 +3,10 @@ package br.furb.su.dataset;
 import java.util.ArrayList;
 import java.util.List;
 
-import br.furb.su.Mensagem;
-import br.furb.su.model.Diploma;
-import br.furb.su.model.Historico;
-import br.furb.su.model.Mensalidade;
+import br.furb.su.modelo.Mensagem;
+import br.furb.su.modelo.dados.Diploma;
+import br.furb.su.modelo.dados.Historico;
+import br.furb.su.modelo.dados.Mensalidade;
 
 public class OutDataset {
 

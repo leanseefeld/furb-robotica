@@ -8,17 +8,15 @@ import java.util.List;
 
 import br.furb.su.dataset.InDataset;
 import br.furb.su.dataset.OutDataset;
-import br.furb.su.model.Aluno;
+import br.furb.su.modelo.dados.Aluno;
 
 public final class Sistema {
 
 	public static boolean DEBUG = true;
 
 	public static final double PERCENTUAL_MULTA = 1.15;
-	public static final int MAX_THREADS = 50;
-
+	public static final int NUM_ESCRAVOS = 4;
 	private static final Sistema INSTANCE = new Sistema();
-
 	private static boolean loaded = false;
 	private static File pastaEntrada;
 	private static File pastaSaida;

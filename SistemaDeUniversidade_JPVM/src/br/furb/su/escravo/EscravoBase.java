@@ -1,13 +1,13 @@
-package br.furb.su.slave;
+package br.furb.su.escravo;
 
 import jpvm.jpvmEnvironment;
 import jpvm.jpvmException;
 
-public abstract class BaseSlave {
+public abstract class EscravoBase {
 	
 	final jpvmEnvironment pvm;
 	
-	public BaseSlave() throws jpvmException {
+	public EscravoBase() throws jpvmException {
 		pvm = new jpvmEnvironment(true);
 	}
 

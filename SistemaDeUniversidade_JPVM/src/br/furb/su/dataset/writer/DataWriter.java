@@ -7,7 +7,7 @@ import java.util.Calendar;
 import java.util.Iterator;
 
 import br.furb.su.dataset.OutDataset;
-import br.furb.su.model.Mensalidade;
+import br.furb.su.modelo.dados.Mensalidade;
 
 public abstract class DataWriter<T> {
 

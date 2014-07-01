@@ -6,7 +6,7 @@ import java.util.Iterator;
 
 import br.furb.su.dataset.OutDataset;
 import br.furb.su.dataset.reader.MensalidadesReader;
-import br.furb.su.model.Mensalidade;
+import br.furb.su.modelo.dados.Mensalidade;
 
 public class MensalidadesWriter extends DataWriter<Mensalidade> {
 

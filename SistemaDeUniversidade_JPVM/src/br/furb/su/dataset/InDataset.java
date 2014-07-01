@@ -5,13 +5,13 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import br.furb.su.model.Aluno;
-import br.furb.su.model.Curso;
-import br.furb.su.model.Disciplina;
-import br.furb.su.model.Historico;
-import br.furb.su.model.Mensalidade;
-import br.furb.su.model.SolicitacaoDiploma;
-import br.furb.su.model.SolicitacaoMatricula;
+import br.furb.su.modelo.dados.Aluno;
+import br.furb.su.modelo.dados.Curso;
+import br.furb.su.modelo.dados.Disciplina;
+import br.furb.su.modelo.dados.Historico;
+import br.furb.su.modelo.dados.Mensalidade;
+import br.furb.su.modelo.dados.SolicitacaoDiploma;
+import br.furb.su.modelo.dados.SolicitacaoMatricula;
 
 public class InDataset {
 

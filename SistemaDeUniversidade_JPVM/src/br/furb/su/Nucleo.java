@@ -30,45 +30,28 @@ import br.furb.su.dataset.writer.DiplomasWriter;
 import br.furb.su.dataset.writer.EstatisticasWriter;
 import br.furb.su.dataset.writer.MensagensWriter;
 import br.furb.su.dataset.writer.MensalidadesWriter;
-import br.furb.su.model.Aluno;
-import br.furb.su.model.Curso;
-import br.furb.su.model.Diploma;
-import br.furb.su.model.Disciplina;
-import br.furb.su.model.Historico;
-import br.furb.su.model.Mensalidade;
-import br.furb.su.model.SituacaoDisciplina;
-import br.furb.su.model.SolicitacaoDiploma;
-import br.furb.su.model.SolicitacaoMatricula;
+import br.furb.su.modelo.Mensagem;
+import br.furb.su.modelo.dados.Aluno;
+import br.furb.su.modelo.dados.Curso;
+import br.furb.su.modelo.dados.Diploma;
+import br.furb.su.modelo.dados.Disciplina;
+import br.furb.su.modelo.dados.Historico;
+import br.furb.su.modelo.dados.Mensalidade;
+import br.furb.su.modelo.dados.SituacaoDisciplina;
+import br.furb.su.modelo.dados.SolicitacaoDiploma;
+import br.furb.su.modelo.dados.SolicitacaoMatricula;
 
-public class Main {
+public class Nucleo {
 
 	private static final String VERIFICACAO_MENSALIDADES = "verificação de mensalidades";
 	private static final String EMISSAO_DIPLOMA = "emissão de diploma";
 	private static final String SOLICITACAO_MATRICULA = "solicitação de matrícula";
 
 	public static void main(String[] args) throws IOException {
-		Sistema.debug("requisitando parâmetros");
-		Scanner scanner = null;
-		try {
-			scanner = new Scanner(System.in);
-			System.out.print("Informe a pasta de origem dos dados: ");
-			File pastaOrigem = new File(scanner.nextLine());
-
-			System.out.print("Informe a pasta de destino dos dados: ");
-			File pastaDestino = new File(scanner.nextLine());
-
-			System.out.print("Informe a data atual no format 'MM/AAAA': ");
-			Calendar dataAtual = converterData(scanner.nextLine());
-
-			Sistema.load(pastaOrigem, pastaDestino, dataAtual);
-		} finally {
-			scanner.close();
-		}
-
+		carregarDados();
 		InDataset inDataset = Sistema.inDataset();
 		OutDataset outDataset = Sistema.outDataset();
 
-		lerDados(inDataset);
 		ligarDados(inDataset);
 		processar(inDataset, outDataset);
 		gravarDados(outDataset);
@@ -192,8 +175,7 @@ public class Main {
 			if (!mensalidade.isPaga() && dataAtual.after(mensalidade.getVencimento())) {
 				totalMulta += mensalidade.calculaMulta();
 				outDataset.addAviso(new Mensagem(mensalidade.getAluno(), VERIFICACAO_MENSALIDADES, //
-						String.format("A mensalidade do dia %s está atrasada e gerou multa de R$ %.2f",
-								formatarData(mensalidade.getCompetencia()), totalMulta)));
+						String.format("A mensalidade do dia %s está atrasada e gerou multa de R$ %.2f", formatarData(mensalidade.getCompetencia()), totalMulta)));
 			}
 		}
 		Sistema.estatisticas().financeiras().setTotalMulta(totalMulta);
@@ -210,22 +192,18 @@ public class Main {
 			SolicitacaoDiploma solic = solicitacoes.get(i);
 			Aluno aluno = solic.getAluno();
 			if (aluno.possuiMensalidadeAtrasada()) {
-				outDataset.addProblema(new Mensagem(aluno, EMISSAO_DIPLOMA,
-						"Não é possível emitir o diploma pois há mensalidade(s) atrasada(s)."));
+				outDataset.addProblema(new Mensagem(aluno, EMISSAO_DIPLOMA, "Não é possível emitir o diploma pois há mensalidade(s) atrasada(s)."));
 			} else {
 				Curso curso = solic.getCurso();
 				List<Historico> historicos = curso.filtrarHistoricos(aluno.getHistoricos());
 				if (historicos.size() < curso.getDisciplinas().size()) {
-					outDataset.addProblema(new Mensagem(aluno, EMISSAO_DIPLOMA,
-							"Não é possível emitir o diploma pois há disciplinas não cursadas."));
+					outDataset.addProblema(new Mensagem(aluno, EMISSAO_DIPLOMA, "Não é possível emitir o diploma pois há disciplinas não cursadas."));
 				} else {
 					Iterator<Historico> iterator = historicos.iterator();
 					while (iterator.hasNext()) {
 						Historico historico = iterator.next();
 						if (historico.getSituacao() != SituacaoDisciplina.APROVADO) {
-							outDataset
-									.addProblema(new Mensagem(aluno, EMISSAO_DIPLOMA,
-											"Não é possível emitir o diploma pois não há aprovação em todas as disciplinas do curso."));
+							outDataset.addProblema(new Mensagem(aluno, EMISSAO_DIPLOMA, "Não é possível emitir o diploma pois não há aprovação em todas as disciplinas do curso."));
 							emissaoNegada = true;
 							break;
 						}
@@ -250,14 +228,12 @@ public class Main {
 			Aluno aluno = solic.getAluno();
 			Disciplina disciplina = solic.getDisciplina();
 			if (aluno.possuiMensalidadeAtrasada()) {
-				outDataset.addProblema(new Mensagem(aluno, SOLICITACAO_MATRICULA,
-						"Não é possível realizar matrículas pois há mensalidade(s) em atraso."));
+				outDataset.addProblema(new Mensagem(aluno, SOLICITACAO_MATRICULA, "Não é possível realizar matrículas pois há mensalidade(s) em atraso."));
 			} else {
 				if (aluno.cursou(disciplina)) {
 					outDataset.addAviso(new Mensagem(aluno, SOLICITACAO_MATRICULA, "Esta disciplina já foi cursada."));
 				}
-				Historico historico = new Historico(aluno, disciplina, solic.getCurso(),
-						SituacaoDisciplina.MATRICULADO, Sistema.getDataAtual());
+				Historico historico = new Historico(aluno, disciplina, solic.getCurso(), SituacaoDisciplina.MATRICULADO, Sistema.getDataAtual());
 				historicos.add(historico);
 			}
 		}
@@ -288,8 +264,7 @@ public class Main {
 					mensalidadeAluno += disciplina.getValorMensal();
 				}
 			}
-			Mensalidade mensalidade = new Mensalidade(aluno, mensalidadeAluno + matriculaAluno, dataAtual,
-					Sistema.proxVecto(dataAtual), false);
+			Mensalidade mensalidade = new Mensalidade(aluno, mensalidadeAluno + matriculaAluno, dataAtual, Sistema.proxVecto(dataAtual), false);
 			outDataset.addMensalidade(mensalidade);
 			totalMatriculas += matriculaAluno;
 			totalMensalidades += mensalidadeAluno;
@@ -330,6 +305,31 @@ public class Main {
 		Calendar data = Calendar.getInstance();
 		data.set(ano, mes - 1, 1, 0, 0, 0);
 		return data;
+	}
+
+	public static void carregarDados() {
+		Sistema.debug("requisitando parâmetros");
+		Scanner scanner = null;
+		try {
+			scanner = new Scanner(System.in);
+			System.out.print("Informe a pasta de origem dos dados: ");
+			File pastaOrigem = new File(scanner.nextLine());
+
+			System.out.print("Informe a pasta de destino dos dados: ");
+			File pastaDestino = new File(scanner.nextLine());
+
+			System.out.print("Informe a data atual no format 'MM/AAAA': ");
+			Calendar dataAtual = converterData(scanner.nextLine());
+
+			Sistema.load(pastaOrigem, pastaDestino, dataAtual);
+		} finally {
+			scanner.close();
+		}
+		try {
+			lerDados(Sistema.inDataset());
+		} catch (FileNotFoundException e) {
+			throw new RuntimeException("não foi possível carregar os dados");
+		}
 	}
 
 }

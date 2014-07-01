@@ -1,6 +1,6 @@
-package br.furb.su;
+package br.furb.su.modelo;
 
-import br.furb.su.model.Aluno;
+import br.furb.su.modelo.dados.Aluno;
 
 public class Mensagem {
 

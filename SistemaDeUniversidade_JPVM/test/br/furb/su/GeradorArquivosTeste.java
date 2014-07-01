@@ -18,7 +18,7 @@ import br.furb.su.dataset.reader.HistoricosReader;
 import br.furb.su.dataset.reader.MensalidadesReader;
 import br.furb.su.dataset.reader.SolicitacoesDiplomaReader;
 import br.furb.su.dataset.reader.SolicitacoesMatriculaReader;
-import br.furb.su.model.SituacaoDisciplina;
+import br.furb.su.modelo.dados.SituacaoDisciplina;
 
 public class GeradorArquivosTeste {
 

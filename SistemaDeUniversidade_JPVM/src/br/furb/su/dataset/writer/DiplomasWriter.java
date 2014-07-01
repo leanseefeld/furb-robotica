@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.util.Iterator;
 
 import br.furb.su.dataset.OutDataset;
-import br.furb.su.model.Diploma;
+import br.furb.su.modelo.dados.Diploma;
 
 public class DiplomasWriter extends DataWriter<Diploma> {
 

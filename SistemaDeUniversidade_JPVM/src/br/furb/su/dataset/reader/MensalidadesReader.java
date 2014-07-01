@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Scanner;
 
 import br.furb.su.dataset.InDataset;
-import br.furb.su.model.Mensalidade;
+import br.furb.su.modelo.dados.Mensalidade;
 
 public class MensalidadesReader extends DataReader<Mensalidade> {
 

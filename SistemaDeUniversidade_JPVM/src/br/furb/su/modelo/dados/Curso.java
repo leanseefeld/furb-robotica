@@ -1,4 +1,4 @@
-package br.furb.su.model;
+package br.furb.su.modelo.dados;
 
 import java.util.ArrayList;
 import java.util.HashMap;

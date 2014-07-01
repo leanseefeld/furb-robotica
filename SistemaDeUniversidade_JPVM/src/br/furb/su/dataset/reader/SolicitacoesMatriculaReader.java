@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Scanner;
 
 import br.furb.su.dataset.InDataset;
-import br.furb.su.model.SolicitacaoMatricula;
+import br.furb.su.modelo.dados.SolicitacaoMatricula;
 
 public class SolicitacoesMatriculaReader extends DataReader<SolicitacaoMatricula> {
 

@@ -6,8 +6,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import br.furb.su.Mensagem;
 import br.furb.su.dataset.OutDataset;
+import br.furb.su.modelo.Mensagem;
 
 public class MensagensWriter extends DataWriter<Mensagem> {
 

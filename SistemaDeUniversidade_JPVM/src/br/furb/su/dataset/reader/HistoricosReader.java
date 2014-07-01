@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Scanner;
 
 import br.furb.su.dataset.InDataset;
-import br.furb.su.model.Historico;
-import br.furb.su.model.SituacaoDisciplina;
+import br.furb.su.modelo.dados.Historico;
+import br.furb.su.modelo.dados.SituacaoDisciplina;
 
 public class HistoricosReader extends DataReader<Historico> {
 

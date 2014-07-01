@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Scanner;
 
 import br.furb.su.dataset.InDataset;
-import br.furb.su.model.SolicitacaoDiploma;
+import br.furb.su.modelo.dados.SolicitacaoDiploma;
 
 public class SolicitacoesDiplomaReader extends DataReader<SolicitacaoDiploma> {
 

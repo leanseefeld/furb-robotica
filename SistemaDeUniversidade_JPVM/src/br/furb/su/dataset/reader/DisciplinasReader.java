@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Scanner;
 
 import br.furb.su.dataset.InDataset;
-import br.furb.su.model.Disciplina;
+import br.furb.su.modelo.dados.Disciplina;
 
 public class DisciplinasReader extends DataReader<Disciplina> {
 

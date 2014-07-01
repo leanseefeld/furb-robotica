@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.Scanner;
 
 import br.furb.su.dataset.InDataset;
-import br.furb.su.model.Curso;
+import br.furb.su.modelo.dados.Curso;
 
 public class CursoReader extends DataReader<Curso> {
 
