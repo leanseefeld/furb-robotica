@@ -13,6 +13,7 @@ import br.furb.su.dataset.InDataset;
 import br.furb.su.dataset.OutDataset;
 import br.furb.su.escravo.CursoCenter;
 import br.furb.su.escravo.DiplomaCenter;
+import br.furb.su.escravo.EscravoBase;
 import br.furb.su.escravo.MatriculaCenter;
 import br.furb.su.escravo.MensalidadeCenter;
 import br.furb.su.modelo.dados.Aluno;
@@ -39,7 +40,7 @@ public final class Sistema {
 	private static Estatisticas estatisticas = new Estatisticas();
 	public static final int NUM_ESCRAVOS;
 
-	private static final Map<Class<?>, Integer> CONFIG_ESCRAVOS = new HashMap<Class<?>, Integer>();
+	private static final Map<Class<? extends EscravoBase>, Integer> CONFIG_ESCRAVOS = new HashMap<>();
 
 	static {
 		CONFIG_ESCRAVOS.put(CursoCenter.class, 1);
@@ -140,7 +141,7 @@ public final class Sistema {
 
 	}
 
-	public static Map<Class<?>, Integer> getConfigEscravos() {
+	public static Map<Class<? extends EscravoBase>, Integer> getConfigEscravos() {
 		return Collections.unmodifiableMap(CONFIG_ESCRAVOS);
 	}
 }
