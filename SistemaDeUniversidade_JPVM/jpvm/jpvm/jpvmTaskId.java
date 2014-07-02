@@ -24,34 +24,41 @@
  */
 
 package jpvm;
-import java.net.*;
-import java.io.*;
 
-public
-class jpvmTaskId implements Serializable {
-	private String		taskHost;
-	private int		taskConnectPort;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
+import java.io.Serializable;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
+
+public class jpvmTaskId implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
+	private String taskHost;
+	private int taskConnectPort;
 
 	public jpvmTaskId() {
-		taskHost 	= null;
+		taskHost = null;
 		taskConnectPort = 0;
 	};
 
 	public jpvmTaskId(int my_port) {
-		taskHost 	= null;
+		taskHost = null;
 		taskConnectPort = 0;
 		try {
 			InetAddress taskAddr = InetAddress.getLocalHost();
 			taskHost = taskAddr.getHostName();
 			taskConnectPort = my_port;
-		}
-		catch (UnknownHostException uhe) {
+		} catch (UnknownHostException uhe) {
 			jpvmDebug.error("jpvmTaskId, unknown host exception");
 		}
 	}
 
 	public jpvmTaskId(String host, int port) {
-		taskHost 	= new String(host);
+		taskHost = new String(host);
 		taskConnectPort = port;
 	}
 
@@ -63,65 +70,61 @@ class jpvmTaskId implements Serializable {
 		return taskConnectPort;
 	}
 
+	@Override
 	public String toString() {
-		return ((taskHost!=null ? taskHost : "(null)") +
-			", port #"+taskConnectPort);
+		return ((taskHost != null ? taskHost : "(null)") + ", port #" + taskConnectPort);
 	}
 
 	public boolean equals(jpvmTaskId tid) {
-		if(tid == null)
+		if (tid == null)
 			return false;
-		if(taskConnectPort != tid.taskConnectPort)
+		if (taskConnectPort != tid.taskConnectPort)
 			return false;
-		if(tid.taskHost==null)
+		if (tid.taskHost == null)
 			return false;
 		boolean ret = tid.taskHost.equalsIgnoreCase(taskHost);
 		return ret;
 	}
 
 	public void send(DataOutputStream strm) throws jpvmException {
-	    int i;
-	    try {
-		int len = 0;
-		if(taskHost!=null) {
-			len = taskHost.length();
-			strm.writeInt(len);
-			char hname[] = new char[len];
-			taskHost.getChars(0,len,hname,0);
-			for(i=0;i<len;i++) {
-				strm.writeChar(hname[i]);
+		int i;
+		try {
+			int len = 0;
+			if (taskHost != null) {
+				len = taskHost.length();
+				strm.writeInt(len);
+				char hname[] = new char[len];
+				taskHost.getChars(0, len, hname, 0);
+				for (i = 0; i < len; i++) {
+					strm.writeChar(hname[i]);
+				}
+			} else {
+				strm.writeInt(len);
 			}
+			strm.writeInt(taskConnectPort);
+		} catch (IOException ioe) {
+			jpvmDebug.note("jpvmTaskId, send - i/o exception");
+			throw new jpvmException("jpvmTaskId, send - i/o exception");
 		}
-		else {
-			strm.writeInt(len);
-		}
-		strm.writeInt(taskConnectPort);
-	    }
-	    catch (IOException ioe) {
-		jpvmDebug.note("jpvmTaskId, send - i/o exception");
-		throw new jpvmException("jpvmTaskId, send - i/o exception");
-	    }
 	}
 
 	public void recv(DataInputStream strm) throws jpvmException {
-	    int i;
-	    try {
-		int len = strm.readInt();
-		if(len>0) {
-			char hname[] = new char[len];
-			for(i=0;i<len;i++) {
-				hname[i] = strm.readChar();
+		int i;
+		try {
+			int len = strm.readInt();
+			if (len > 0) {
+				char hname[] = new char[len];
+				for (i = 0; i < len; i++) {
+					hname[i] = strm.readChar();
+				}
+				taskHost = new String(hname);
+			} else {
+				taskHost = null;
 			}
-			taskHost = new String(hname);
+			taskConnectPort = strm.readInt();
+		} catch (IOException ioe) {
+			jpvmDebug.note("jpvmTaskId, recv - i/o exception");
+			throw new jpvmException("jpvmTaskId, recv - i/o exception");
 		}
-		else {
-			taskHost = null;
-		}
-		taskConnectPort = strm.readInt();
-	    }
-	    catch (IOException ioe) {
-		jpvmDebug.note("jpvmTaskId, recv - i/o exception");
-		throw new jpvmException("jpvmTaskId, recv - i/o exception");
-	    }
 	}
 };

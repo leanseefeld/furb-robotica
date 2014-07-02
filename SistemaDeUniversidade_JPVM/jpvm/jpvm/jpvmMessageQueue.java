@@ -28,27 +28,26 @@
 package jpvm;
 
 class jpvmMessageQueueElement {
-	public	jpvmMessage 		message;
-	public	jpvmMessageQueueElement next;
+	public jpvmMessage message;
+	public jpvmMessageQueueElement next;
 
 	public jpvmMessageQueueElement() {
 		message = null;
-		next	= null;
+		next = null;
 	}
 
 	public jpvmMessageQueueElement(jpvmMessage m) {
 		message = m;
-		next	= null;
+		next = null;
 	}
 };
 
-public
-class jpvmMessageQueue {
-	private	jpvmMessageQueueElement	list_head;
-	private	jpvmMessageQueueElement	list_tail;
+public class jpvmMessageQueue {
+	private jpvmMessageQueueElement list_head;
+	private jpvmMessageQueueElement list_tail;
 
 	private synchronized void addElement(jpvmMessageQueueElement nw) {
-		if(list_head == null) {
+		if (list_head == null) {
 			list_head = list_tail = nw;
 			return;
 		}
@@ -57,23 +56,26 @@ class jpvmMessageQueue {
 	}
 
 	private synchronized void deleteElement(jpvmMessageQueueElement d) {
-		if(list_head == null) return;
-		if(list_head == d) {
+		if (list_head == null)
+			return;
+		if (list_head == d) {
 			// Deleting head element.
 			list_head = d.next;
-			if(list_tail == d) list_tail=null;
+			if (list_tail == d)
+				list_tail = null;
 			return;
 		}
 		jpvmMessageQueueElement tmp = list_head;
-		while(tmp.next != d) {
+		while (tmp.next != d) {
 			tmp = tmp.next;
-			if(tmp == null) {
+			if (tmp == null) {
 				// Element wasn't in the list
 				return;
 			}
 		}
 		tmp.next = d.next;
-		if(list_tail==d) list_tail=tmp;
+		if (list_tail == d)
+			list_tail = tmp;
 	}
 
 	private synchronized jpvmMessageQueueElement find() {
@@ -83,7 +85,8 @@ class jpvmMessageQueue {
 	private synchronized jpvmMessageQueueElement find(int tag) {
 		jpvmMessageQueueElement tmp = list_head;
 		while (tmp != null) {
-			if(tmp.message.messageTag == tag) return tmp;
+			if (tmp.message.messageTag == tag)
+				return tmp;
 			tmp = tmp.next;
 		}
 		return null;
@@ -92,18 +95,17 @@ class jpvmMessageQueue {
 	private synchronized jpvmMessageQueueElement find(jpvmTaskId tid) {
 		jpvmMessageQueueElement tmp = list_head;
 		while (tmp != null) {
-			if(tmp.message.sourceTid.equals(tid)) return tmp;
+			if (tmp.message.sourceTid.equals(tid))
+				return tmp;
 			tmp = tmp.next;
 		}
 		return null;
 	}
 
-	private synchronized jpvmMessageQueueElement find(jpvmTaskId tid, 
-	    int tag) {
+	private synchronized jpvmMessageQueueElement find(jpvmTaskId tid, int tag) {
 		jpvmMessageQueueElement tmp = list_head;
 		while (tmp != null) {
-			if((tmp.message.sourceTid.equals(tid)) && 
-			   (tmp.message.messageTag==tag))
+			if ((tmp.message.sourceTid.equals(tid)) && (tmp.message.messageTag == tag))
 				return tmp;
 			tmp = tmp.next;
 		}
@@ -142,67 +144,63 @@ class jpvmMessageQueue {
 
 	public synchronized jpvmMessage dequeue() {
 		jpvmMessageQueueElement tmp = null;
-		while(true) {
-			if((tmp = find())!=null) {
+		while (true) {
+			if ((tmp = find()) != null) {
 				deleteElement(tmp);
 				return tmp.message;
 			}
 			try {
 				wait();
-			}
-			catch (InterruptedException ie) {
+			} catch (InterruptedException ie) {
 			}
 		}
 	}
 
 	public synchronized jpvmMessage dequeue(int tag) {
 		jpvmMessageQueueElement tmp = null;
-		while(true) {
-			if((tmp = find(tag))!=null) {
+		while (true) {
+			if ((tmp = find(tag)) != null) {
 				deleteElement(tmp);
 				return tmp.message;
 			}
 			try {
 				wait();
-			}
-			catch (InterruptedException ie) {
+			} catch (InterruptedException ie) {
 			}
 		}
 	}
 
 	public synchronized jpvmMessage dequeue(jpvmTaskId tid) {
 		jpvmMessageQueueElement tmp = null;
-		while(true) {
-			if((tmp = find(tid))!=null) {
+		while (true) {
+			if ((tmp = find(tid)) != null) {
 				deleteElement(tmp);
 				return tmp.message;
 			}
 			try {
 				wait();
-			}
-			catch (InterruptedException ie) {
+			} catch (InterruptedException ie) {
 			}
 		}
 	}
 
 	public synchronized jpvmMessage dequeue(jpvmTaskId tid, int tag) {
 		jpvmMessageQueueElement tmp = null;
-		while(true) {
-			if((tmp = find(tid,tag))!=null) {
+		while (true) {
+			if ((tmp = find(tid, tag)) != null) {
 				deleteElement(tmp);
 				return tmp.message;
 			}
 			try {
 				wait();
-			}
-			catch (InterruptedException ie) {
+			} catch (InterruptedException ie) {
 			}
 		}
 	}
 
 	public synchronized jpvmMessage dequeueNonBlock() {
 		jpvmMessageQueueElement tmp = find();
-		if(tmp != null) {
+		if (tmp != null) {
 			deleteElement(tmp);
 			return tmp.message;
 		}
@@ -211,7 +209,7 @@ class jpvmMessageQueue {
 
 	public synchronized jpvmMessage dequeueNonBlock(int tag) {
 		jpvmMessageQueueElement tmp = find(tag);
-		if(tmp != null) {
+		if (tmp != null) {
 			deleteElement(tmp);
 			return tmp.message;
 		}
@@ -220,16 +218,16 @@ class jpvmMessageQueue {
 
 	public synchronized jpvmMessage dequeueNonBlock(jpvmTaskId tid) {
 		jpvmMessageQueueElement tmp = find(tid);
-		if(tmp != null) {
+		if (tmp != null) {
 			deleteElement(tmp);
 			return tmp.message;
 		}
 		return null;
 	}
 
-	public synchronized jpvmMessage dequeueNonBlock(jpvmTaskId tid,int tag){
-		jpvmMessageQueueElement tmp = find(tid,tag);
-		if(tmp != null) {
+	public synchronized jpvmMessage dequeueNonBlock(jpvmTaskId tid, int tag) {
+		jpvmMessageQueueElement tmp = find(tid, tag);
+		if (tmp != null) {
 			deleteElement(tmp);
 			return tmp.message;
 		}

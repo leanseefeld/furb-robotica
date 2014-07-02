@@ -31,20 +31,20 @@ import java.net.*;
 import java.io.*;
 import jpvm.jpvmTaskId;
 
-public
-class jpvmRecvConnection {
-	private InputStream	instrm;
-	public DataInputStream	strm;
-	public jpvmTaskId	tid;
-	
+public class jpvmRecvConnection {
+	private InputStream instrm;
+	public DataInputStream strm;
+	public jpvmTaskId tid;
+
 	public jpvmRecvConnection() {
 		instrm = null;
 		strm = null;
-		tid   = null;
+		tid = null;
 	}
 
 	public jpvmRecvConnection(Socket sock) {
-		if(sock==null) return;
+		if (sock == null)
+			return;
 		try {
 			instrm = sock.getInputStream();
 			instrm = new BufferedInputStream(instrm);
@@ -52,35 +52,30 @@ class jpvmRecvConnection {
 			tid = new jpvmTaskId();
 			try {
 				tid.recv(strm);
+			} catch (jpvmException jpe) {
+				strm = null;
+				tid = null;
+				jpvmDebug.error("jpvmRecvConnection, internal" + " error");
 			}
-			catch (jpvmException jpe) {
-				strm  = null;
-				tid   = null;
-				jpvmDebug.error("jpvmRecvConnection, internal"+
-					" error");
-			}
-			jpvmDebug.note("jpvmRecvConnection, connect to "
-				+tid.toString()+" established");
-		}
-		catch (IOException ioe) {
-			strm  = null;
-			tid   = null;
+			jpvmDebug.note("jpvmRecvConnection, connect to " + tid.toString() + " established");
+		} catch (IOException ioe) {
+			strm = null;
+			tid = null;
 			jpvmDebug.error("jpvmRecvConnection, i/o exception");
 		}
-		if(strm == null) return;
+		if (strm == null)
+			return;
 	}
 
 	public boolean hasMessagesQueued() {
 		boolean ret = false;
-		if(instrm != null) {
+		if (instrm != null) {
 			try {
-			  if (instrm.available() > 0)
-				ret = true;
-			}
-			catch (IOException ioe) {
+				if (instrm.available() > 0)
+					ret = true;
+			} catch (IOException ioe) {
 				ret = false;
-				jpvmDebug.error("jpvmRecvConnection, " +
-					"hasMessagesQueued - i/o exception");
+				jpvmDebug.error("jpvmRecvConnection, " + "hasMessagesQueued - i/o exception");
 			}
 		}
 		return ret;

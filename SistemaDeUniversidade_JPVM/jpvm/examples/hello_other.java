@@ -25,6 +25,8 @@ package examples;
  * MA 02139, USA.
  */
 
+import javax.swing.JOptionPane;
+
 import jpvm.*;
 
 class hello_other {
@@ -32,6 +34,7 @@ class hello_other {
 
 	public static void main(String args[]) {
 		try {
+			JOptionPane.showMessageDialog(null, "hello_other.main()");
 			// inicia o jpvm...
 			jpvmEnvironment jpvm = new jpvmEnvironment();
 
