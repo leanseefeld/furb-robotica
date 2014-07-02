@@ -1,4 +1,4 @@
-package br.furb.su.escravo;
+package br.furb.su.mestre;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -12,18 +12,16 @@ import jpvm.jpvmMessage;
 import jpvm.jpvmTaskId;
 import br.furb.su.dataset.reader.SolicitacoesDiplomaReader;
 import br.furb.su.dataset.writer.SolicitacaoDiplomaWriter;
+import br.furb.su.escravo.RequestEscravo;
 import br.furb.su.modelo.dados.SolicitacaoDiploma;
 
 public class DiplomaCenterControle extends BaseCenterControle {
 
-	private jpvmTaskId tid;
-	private jpvmEnvironment pvm;
 	private SolicitacoesDiplomaReader solReader;
 	private SolicitacaoDiplomaWriter solWriter;
 
 	public DiplomaCenterControle(jpvmEnvironment pvm, jpvmTaskId tid) {
-		this.tid = tid;
-		this.pvm = pvm;
+		super(pvm, tid);
 	}
 
 	public SolicitacaoDiploma getSolicitacaoDiploma(long codAluno, int codCurso) throws jpvmException {
@@ -47,6 +45,26 @@ public class DiplomaCenterControle extends BaseCenterControle {
 		jpvmBuffer buffer = new jpvmBuffer();
 		buffer.pack(comando.toString());
 		pvm.pvm_send(buffer, tid, RequestEscravo.UPLOAD.tag());
+		jpvmMessage msg = pvm.pvm_recv();
+		checkErrorResponse(msg);
+	}
+
+	public void setCursoCenter(jpvmTaskId taskId) throws jpvmException {
+		StringBuilder comando = new StringBuilder();
+		comando.append(String.format("cursoCenter.host=%s;cursoCenter.port=%d", taskId.getHost(), taskId.getPort()));
+		jpvmBuffer buffer = new jpvmBuffer();
+		buffer.pack(comando.toString());
+		pvm.pvm_send(buffer, tid, RequestEscravo.SET_SLAVE.tag());
+		jpvmMessage msg = pvm.pvm_recv();
+		checkErrorResponse(msg);
+	}
+
+	public void setMensalidadeCenter(jpvmTaskId taskId) throws jpvmException {
+		StringBuilder comando = new StringBuilder();
+		comando.append(String.format("mensalidadeCenter.host=%s;mensalidadeCenter.port=%d", taskId.getHost(), taskId.getPort()));
+		jpvmBuffer buffer = new jpvmBuffer();
+		buffer.pack(comando.toString());
+		pvm.pvm_send(buffer, tid, RequestEscravo.SET_SLAVE.tag());
 		jpvmMessage msg = pvm.pvm_recv();
 		checkErrorResponse(msg);
 	}

@@ -81,7 +81,10 @@ public abstract class EscravoBase {
 					doUnlock(destinatario, bufferStr);
 					break;
 				case OPERATION:
-					doOperation(msg);
+					doOperation(bufferStr);
+					break;
+				case SET_SLAVE:
+					doSetSlave(bufferStr);
 					break;
 				default:
 					responder(ResponseEscravo.FAILURE, String.format(MSG_COD_NAO_SUPORTADO, req.name(), req.tag()));
@@ -120,7 +123,9 @@ public abstract class EscravoBase {
 
 	protected abstract void doUnlock(jpvmTaskId taskId, String buffer);
 
-	protected abstract void doOperation(jpvmMessage msg);
+	protected abstract void doOperation(String buffer);
+
+	protected abstract void doSetSlave(String buffer);
 
 	protected void lock(jpvmTaskId taskId, Integer key) throws jpvmException {
 		if (checkLocked(taskId, key)) {

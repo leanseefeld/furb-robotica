@@ -1,4 +1,4 @@
-package br.furb.su.escravo;
+package br.furb.su.mestre;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -16,6 +16,8 @@ import br.furb.su.dataset.reader.HistoricosReader;
 import br.furb.su.dataset.reader.HistoricosWriter;
 import br.furb.su.dataset.writer.CursoWriter;
 import br.furb.su.dataset.writer.DisciplinasWriter;
+import br.furb.su.escravo.CursoCenter;
+import br.furb.su.escravo.RequestEscravo;
 import br.furb.su.modelo.dados.Curso;
 import br.furb.su.modelo.dados.Disciplina;
 import br.furb.su.modelo.dados.Historico;
@@ -28,8 +30,6 @@ import br.furb.su.modelo.dados.Historico;
  */
 public class CursoCenterControle extends BaseCenterControle {
 
-	private jpvmTaskId tid;
-	private jpvmEnvironment pvm;
 	private final CursoReader cursoReader;
 	private final CursoWriter cursoWriter;
 	private final DisciplinasWriter disciplinasWriter;
@@ -37,8 +37,7 @@ public class CursoCenterControle extends BaseCenterControle {
 	private final HistoricosWriter historicosWriter;
 
 	public CursoCenterControle(jpvmEnvironment pvm, jpvmTaskId tid) {
-		this.pvm = pvm;
-		this.tid = tid;
+		super(pvm, tid);
 		cursoReader = new CursoReader();
 		cursoWriter = new CursoWriter();
 		disciplinasWriter = new DisciplinasWriter();

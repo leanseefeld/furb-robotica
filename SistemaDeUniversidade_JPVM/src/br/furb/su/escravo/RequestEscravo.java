@@ -45,8 +45,12 @@ public enum RequestEscravo {
 	/**
 	 * Executa a operação indicada no buffer, com os respectivos parâmetros.
 	 */
-	OPERATION;
-	
+	OPERATION,
+	/**
+	 * Identifica outro escravo.
+	 */
+	SET_SLAVE;
+
 	public static final int TOTAL_REQUESTS = values().length;
 
 	public int tag() {

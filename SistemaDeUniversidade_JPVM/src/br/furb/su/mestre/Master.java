@@ -9,14 +9,10 @@ import jpvm.jpvmTaskId;
 import br.furb.su.Sistema;
 import br.furb.su.dataset.InDataset;
 import br.furb.su.escravo.CursoCenter;
-import br.furb.su.escravo.CursoCenterControle;
 import br.furb.su.escravo.DiplomaCenter;
-import br.furb.su.escravo.DiplomaCenterControle;
 import br.furb.su.escravo.EscravoBase;
 import br.furb.su.escravo.MatriculaCenter;
-import br.furb.su.escravo.MatriculaCenterControle;
 import br.furb.su.escravo.MensalidadeCenter;
-import br.furb.su.escravo.MensalidadeCenterControle;
 import br.furb.su.modelo.dados.Curso;
 import br.furb.su.modelo.dados.Disciplina;
 import br.furb.su.modelo.dados.Historico;
@@ -34,6 +30,10 @@ public class Master {
 
 	private static jpvmEnvironment pvm;
 	private Map<Class<?>, jpvmTaskId> idEscravos;
+	private CursoCenterControle cursoControle;
+	private DiplomaCenterControle diplomaControle;
+	private MensalidadeCenterControle mensalidadeControle;
+	private MatriculaCenterControle matriculaControle;
 
 	public static void main(String[] args) throws jpvmException {
 		Master m = new Master();
@@ -45,6 +45,7 @@ public class Master {
 		Sistema.inicializar();
 		obterEscravos();
 		distribuirDados();
+		processar();
 	}
 
 	public void obterEscravos() throws jpvmException {
@@ -61,36 +62,53 @@ public class Master {
 		InDataset dados = Sistema.inDataset();
 
 		jpvmTaskId ccId = idEscravos.get(CursoCenter.class.getName());
-		CursoCenterControle ccc = new CursoCenterControle(pvm, ccId);
+		cursoControle = new CursoCenterControle(pvm, ccId);
+		// cursos
 		for (Curso curso : dados.getCursosMap().values()) {
-			ccc.insereCurso(curso);
+			cursoControle.insereCurso(curso);
 		}
+		// históricos
 		for (Historico historico : dados.getHistoricos()) {
-			ccc.insereHistorico(historico);
+			cursoControle.insereHistorico(historico);
 		}
+		// disciplinas
 		for (Disciplina disciplina : dados.getDisciplinasMap().values()) {
-			ccc.insereDisciplina(disciplina);
+			cursoControle.insereDisciplina(disciplina);
 		}
 
 		jpvmTaskId dcId = idEscravos.get(DiplomaCenter.class);
-		DiplomaCenterControle dcc = new DiplomaCenterControle(pvm, dcId);
+		diplomaControle = new DiplomaCenterControle(pvm, dcId);
+		// solicitações de diploma
 		for (SolicitacaoDiploma solDip : dados.getSolicitacoesDiploma()) {
-			dcc.insereSolicitacaoDiploma(solDip);
+			diplomaControle.insereSolicitacaoDiploma(solDip);
 		}
 
 		jpvmTaskId mcId = idEscravos.get(MensalidadeCenter.class);
-		MensalidadeCenterControle mcc = new MensalidadeCenterControle(pvm, mcId);
+		mensalidadeControle = new MensalidadeCenterControle(pvm, mcId);
+		// mensalidades
 		for (Mensalidade m : dados.getMensalidades()) {
-			mcc.insereMensalidade(m);
+			mensalidadeControle.insereMensalidade(m);
 		}
 
 		jpvmTaskId macId = idEscravos.get(MatriculaCenter.class);
-		MatriculaCenterControle macc = new MatriculaCenterControle(pvm, macId);
+		matriculaControle = new MatriculaCenterControle(pvm, macId);
+		// solicitações de matricula
 		for (SolicitacaoMatricula solMac : dados.getSolicitacoesMatricula()) {
-			macc.insereSolicitacaoMatricula(solMac);
+			matriculaControle.insereSolicitacaoMatricula(solMac);
 		}
 
-		// TODO
+		doHandshake();
+	}
+
+	private void doHandshake() throws jpvmException {
+		matriculaControle.setCursoCenter(cursoControle.getTaskId());
+		matriculaControle.setMensalidadeCenter(mensalidadeControle.getTaskId());
+		diplomaControle.setCursoCenter(cursoControle.getTaskId());
+		diplomaControle.setMensalidadeCenter(mensalidadeControle.getTaskId());
+	}
+
+	public void processar() {
+
 	}
 
 }

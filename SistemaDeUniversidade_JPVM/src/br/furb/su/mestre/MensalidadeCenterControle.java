@@ -1,4 +1,4 @@
-package br.furb.su.escravo;
+package br.furb.su.mestre;
 
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -13,18 +13,16 @@ import jpvm.jpvmMessage;
 import jpvm.jpvmTaskId;
 import br.furb.su.dataset.reader.MensalidadesReader;
 import br.furb.su.dataset.writer.MensalidadesWriter;
+import br.furb.su.escravo.RequestEscravo;
 import br.furb.su.modelo.dados.Mensalidade;
 
 public class MensalidadeCenterControle extends BaseCenterControle {
 
-	private jpvmTaskId tid;
-	private jpvmEnvironment pvm;
 	private MensalidadesReader reader;
 	private MensalidadesWriter writer;
 
 	public MensalidadeCenterControle(jpvmEnvironment pvm, jpvmTaskId tid) {
-		this.tid = tid;
-		this.pvm = pvm;
+		super(pvm, tid);
 	}
 
 	public List<Mensalidade> getMensalidade(int codAluno) throws jpvmException {
