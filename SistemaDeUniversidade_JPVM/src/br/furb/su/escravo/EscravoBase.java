@@ -155,7 +155,7 @@ public abstract class EscravoBase {
 		if (mensagem != null) {
 			buffer.pack(mensagem);
 		}
-		pvm.pvm_send(buffer, destinatario, responseTag.getTag());
+		pvm.pvm_send(buffer, destinatario, responseTag.tag());
 		respondido = true;
 	}
 

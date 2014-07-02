@@ -17,6 +17,10 @@ public class CursoReader extends DataReader<Curso> {
 	public CursoReader(File pastaOrigem) {
 		super(new File(pastaOrigem, FILE_NAME));
 	}
+	
+	public CursoReader() {
+		super();
+	}
 
 	@Override
 	protected Curso lerRegistro() {
@@ -41,5 +45,6 @@ public class CursoReader extends DataReader<Curso> {
 		super.inicializa(inDataset);
 		cursos = inDataset.getCursosMap();
 	}
+	
 
 }

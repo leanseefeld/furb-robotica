@@ -2,10 +2,9 @@ package br.furb.su.dataset.reader;
 
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.Calendar;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import br.furb.su.Sistema;
 import br.furb.su.dataset.InDataset;
@@ -25,20 +24,25 @@ public abstract class DataReader<T> {
 		this.arquivoOrigem = arquivoOrigem;
 	}
 
-	public void ler(InDataset inDataset) throws FileNotFoundException {
+	public DataReader() {
+		arquivoOrigem = null;
+	}
+
+	public void lerArquivo(InDataset inDataset) throws FileNotFoundException {
 		try {
+			if (arquivoOrigem == null) {
+				throw new IllegalArgumentException("um arquivo deve ser informado para leitura em batch");
+			}
 			if (!arquivoOrigem.exists()) {
 				throw new IllegalArgumentException("arquivo de origem não existe: " + arquivoOrigem.getAbsolutePath());
 			}
 			Sistema.debug("iniciando leitura (" + getClass().getName() + ")");
 			try (Scanner sc = new Scanner(arquivoOrigem)) {
-				sc.useDelimiter(",|[\r\n]+");
-				this.scanner = sc;
+				configScanner(sc);
 				inicializa(inDataset);
 
 				T registro;
 				while (sc.hasNextLine() && (registro = lerRegistro()) != null) {
-//					Sistema.debug("leu um registro (" + getClass().getName() + ")");
 					insereRegistro(registro);
 				}
 			} finally {
@@ -51,24 +55,33 @@ public abstract class DataReader<T> {
 		}
 	}
 
+	public List<T> ler(String entrada) {
+		Sistema.debug("iniciando leitura (" + getClass().getName() + ")");
+		List<T> registros = new ArrayList<>();
+
+		try (Scanner sc = new Scanner(entrada)) {
+			configScanner(sc);
+
+			T registro;
+			while (sc.hasNextLine() && (registro = lerRegistro()) != null) {
+				registros.add(registro);
+			}
+		}
+		Sistema.debug("leitura finalizada (" + getClass().getName() + ")");
+		return registros;
+	}
+
 	protected void inicializa(InDataset inDataset) {
 		// para ser sobrescrito
+	}
+
+	private void configScanner(Scanner sc) {
+		sc.useDelimiter(",|[\r\n]+");
+		this.scanner = sc;
 	}
 
 	protected abstract T lerRegistro();
 
 	protected abstract void insereRegistro(T registro);
 
-	protected static Calendar stringToDate(String str) {
-		Matcher m = Pattern.compile("(\\d{2})/(\\d{2})/(\\d{4})").matcher(str);
-		if (!m.matches()) {
-			throw new IllegalArgumentException("data não reconhecida: " + str);
-		}
-		int dia = Integer.parseInt(m.group(1));
-		int mes = Integer.parseInt(m.group(2));
-		int ano = Integer.parseInt(m.group(3));
-		Calendar data = Calendar.getInstance();
-		data.set(ano, mes - 1, dia, 0, 0, 0);
-		return data;
-	}
 }

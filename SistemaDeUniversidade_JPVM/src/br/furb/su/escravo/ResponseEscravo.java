@@ -23,7 +23,7 @@ public enum ResponseEscravo {
 	 */
 	FAILURE;
 
-	public int getTag() {
+	public int tag() {
 		return ordinal();
 	}
 

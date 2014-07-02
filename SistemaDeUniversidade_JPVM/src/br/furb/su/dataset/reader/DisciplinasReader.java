@@ -16,6 +16,10 @@ public class DisciplinasReader extends DataReader<Disciplina> {
 		super(new File(pastaOrigem, FILE_NAME));
 	}
 
+	public DisciplinasReader() {
+		super();
+	}
+
 	@Override
 	protected Disciplina lerRegistro() {
 		Scanner sc = scanner;

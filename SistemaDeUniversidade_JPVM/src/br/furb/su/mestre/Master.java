@@ -25,7 +25,7 @@ import br.furb.su.modelo.dados.Historico;
 public class Master {
 
 	private static jpvmEnvironment pvm;
-	private Map<Class<?>, jpvmTaskId[]> idsEscravos;
+	private Map<Class<?>, jpvmTaskId> idEscravos;
 
 	public static void main(String[] args) throws jpvmException {
 		Master m = new Master();
@@ -40,22 +40,20 @@ public class Master {
 	}
 
 	public void obterEscravos() throws jpvmException {
-		idsEscravos = new HashMap<>();
+		idEscravos = new HashMap<>();
 
-		for (Entry<Class<? extends EscravoBase>, Integer> cfg : Sistema.getConfigEscravos().entrySet()) {
-			int qtEscravos = cfg.getValue().intValue();
-			jpvmTaskId[] newIds = new jpvmTaskId[qtEscravos];
-			final Class<? extends EscravoBase> classeEscravo = cfg.getKey();
-			pvm.pvm_spawn(classeEscravo.getName(), qtEscravos, newIds);
-			idsEscravos.put(classeEscravo, newIds);
+		for (Class<? extends EscravoBase> classeEscravo : Sistema.getEscravos()) {
+			jpvmTaskId[] newIds = new jpvmTaskId[1];
+			pvm.pvm_spawn(classeEscravo.getName(), 1, newIds);
+			idEscravos.put(classeEscravo, newIds[0]);
 		}
 	}
 
 	public void distribuirDados() {
 		InDataset dados = Sistema.inDataset();
 
-		jpvmTaskId[] ids = idsEscravos.get(CursoCenter.class.getName());
-		CursoCenterControle ccc = new CursoCenterControle(ids);
+		jpvmTaskId id = idEscravos.get(CursoCenter.class.getName());
+		CursoCenterControle ccc = new CursoCenterControle(pvm, id);
 		for (Curso curso : dados.getCursosMap().values()) {
 			ccc.insereCurso(curso);
 		}

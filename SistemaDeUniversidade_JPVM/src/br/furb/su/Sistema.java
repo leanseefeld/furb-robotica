@@ -3,12 +3,11 @@ package br.furb.su;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.GregorianCalendar;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -50,17 +49,8 @@ public final class Sistema {
 	private static OutDataset outDataset;
 	private static Calendar dataAtual;
 	private static Estatisticas estatisticas = new Estatisticas();
-	public static final int NUM_ESCRAVOS;
-
-	private static final Map<Class<? extends EscravoBase>, Integer> CONFIG_ESCRAVOS = new HashMap<>();
-
-	static {
-		CONFIG_ESCRAVOS.put(CursoCenter.class, 1);
-		CONFIG_ESCRAVOS.put(DiplomaCenter.class, 1);
-		CONFIG_ESCRAVOS.put(MatriculaCenter.class, 1);
-		CONFIG_ESCRAVOS.put(MensalidadeCenter.class, 1);
-		NUM_ESCRAVOS = 4;
-	}
+	private static final Collection<Class<? extends EscravoBase>> ESCRAVOS = Arrays.asList(CursoCenter.class, DiplomaCenter.class, MatriculaCenter.class, MensalidadeCenter.class);
+	public static final int NUM_ESCRAVOS = ESCRAVOS.size();
 
 	private Sistema() {
 		// no!
@@ -150,11 +140,10 @@ public final class Sistema {
 			StackTraceElement[] stack = ex.getStackTrace();
 			System.out.println("[" + Thread.currentThread().getName() + "] " + stack[1].toString() + ": " + msg);
 		}
-
 	}
 
-	public static Map<Class<? extends EscravoBase>, Integer> getConfigEscravos() {
-		return Collections.unmodifiableMap(CONFIG_ESCRAVOS);
+	public static Collection<Class<? extends EscravoBase>> getEscravos() {
+		return ESCRAVOS;
 	}
 
 	public static void inicializar() {
@@ -167,7 +156,7 @@ public final class Sistema {
 			File pastaDestino = new File(scanner.nextLine());
 
 			System.out.print("Informe a data atual no format 'MM/AAAA': ");
-			Calendar data = Sistema.converterData(scanner.nextLine());
+			Calendar data = Sistema.converterData_mes(scanner.nextLine());
 
 			load(pastaOrigem, pastaDestino, data);
 		}
@@ -178,7 +167,13 @@ public final class Sistema {
 		}
 	}
 
-	public static Calendar converterData(String string) {
+	/**
+	 * Reconhece data no formato {@code "mmaaa"}.
+	 * 
+	 * @param string
+	 * @return
+	 */
+	public static Calendar converterData_mes(String string) {
 		Matcher m = Pattern.compile("(\\d{2})/(\\d{4})").matcher(string);
 		if (!m.matches()) {
 			throw new IllegalArgumentException("data não reconhecida: " + string);
@@ -205,6 +200,27 @@ public final class Sistema {
 		return String.valueOf(dia).concat("/").concat(String.valueOf(mes)).concat("/").concat(String.valueOf(ano));
 	}
 
+	/**
+	 * Converte uma String representando uma data no formato
+	 * {@code "dd/mm/aaaa"} em {@link Calendar}
+	 * 
+	 * @param str
+	 *            string.
+	 * @return calendário configurado com a data.
+	 */
+	public static Calendar converterData(String str) {
+		Matcher m = Pattern.compile("(\\d{2})/(\\d{2})/(\\d{4})").matcher(str);
+		if (!m.matches()) {
+			throw new IllegalArgumentException("data não reconhecida: " + str);
+		}
+		int dia = Integer.parseInt(m.group(1));
+		int mes = Integer.parseInt(m.group(2));
+		int ano = Integer.parseInt(m.group(3));
+		Calendar data = Calendar.getInstance();
+		data.set(ano, mes - 1, dia, 0, 0, 0);
+		return data;
+	}
+
 	public static void lerDados(InDataset inDataset) throws FileNotFoundException {
 		debug("lendo dados");
 		File pastaEntrada = getPastaEntrada();
@@ -217,8 +233,9 @@ public final class Sistema {
 				new SolicitacoesDiplomaReader(pastaEntrada) //
 		};
 		for (int i = 0; i < leitores.length; i++) {
-			leitores[i].ler(inDataset);
+			leitores[i].lerArquivo(inDataset);
 		}
 		debug("leu dados");
 	}
+
 }
