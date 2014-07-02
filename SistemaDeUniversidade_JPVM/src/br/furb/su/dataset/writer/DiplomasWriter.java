@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
-import br.furb.su.Nucleo;
+import br.furb.su.Sistema;
 import br.furb.su.dataset.OutDataset;
 import br.furb.su.modelo.dados.Diploma;
 
@@ -20,7 +20,7 @@ public class DiplomasWriter extends DataWriter<Diploma> {
 		sep();
 		pis.print(r.getCurso().getCod());
 		sep();
-		pis.print(Nucleo.formatarData(r.getData()));
+		pis.print(Sistema.formatarData(r.getData()));
 	}
 
 	@Override

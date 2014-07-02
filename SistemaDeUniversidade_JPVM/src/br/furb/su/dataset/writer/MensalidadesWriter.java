@@ -4,7 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
-import br.furb.su.Nucleo;
+import br.furb.su.Sistema;
 import br.furb.su.dataset.OutDataset;
 import br.furb.su.dataset.reader.MensalidadesReader;
 import br.furb.su.modelo.dados.Mensalidade;
@@ -21,9 +21,9 @@ public class MensalidadesWriter extends DataWriter<Mensalidade> {
 		sep();
 		pis.print(mensalidade.getValor());
 		sep();
-		pis.print(Nucleo.formatarData(mensalidade.getCompetencia()));
+		pis.print(Sistema.formatarData(mensalidade.getCompetencia()));
 		sep();
-		pis.print(Nucleo.formatarData(mensalidade.getVencimento()));
+		pis.print(Sistema.formatarData(mensalidade.getVencimento()));
 		sep();
 		pis.print(mensalidade.isPaga());
 		nl();

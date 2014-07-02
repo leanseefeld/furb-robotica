@@ -1,27 +1,15 @@
 package br.furb.su;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import br.furb.su.dataset.InDataset;
 import br.furb.su.dataset.OutDataset;
-import br.furb.su.dataset.reader.AlunosReader;
-import br.furb.su.dataset.reader.CursoReader;
-import br.furb.su.dataset.reader.DataReader;
-import br.furb.su.dataset.reader.DisciplinasReader;
-import br.furb.su.dataset.reader.HistoricosReader;
-import br.furb.su.dataset.reader.MensalidadesReader;
-import br.furb.su.dataset.reader.SolicitacoesDiplomaReader;
-import br.furb.su.dataset.reader.SolicitacoesMatriculaReader;
 import br.furb.su.dataset.writer.DataWriter;
 import br.furb.su.dataset.writer.DiplomasWriter;
 import br.furb.su.dataset.writer.EstatisticasWriter;
@@ -41,42 +29,28 @@ import br.furb.su.modelo.dados.SolicitacaoMatricula;
 /**
  * Ofere as funções de manipulação sobre os dados.
  * 
+ * @deprecated as funções de processamento serão gradativamente transferidas
+ *             para os escravos correspondentes.
+ * 
  * @author wseefeld
  * 
  */
+@Deprecated
 public class Nucleo {
 
 	private static final String VERIFICACAO_MENSALIDADES = "verificação de mensalidades";
 	private static final String EMISSAO_DIPLOMA = "emissão de diploma";
 	private static final String SOLICITACAO_MATRICULA = "solicitação de matrícula";
 
-	@Deprecated
 	public static void main(String[] args) throws IOException {
 		System.err.println("Ponto de entrada desatualizado: Nucleo.main()\nExecute via JPVM.\n");
-		carregarDados();
+		Sistema.inicializar();
 		InDataset inDataset = Sistema.inDataset();
 		OutDataset outDataset = Sistema.outDataset();
 
 		ligarDados(inDataset);
 		processar(inDataset, outDataset);
 		gravarDados(outDataset);
-	}
-
-	private static void lerDados(InDataset inDataset) throws FileNotFoundException {
-		Sistema.debug("lendo dados");
-		File pastaEntrada = Sistema.getPastaEntrada();
-		DataReader<?>[] leitores = new DataReader[] { new AlunosReader(pastaEntrada), //
-				new MensalidadesReader(pastaEntrada), //
-				new SolicitacoesMatriculaReader(pastaEntrada), //
-				new HistoricosReader(pastaEntrada), //
-				new DisciplinasReader(pastaEntrada), //
-				new CursoReader(pastaEntrada), //
-				new SolicitacoesDiplomaReader(pastaEntrada) //
-		};
-		for (int i = 0; i < leitores.length; i++) {
-			leitores[i].ler(inDataset);
-		}
-		Sistema.debug("leu dados");
 	}
 
 	private static void ligarDados(InDataset dataset) {
@@ -180,7 +154,7 @@ public class Nucleo {
 			if (!mensalidade.isPaga() && dataAtual.after(mensalidade.getVencimento())) {
 				totalMulta += mensalidade.calculaMulta();
 				outDataset.addAviso(new Mensagem(mensalidade.getAluno(), VERIFICACAO_MENSALIDADES, //
-						String.format("A mensalidade do dia %s está atrasada e gerou multa de R$ %.2f", formatarData(mensalidade.getCompetencia()), totalMulta)));
+						String.format("A mensalidade do dia %s está atrasada e gerou multa de R$ %.2f", Sistema.formatarData(mensalidade.getCompetencia()), totalMulta)));
 			}
 		}
 		Sistema.estatisticas().financeiras().setTotalMulta(totalMulta);
@@ -295,58 +269,6 @@ public class Nucleo {
 			gravadores[i].gravarDados(outDataset);
 		}
 		Sistema.debug("dados gravados");
-	}
-
-	/**
-	 * Converte um objeto de {@code Calendar} em uma string contendo:
-	 * {@code dia/mes/ano}
-	 * 
-	 * @param date
-	 *            data a ser convertida.
-	 * @return representação da data informada em string.
-	 */
-	public static String formatarData(Calendar date) {
-		int dia = date.get(Calendar.DAY_OF_MONTH);
-		int mes = date.get(Calendar.MONTH) + 1;
-		int ano = date.get(Calendar.YEAR);
-		return String.valueOf(dia).concat("/").concat(String.valueOf(mes)).concat("/").concat(String.valueOf(ano));
-	}
-
-	private static Calendar converterData(String string) {
-		Matcher m = Pattern.compile("(\\d{2})/(\\d{4})").matcher(string);
-		if (!m.matches()) {
-			throw new IllegalArgumentException("data não reconhecida: " + string);
-		}
-		int mes = Integer.parseInt(m.group(1));
-		int ano = Integer.parseInt(m.group(2));
-		Calendar data = Calendar.getInstance();
-		data.set(ano, mes - 1, 1, 0, 0, 0);
-		return data;
-	}
-
-	public static void carregarDados() {
-		Sistema.debug("requisitando parâmetros");
-		Scanner scanner = null;
-		try {
-			scanner = new Scanner(System.in);
-			System.out.print("Informe a pasta de origem dos dados: ");
-			File pastaOrigem = new File(scanner.nextLine());
-
-			System.out.print("Informe a pasta de destino dos dados: ");
-			File pastaDestino = new File(scanner.nextLine());
-
-			System.out.print("Informe a data atual no format 'MM/AAAA': ");
-			Calendar dataAtual = converterData(scanner.nextLine());
-
-			Sistema.load(pastaOrigem, pastaDestino, dataAtual);
-		} finally {
-			scanner.close();
-		}
-		try {
-			lerDados(Sistema.inDataset());
-		} catch (FileNotFoundException e) {
-			throw new RuntimeException("não foi possível carregar os dados");
-		}
 	}
 
 }

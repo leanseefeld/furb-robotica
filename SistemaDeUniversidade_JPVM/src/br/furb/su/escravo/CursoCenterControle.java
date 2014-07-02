@@ -4,6 +4,7 @@ import java.util.List;
 
 import jpvm.jpvmTaskId;
 import br.furb.su.modelo.dados.Curso;
+import br.furb.su.modelo.dados.Disciplina;
 import br.furb.su.modelo.dados.Historico;
 
 /**
@@ -35,6 +36,10 @@ public class CursoCenterControle {
 	}
 
 	public void insereHistorico(Historico historico) {
+		// TODO: lançar exceção em caso de problema
+	}
+
+	public void insereDisciplina(Disciplina disciplina) {
 		// TODO: lançar exceção em caso de problema
 	}
 

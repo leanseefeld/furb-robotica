@@ -1,6 +1,7 @@
 package br.furb.su;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
@@ -8,9 +9,20 @@ import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import br.furb.su.dataset.InDataset;
 import br.furb.su.dataset.OutDataset;
+import br.furb.su.dataset.reader.AlunosReader;
+import br.furb.su.dataset.reader.CursoReader;
+import br.furb.su.dataset.reader.DataReader;
+import br.furb.su.dataset.reader.DisciplinasReader;
+import br.furb.su.dataset.reader.HistoricosReader;
+import br.furb.su.dataset.reader.MensalidadesReader;
+import br.furb.su.dataset.reader.SolicitacoesDiplomaReader;
+import br.furb.su.dataset.reader.SolicitacoesMatriculaReader;
 import br.furb.su.escravo.CursoCenter;
 import br.furb.su.escravo.DiplomaCenter;
 import br.furb.su.escravo.EscravoBase;
@@ -143,5 +155,70 @@ public final class Sistema {
 
 	public static Map<Class<? extends EscravoBase>, Integer> getConfigEscravos() {
 		return Collections.unmodifiableMap(CONFIG_ESCRAVOS);
+	}
+
+	public static void inicializar() {
+		debug("requisitando parâmetros");
+		try (Scanner scanner = new Scanner(System.in)) {
+			System.out.print("Informe a pasta de origem dos dados: ");
+			File pastaOrigem = new File(scanner.nextLine());
+
+			System.out.print("Informe a pasta de destino dos dados: ");
+			File pastaDestino = new File(scanner.nextLine());
+
+			System.out.print("Informe a data atual no format 'MM/AAAA': ");
+			Calendar data = Sistema.converterData(scanner.nextLine());
+
+			load(pastaOrigem, pastaDestino, data);
+		}
+		try {
+			Sistema.lerDados(inDataset());
+		} catch (FileNotFoundException e) {
+			throw new RuntimeException("não foi possível carregar os dados");
+		}
+	}
+
+	public static Calendar converterData(String string) {
+		Matcher m = Pattern.compile("(\\d{2})/(\\d{4})").matcher(string);
+		if (!m.matches()) {
+			throw new IllegalArgumentException("data não reconhecida: " + string);
+		}
+		int mes = Integer.parseInt(m.group(1));
+		int ano = Integer.parseInt(m.group(2));
+		Calendar data = Calendar.getInstance();
+		data.set(ano, mes - 1, 1, 0, 0, 0);
+		return data;
+	}
+
+	/**
+	 * Converte um objeto de {@code Calendar} em uma string contendo:
+	 * {@code dia/mes/ano}
+	 * 
+	 * @param date
+	 *            data a ser convertida.
+	 * @return representação da data informada em string.
+	 */
+	public static String formatarData(Calendar date) {
+		int dia = date.get(Calendar.DAY_OF_MONTH);
+		int mes = date.get(Calendar.MONTH) + 1;
+		int ano = date.get(Calendar.YEAR);
+		return String.valueOf(dia).concat("/").concat(String.valueOf(mes)).concat("/").concat(String.valueOf(ano));
+	}
+
+	public static void lerDados(InDataset inDataset) throws FileNotFoundException {
+		debug("lendo dados");
+		File pastaEntrada = getPastaEntrada();
+		DataReader<?>[] leitores = new DataReader[] { new AlunosReader(pastaEntrada), //
+				new MensalidadesReader(pastaEntrada), //
+				new SolicitacoesMatriculaReader(pastaEntrada), //
+				new HistoricosReader(pastaEntrada), //
+				new DisciplinasReader(pastaEntrada), //
+				new CursoReader(pastaEntrada), //
+				new SolicitacoesDiplomaReader(pastaEntrada) //
+		};
+		for (int i = 0; i < leitores.length; i++) {
+			leitores[i].ler(inDataset);
+		}
+		debug("leu dados");
 	}
 }
