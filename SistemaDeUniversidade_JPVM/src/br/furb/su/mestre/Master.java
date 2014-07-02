@@ -10,10 +10,19 @@ import br.furb.su.Sistema;
 import br.furb.su.dataset.InDataset;
 import br.furb.su.escravo.CursoCenter;
 import br.furb.su.escravo.CursoCenterControle;
+import br.furb.su.escravo.DiplomaCenter;
+import br.furb.su.escravo.DiplomaCenterControle;
 import br.furb.su.escravo.EscravoBase;
+import br.furb.su.escravo.MatriculaCenter;
+import br.furb.su.escravo.MatriculaCenterControle;
+import br.furb.su.escravo.MensalidadeCenter;
+import br.furb.su.escravo.MensalidadeCenterControle;
 import br.furb.su.modelo.dados.Curso;
 import br.furb.su.modelo.dados.Disciplina;
 import br.furb.su.modelo.dados.Historico;
+import br.furb.su.modelo.dados.Mensalidade;
+import br.furb.su.modelo.dados.SolicitacaoDiploma;
+import br.furb.su.modelo.dados.SolicitacaoMatricula;
 
 /**
  * Mestre responsável por iniciar e coordenar a aplicação.
@@ -51,8 +60,8 @@ public class Master {
 	public void distribuirDados() throws jpvmException {
 		InDataset dados = Sistema.inDataset();
 
-		jpvmTaskId id = idEscravos.get(CursoCenter.class.getName());
-		CursoCenterControle ccc = new CursoCenterControle(pvm, id);
+		jpvmTaskId ccId = idEscravos.get(CursoCenter.class.getName());
+		CursoCenterControle ccc = new CursoCenterControle(pvm, ccId);
 		for (Curso curso : dados.getCursosMap().values()) {
 			ccc.insereCurso(curso);
 		}
@@ -62,6 +71,25 @@ public class Master {
 		for (Disciplina disciplina : dados.getDisciplinasMap().values()) {
 			ccc.insereDisciplina(disciplina);
 		}
+
+		jpvmTaskId dcId = idEscravos.get(DiplomaCenter.class);
+		DiplomaCenterControle dcc = new DiplomaCenterControle(pvm, dcId);
+		for (SolicitacaoDiploma solDip : dados.getSolicitacoesDiploma()) {
+			dcc.insereSolicitacaoDiploma(solDip);
+		}
+
+		jpvmTaskId mcId = idEscravos.get(MensalidadeCenter.class);
+		MensalidadeCenterControle mcc = new MensalidadeCenterControle(pvm, mcId);
+		for (Mensalidade m : dados.getMensalidades()) {
+			mcc.insereMensalidade(m);
+		}
+
+		jpvmTaskId macId = idEscravos.get(MatriculaCenter.class);
+		MatriculaCenterControle macc = new MatriculaCenterControle(pvm, macId);
+		for (SolicitacaoMatricula solMac : dados.getSolicitacoesMatricula()) {
+			macc.insereSolicitacaoMatricula(solMac);
+		}
+
 		// TODO
 	}
 

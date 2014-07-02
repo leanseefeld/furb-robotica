@@ -12,9 +12,10 @@ import jpvm.jpvmException;
 import jpvm.jpvmMessage;
 import jpvm.jpvmTaskId;
 import br.furb.su.dataset.reader.CursoReader;
-import br.furb.su.dataset.reader.DisciplinasReader;
 import br.furb.su.dataset.reader.HistoricosReader;
+import br.furb.su.dataset.reader.HistoricosWriter;
 import br.furb.su.dataset.writer.CursoWriter;
+import br.furb.su.dataset.writer.DisciplinasWriter;
 import br.furb.su.modelo.dados.Curso;
 import br.furb.su.modelo.dados.Disciplina;
 import br.furb.su.modelo.dados.Historico;
@@ -25,22 +26,24 @@ import br.furb.su.modelo.dados.Historico;
  * @author wseefeld
  * 
  */
-public class CursoCenterControle {
+public class CursoCenterControle extends BaseCenterControle {
 
 	private jpvmTaskId tid;
 	private jpvmEnvironment pvm;
 	private final CursoReader cursoReader;
-	private final DisciplinasReader disciplinasReader;
-	private final HistoricosReader historicosReader;
 	private final CursoWriter cursoWriter;
+	private final DisciplinasWriter disciplinasWriter;
+	private final HistoricosReader historicosReader;
+	private final HistoricosWriter historicosWriter;
 
 	public CursoCenterControle(jpvmEnvironment pvm, jpvmTaskId tid) {
 		this.pvm = pvm;
 		this.tid = tid;
 		cursoReader = new CursoReader();
-		disciplinasReader = new DisciplinasReader();
-		historicosReader = new HistoricosReader();
 		cursoWriter = new CursoWriter();
+		disciplinasWriter = new DisciplinasWriter();
+		historicosReader = new HistoricosReader();
+		historicosWriter = new HistoricosWriter();
 	}
 
 	public Curso getCurso(int cod) throws jpvmException {
@@ -69,26 +72,46 @@ public class CursoCenterControle {
 		checkErrorResponse(msg);
 	}
 
-	public List<Historico> getHistorico(long codAluno) {
-		// TODO
-		return null;
+	public List<Historico> getHistorico(long codAluno, int codCurso) throws jpvmException {
+		jpvmBuffer buffer = new jpvmBuffer();
+		buffer.pack(String.format("aluno=%d;curso=%d", codAluno, codCurso));
+		pvm.pvm_send(buffer, tid, RequestEscravo.GET.tag());
+		jpvmMessage msg = pvm.pvm_recv();
+		final String bufferStr = msg.buffer.upkstr();
+		checkErrorResponse(msg);
+		return historicosReader.ler(bufferStr);
 	}
 
-	public void insereHistorico(Historico historico) {
-		// TODO: lançar exceção em caso de problema
-	}
-
-	public void insereDisciplina(Disciplina disciplina) {
-		// TODO: lançar exceção em caso de problema
-	}
-
-	private static void checkErrorResponse(jpvmMessage msg) throws jpvmException {
-		if (msg.messageTag == ResponseEscravo.LOCKED.tag()) {
-			throw new LockException(msg.buffer.upkstr());
+	public void insereHistorico(Historico historico) throws jpvmException {
+		StringBuilder comando = new StringBuilder();
+		comando.append(CursoCenter.TIPO_HISTORICO).append('\n');
+		try (StringWriter sw = new StringWriter(); PrintWriter pw = new PrintWriter(sw)) {
+			historicosWriter.gravarDados(Arrays.asList(historico), pw);
+			comando.append(sw.getBuffer().toString());
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
-		if (msg.messageTag == ResponseEscravo.FAILURE.tag()) {
-			throw new SlaveException(msg.buffer.upkstr());
+		jpvmBuffer buffer = new jpvmBuffer();
+		buffer.pack(comando.toString());
+		pvm.pvm_send(buffer, tid, RequestEscravo.UPLOAD.tag());
+		jpvmMessage msg = pvm.pvm_recv();
+		checkErrorResponse(msg);
+	}
+
+	public void insereDisciplina(Disciplina disciplina) throws jpvmException {
+		StringBuilder comando = new StringBuilder();
+		comando.append(CursoCenter.TIPO_HISTORICO).append('\n');
+		try (StringWriter sw = new StringWriter(); PrintWriter pw = new PrintWriter(sw)) {
+			disciplinasWriter.gravarDados(Arrays.asList(disciplina), pw);
+			comando.append(sw.getBuffer().toString());
+		} catch (IOException e) {
+			throw new RuntimeException(e);
 		}
+		jpvmBuffer buffer = new jpvmBuffer();
+		buffer.pack(comando.toString());
+		pvm.pvm_send(buffer, tid, RequestEscravo.UPLOAD.tag());
+		jpvmMessage msg = pvm.pvm_recv();
+		checkErrorResponse(msg);
 	}
 
 }
