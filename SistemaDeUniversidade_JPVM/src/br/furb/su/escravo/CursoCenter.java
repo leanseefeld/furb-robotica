@@ -24,6 +24,10 @@ public class CursoCenter extends EscravoBase {
 		super();
 	}
 
+	public static void main(String[] args) throws jpvmException {
+		new CursoCenter();
+	}
+
 	public void insereCurso(Curso curso) {
 		cursos.add(curso);
 	}
