@@ -21,6 +21,7 @@ public class DiplomasWriter extends DataWriter<Diploma> {
 		pis.print(r.getCurso().getCod());
 		sep();
 		pis.print(Sistema.formatarData(r.getData()));
+		nl();
 	}
 
 	@Override

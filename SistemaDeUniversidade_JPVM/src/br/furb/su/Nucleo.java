@@ -266,7 +266,7 @@ public class Nucleo {
 		};
 
 		for (int i = 0; i < gravadores.length; i++) {
-			gravadores[i].gravarDados(outDataset);
+			gravadores[i].gravarArquivo(outDataset);
 		}
 		Sistema.debug("dados gravados");
 	}

@@ -2,7 +2,6 @@ package br.furb.su.mestre;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Map.Entry;
 
 import jpvm.jpvmEnvironment;
 import jpvm.jpvmException;
@@ -49,7 +48,7 @@ public class Master {
 		}
 	}
 
-	public void distribuirDados() {
+	public void distribuirDados() throws jpvmException {
 		InDataset dados = Sistema.inDataset();
 
 		jpvmTaskId id = idEscravos.get(CursoCenter.class.getName());

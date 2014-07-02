@@ -14,11 +14,12 @@ import jpvm.jpvmTaskId;
 
 public abstract class EscravoBase {
 
-	protected static final String MSG_REGISTRO_TRAVADO = "Registro %d está travado para %s";
-	protected static final String MSG_REGISTRO_LIVRE = "Registro %d está livre.";
 	protected static final String MSG_COD_NAO_RECONHECIDO = "Código de requisição desconhecido: %d";
 	protected static final String MSG_COD_NAO_SUPORTADO = "Código de requisição conhecido, mas não suportado: %s (%d)";
+	protected static final String MSG_REGISTRO_LIVRE = "Registro %d está livre.";
+	protected static final String MSG_REGISTRO_TRAVADO = "Registro %d está travado para %s";
 	protected static final String MSG_SEM_RESPOSTA = "O escravo esqueceu de responder.";
+	protected static final String MSG_TIPO_NAO_RECONHECIDO = "Tipo não reconhecido: %s";
 	private static final Integer ANY_REGISTER = new Integer(Integer.MIN_VALUE);
 
 	protected final jpvmEnvironment pvm;
@@ -31,49 +32,53 @@ public abstract class EscravoBase {
 	public EscravoBase() throws jpvmException {
 		pvm = new jpvmEnvironment(true);
 		locks = new HashMap<>();
+	}
+
+	public void run() throws jpvmException {
 		isAtivo = true;
 		do {
 			respondido = false;
 			jpvmMessage msg = pvm.pvm_recv();
 			destinatario = msg.sourceTid;
-			processaRequest(msg);
+			processaMensagem(msg);
 		} while (isAtivo);
 	}
 
-	protected void processaRequest(jpvmMessage msg) throws jpvmException {
+	protected void processaMensagem(jpvmMessage msg) throws jpvmException {
 		final int messageTag = msg.messageTag;
 		final jpvmBuffer buffer = msg.buffer;
 		if (messageTag < 0 || messageTag > RequestEscravo.TOTAL_REQUESTS) {
 			responder(ResponseEscravo.FAILURE, String.format(MSG_COD_NAO_RECONHECIDO, messageTag));
 		} else {
 			try {
+				String bufferStr = buffer.upkstr();
 				RequestEscravo req = RequestEscravo.values()[messageTag];
 				switch (req) {
 				case KILL:
 					doKill();
 					break;
 				case UPLOAD:
-					doUpload(buffer);
+					doUpload(bufferStr);
 					break;
 				case DOWNLOAD:
 					if (checkLocked(destinatario, ANY_REGISTER)) {
-						doDownload(buffer);
+						doDownload(bufferStr);
 					}
 					break;
 				case GET:
-					doGet(buffer);
+					doGet(bufferStr);
 					break;
 				case REMOVE:
-					doRemove(buffer);
+					doRemove(bufferStr);
 					break;
 				case UPDATE:
-					doUpdate(buffer);
+					doUpdate(bufferStr);
 					break;
 				case LOCK:
-					doLock(destinatario, buffer);
+					doLock(destinatario, bufferStr);
 					break;
 				case UNLOCK:
-					doUnlock(destinatario, buffer);
+					doUnlock(destinatario, bufferStr);
 					break;
 				case OPERATION:
 					doOperation(msg);
@@ -101,19 +106,19 @@ public abstract class EscravoBase {
 		responder(ResponseEscravo.OK, null);
 	}
 
-	protected abstract void doUpload(jpvmBuffer buffer);
+	protected abstract void doUpload(String buffer);
 
-	protected abstract void doDownload(jpvmBuffer buffer);
+	protected abstract void doDownload(String buffer);
 
-	protected abstract void doGet(jpvmBuffer buffer);
+	protected abstract void doGet(String buffer);
 
-	protected abstract void doRemove(jpvmBuffer buffer);
+	protected abstract void doRemove(String buffer);
 
-	protected abstract void doUpdate(jpvmBuffer buffer);
+	protected abstract void doUpdate(String buffer);
 
-	protected abstract void doLock(jpvmTaskId taskId, jpvmBuffer buffer);
+	protected abstract void doLock(jpvmTaskId taskId, String buffer);
 
-	protected abstract void doUnlock(jpvmTaskId taskId, jpvmBuffer buffer);
+	protected abstract void doUnlock(jpvmTaskId taskId, String buffer);
 
 	protected abstract void doOperation(jpvmMessage msg);
 
