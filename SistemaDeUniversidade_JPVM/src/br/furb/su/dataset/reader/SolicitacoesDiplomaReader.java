@@ -12,6 +12,9 @@ public class SolicitacoesDiplomaReader extends DataReader<SolicitacaoDiploma> {
 	public static final String FILE_NAME = "solicitacoesDiploma.csv";
 	private List<SolicitacaoDiploma> solicitacoesDiploma;
 
+	public SolicitacoesDiplomaReader() {
+	}
+	
 	public SolicitacoesDiplomaReader(File pastaOrigem) {
 		super(new File(pastaOrigem, FILE_NAME));
 	}

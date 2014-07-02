@@ -68,7 +68,7 @@ public abstract class EscravoBase {
 				case GET:
 					doGet(bufferStr);
 					break;
-				case REMOVE:
+				/*case REMOVE:
 					doRemove(bufferStr);
 					break;
 				case UPDATE:
@@ -79,7 +79,7 @@ public abstract class EscravoBase {
 					break;
 				case UNLOCK:
 					doUnlock(destinatario, bufferStr);
-					break;
+					break;*/
 				case OPERATION:
 					doOperation(bufferStr);
 					break;
@@ -115,13 +115,13 @@ public abstract class EscravoBase {
 
 	protected abstract void doGet(String buffer);
 
-	protected abstract void doRemove(String buffer);
+	/*protected abstract void doRemove(String buffer);
 
 	protected abstract void doUpdate(String buffer);
 
 	protected abstract void doLock(jpvmTaskId taskId, String buffer);
 
-	protected abstract void doUnlock(jpvmTaskId taskId, String buffer);
+	protected abstract void doUnlock(jpvmTaskId taskId, String buffer);*/
 
 	protected abstract void doOperation(String buffer);
 

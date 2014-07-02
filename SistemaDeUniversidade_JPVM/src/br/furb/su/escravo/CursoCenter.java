@@ -3,8 +3,6 @@ package br.furb.su.escravo;
 import java.util.List;
 
 import jpvm.jpvmException;
-import jpvm.jpvmMessage;
-import jpvm.jpvmTaskId;
 import br.furb.su.dataset.reader.CursoReader;
 import br.furb.su.dataset.reader.DisciplinasReader;
 import br.furb.su.dataset.reader.HistoricosReader;
@@ -39,8 +37,13 @@ public class CursoCenter extends EscravoBase {
 		historicosReader = new HistoricosReader();
 	}
 
-	public static void main(String[] args) throws jpvmException {
-		new CursoCenter().run();
+	public static void main(String[] args) {
+		try {
+			new CursoCenter().run();
+		} catch (jpvmException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 
 	public void insereCurso(Curso curso) {
@@ -94,31 +97,13 @@ public class CursoCenter extends EscravoBase {
 	}
 
 	@Override
-	protected void doRemove(String buffer) {
+	protected void doOperation(String buffer) {
 		// TODO Auto-generated method stub
 
 	}
 
 	@Override
-	protected void doUpdate(String buffer) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	protected void doLock(jpvmTaskId taskId, String buffer) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	protected void doUnlock(jpvmTaskId taskId, String buffer) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	protected void doOperation(jpvmMessage msg) {
+	protected void doSetSlave(String buffer) {
 		// TODO Auto-generated method stub
 
 	}

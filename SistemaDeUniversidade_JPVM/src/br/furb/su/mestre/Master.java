@@ -52,6 +52,7 @@ public class Master {
 		idEscravos = new HashMap<>();
 
 		for (Class<? extends EscravoBase> classeEscravo : Sistema.getEscravos()) {
+			Sistema.debug("obtendo escravo: " + classeEscravo.getName());
 			jpvmTaskId[] newIds = new jpvmTaskId[1];
 			pvm.pvm_spawn(classeEscravo.getName(), 1, newIds);
 			idEscravos.put(classeEscravo, newIds[0]);

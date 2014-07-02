@@ -8,4 +8,42 @@ public class MensalidadeCenter extends EscravoBase {
 		super();
 	}
 
+	public static void main(String[] args){
+		try {
+			new MensalidadeCenter().run();
+		} catch (jpvmException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Override
+	protected void doUpload(String buffer) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	protected void doDownload(String buffer) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	protected void doGet(String buffer) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	protected void doOperation(String buffer) {
+		// TODO Auto-generated method stub
+
+	}
+
+	@Override
+	protected void doSetSlave(String buffer) {
+		// TODO Auto-generated method stub
+
+	}
+
 }

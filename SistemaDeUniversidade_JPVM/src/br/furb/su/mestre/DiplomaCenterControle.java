@@ -68,5 +68,15 @@ public class DiplomaCenterControle extends BaseCenterControle {
 		jpvmMessage msg = pvm.pvm_recv();
 		checkErrorResponse(msg);
 	}
+	
+	public void processaDiplomas() throws jpvmException {
+		StringBuilder comando = new StringBuilder();
+		comando.append("processaDiplomas");
+		jpvmBuffer buffer = new jpvmBuffer();
+		buffer.pack(comando.toString());
+		pvm.pvm_send(buffer, tid, RequestEscravo.OPERATION.tag());
+		jpvmMessage msg = pvm.pvm_recv();
+		checkErrorResponse(msg);
+	}
 
 }
