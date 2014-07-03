@@ -1,15 +1,29 @@
 package br.furb.su.escravo;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import jpvm.jpvmBuffer;
 import jpvm.jpvmException;
 import br.furb.su.dataset.reader.CursoReader;
 import br.furb.su.dataset.reader.DisciplinasReader;
 import br.furb.su.dataset.reader.HistoricosReader;
+import br.furb.su.dataset.reader.HistoricosWriter;
+import br.furb.su.dataset.writer.CursoWriter;
+import br.furb.su.dataset.writer.DataWriter;
+import br.furb.su.dataset.writer.DisciplinasWriter;
 import br.furb.su.modelo.dados.Curso;
 import br.furb.su.modelo.dados.Disciplina;
 import br.furb.su.modelo.dados.Historico;
+import br.furb.su.modelo.dados.SituacaoDisciplina;
+import br.furb.su.operacoes.Operacao;
 
 /**
  * Armazena {@link Curso Cursos}, {@link Disciplina Disciplinas} e
@@ -23,22 +37,41 @@ public class CursoCenter extends EscravoBase {
 	public static final String TIPO_CURSO = "curso";
 	public static final String TIPO_DISCIPLINA = "disciplina";
 	public static final String TIPO_HISTORICO = "historico";
+	public static final String GET_CURSO = "curso";
+	public static final String GET_HISTORICO = "historico";
+	public static final String GET_DISCIPLINA = "disciplina";
+	public static final String GET_ALUNO_CURSOU = "aluno_cursou";
+	public static final String GET_HISTORICOS_ATIVOS = "historicos_ativos";
+	public static final String GET_HISTORICOS_MAIS_RECENTE = "historico_mais_recente";
+	public static final String GET_TOTAL_DISCIPLINAS_NO_CURSO = "total_disciplinas_no_nurso";
+	public static final String PARAM_COD_ALUNO = "codAluno";
+	public static final String PARAM_COD_CURSO = "codCurso";
+	public static final String PARAM_COD_DISCIPLINA = "codDisciplina";
 
-	private final List<Curso> cursos;
-	private final List<Disciplina> disciplinas;
-	private final List<Historico> historicos;
+	private final Map<Integer, Curso> cursos;
+	private final Map<Integer, Disciplina> disciplinas;
+	/**
+	 * {@code Map<CodAluno, Map<CodCurso, List<Historico>>>}
+	 */
+	private final Map<Long, Map<Integer, List<Historico>>> historicos;
 	private final CursoReader cursoReader;
+	private final CursoWriter cursoWriter;
 	private final DisciplinasReader disciplinasReader;
+	private final DisciplinasWriter disciplinasWriter;
 	private final HistoricosReader historicosReader;
+	private final HistoricosWriter historicosWriter;
 
 	public CursoCenter() throws jpvmException {
 		super();
 		cursoReader = new CursoReader();
+		cursoWriter = new CursoWriter();
 		disciplinasReader = new DisciplinasReader();
+		disciplinasWriter = new DisciplinasWriter();
 		historicosReader = new HistoricosReader();
-		cursos = new ArrayList<>();
-		disciplinas = new ArrayList<>();
-		historicos = new ArrayList<>();
+		historicosWriter = new HistoricosWriter();
+		cursos = new HashMap<>();
+		disciplinas = new HashMap<>();
+		historicos = new HashMap<>();
 	}
 
 	public static void main(String[] args) throws jpvmException {
@@ -46,15 +79,25 @@ public class CursoCenter extends EscravoBase {
 	}
 
 	public void insereCurso(Curso curso) {
-		cursos.add(curso);
+		cursos.put(curso.getCod(), curso);
 	}
 
 	public void insereDisciplina(Disciplina disciplina) {
-		disciplinas.add(disciplina);
+		disciplinas.put(disciplina.getCod(), disciplina);
 	}
 
 	public void insereHistorico(Historico historico) {
-		historicos.add(historico);
+		Map<Integer, List<Historico>> alunoHis = historicos.get(historico.getCodAluno());
+		if (alunoHis == null) {
+			alunoHis = new HashMap<>();
+			historicos.put(historico.getCodAluno(), alunoHis);
+		}
+		List<Historico> cursoHis = alunoHis.get(historico.getCodCurso());
+		if (cursoHis == null) {
+			cursoHis = new ArrayList<>();
+			alunoHis.put(historico.getCodCurso(), cursoHis);
+		}
+		cursoHis.add(historico);
 	}
 
 	@Override
@@ -65,18 +108,27 @@ public class CursoCenter extends EscravoBase {
 		last = buffer;
 		switch (tipo) {
 		case TIPO_CURSO:
-			cursos.addAll(cursoReader.ler(registros));
+			List<Curso> cursosRecebidos = cursoReader.ler(registros);
+			for (Curso curso : cursosRecebidos) {
+				insereCurso(curso);
+			}
 			break;
 		case TIPO_DISCIPLINA:
-			disciplinas.addAll(disciplinasReader.ler(registros));
+			final List<Disciplina> discRecebidas = disciplinasReader.ler(registros);
+			for (Disciplina disciplina : discRecebidas) {
+				insereDisciplina(disciplina);
+			}
 			break;
 		case TIPO_HISTORICO:
-			historicos.addAll(historicosReader.ler(registros));
+			List<Historico> histRecebido = historicosReader.ler(registros);
+			for (Historico historico : histRecebido) {
+				insereHistorico(historico);
+			}
 			break;
 		default:
 			tryResponder(ResponseEscravo.FAILURE, String.format(MSG_TIPO_NAO_RECONHECIDO, tipo));
 		}
-		tryResponder(ResponseEscravo.OK, null);
+		tryResponder(ResponseEscravo.OK);
 	}
 
 	@Override
@@ -87,8 +139,103 @@ public class CursoCenter extends EscravoBase {
 
 	@Override
 	protected void doGet(String buffer) {
-		// TODO Auto-generated method stub
+		Operacao getOp = converterGetParaOperacao(buffer);
 
+		int codCurso = ((Integer) getOp.getParam(PARAM_COD_CURSO)).intValue();
+		escolha: switch (getOp.getNome()) {
+		case GET_CURSO:
+			Curso curso = cursos.get(codCurso);
+			tryResponder(ResponseEscravo.OK, writeToString(cursoWriter, Arrays.asList(curso)));
+			break;
+		case GET_HISTORICO:
+			Map<Integer, List<Historico>> alunoHis = historicos.get(getOp.getParam(PARAM_COD_ALUNO));
+			if (alunoHis != null) {
+				List<Historico> curHis = alunoHis.get(codCurso);
+				if (curHis != null && !curHis.isEmpty()) {
+					tryResponder(ResponseEscravo.OK, writeToString(historicosWriter, curHis));
+					break;
+				}
+			}
+			tryResponder(ResponseEscravo.OK, "");
+			break;
+		case GET_DISCIPLINA:
+			Disciplina d = disciplinas.get(getOp.getParam(PARAM_COD_DISCIPLINA));
+			tryResponder(ResponseEscravo.OK, writeToString(disciplinasWriter, Arrays.asList(d)));
+			break;
+		case GET_ALUNO_CURSOU:
+			alunoHis = historicos.get(getOp.getParam(PARAM_COD_ALUNO));
+			if (alunoHis != null) {
+				Integer codDisciplina = ((Integer) getOp.getParam(PARAM_COD_DISCIPLINA)).intValue();
+				for (List<Historico> historicos : alunoHis.values()) {
+					for (Historico historico : historicos) {
+						if (codDisciplina == historico.getCodDisciplina()) {
+							tryResponder(ResponseEscravo.OK, Boolean.TRUE.toString());
+							break escolha;
+						}
+					}
+				}
+			}
+			tryResponder(ResponseEscravo.OK, Boolean.FALSE.toString());
+			break;
+		case GET_HISTORICOS_ATIVOS:
+			alunoHis = historicos.get(getOp.getParam(PARAM_COD_ALUNO));
+			List<Historico> ativos = new ArrayList<>();
+			if (alunoHis != null) {
+				for (List<Historico> historicos : alunoHis.values()) {
+					for (Historico historico : historicos) {
+						SituacaoDisciplina situacao = historico.getSituacao();
+						if (situacao == SituacaoDisciplina.MATRICULADO || situacao == SituacaoDisciplina.CURSANDO) {
+							ativos.add(historico);
+						}
+					}
+				}
+			}
+			tryResponder(ResponseEscravo.OK, writeToString(historicosWriter, ativos));
+			break;
+		case GET_HISTORICOS_MAIS_RECENTE:
+			List<Historico> historicosRecentes = new ArrayList<>();
+
+			alunoHis = historicos.get(getOp.getParam(PARAM_COD_ALUNO));
+			if (alunoHis != null) {
+				List<Historico> historicoCurso = alunoHis.get(codCurso);
+				if (historicoCurso != null) {
+					Map<Integer, Historico> historicoDisciplinas = new HashMap<>();
+					for (Historico historico : historicoCurso) {
+						int codDisc = historico.getCodDisciplina();
+						Historico historicoAnterior = historicoDisciplinas.get(codDisc);
+						if (historicoAnterior == null || historicoAnterior.getInicio().before(historico.getInicio())) {
+							historicoDisciplinas.put(codDisc, historico);
+						}
+					}
+					historicosRecentes.addAll(historicoDisciplinas.values());
+				}
+			}
+			tryResponder(ResponseEscravo.OK, writeToString(historicosWriter, historicosRecentes));
+			break;
+		case GET_TOTAL_DISCIPLINAS_NO_CURSO:
+			curso = cursos.get(codCurso);
+			if (curso == null) {
+				tryResponder(ResponseEscravo.FAILURE, "curso não cadastrado: " + codCurso);
+				break;
+			}
+			jpvmBuffer outBuffer = new jpvmBuffer();
+			outBuffer.pack(curso.getCodDisciplinas().size());
+			tryResponder(ResponseEscravo.OK, outBuffer);
+			break;
+		default:
+			super.doGet(getOp.getNome());
+			return;
+		}
+
+	}
+
+	private static <T> String writeToString(DataWriter<T> writer, Collection<T> dados) {
+		try (StringWriter sw = new StringWriter(); PrintWriter pw = new PrintWriter(sw)) {
+			writer.gravarDados(dados, pw);
+			return sw.getBuffer().toString();
+		} catch (IOException e) {
+			throw new RuntimeException("Erro ao gravar dados", e);
+		}
 	}
 
 }

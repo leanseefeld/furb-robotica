@@ -11,8 +11,8 @@ import jpvm.jpvmEnvironment;
 import jpvm.jpvmException;
 import jpvm.jpvmMessage;
 import jpvm.jpvmTaskId;
-import br.furb.su.Sistema;
 import br.furb.su.dataset.reader.CursoReader;
+import br.furb.su.dataset.reader.DisciplinasReader;
 import br.furb.su.dataset.reader.HistoricosReader;
 import br.furb.su.dataset.reader.HistoricosWriter;
 import br.furb.su.dataset.writer.CursoWriter;
@@ -22,6 +22,7 @@ import br.furb.su.escravo.RequestEscravo;
 import br.furb.su.modelo.dados.Curso;
 import br.furb.su.modelo.dados.Disciplina;
 import br.furb.su.modelo.dados.Historico;
+import br.furb.su.modelo.dados.SituacaoDisciplina;
 
 /**
  * Controla o acesso ao escravo {@code CursoCenter}.
@@ -34,6 +35,7 @@ public class CursoCenterControle extends BaseCenterControle {
 	private final CursoReader cursoReader;
 	private final CursoWriter cursoWriter;
 	private final DisciplinasWriter disciplinasWriter;
+	private final DisciplinasReader disciplinasReader;
 	private final HistoricosReader historicosReader;
 	private final HistoricosWriter historicosWriter;
 
@@ -42,15 +44,18 @@ public class CursoCenterControle extends BaseCenterControle {
 		cursoReader = new CursoReader();
 		cursoWriter = new CursoWriter();
 		disciplinasWriter = new DisciplinasWriter();
+		disciplinasReader = new DisciplinasReader();
 		historicosReader = new HistoricosReader();
 		historicosWriter = new HistoricosWriter();
 	}
 
 	public Curso getCurso(int cod) throws jpvmException {
 		jpvmBuffer buffer = new jpvmBuffer();
-		buffer.pack("curso=".concat(String.valueOf(cod)));
+		buffer.pack(String.format("%s\n%s=%d", //
+				CursoCenter.GET_CURSO, //
+				CursoCenter.PARAM_COD_CURSO, cod));
 		pvm.pvm_send(buffer, tid, RequestEscravo.GET.tag());
-		jpvmMessage msg = pvm.pvm_recv();
+		jpvmMessage msg = pvm.pvm_recv(tid);
 		final String bufferStr = msg.buffer.upkstr();
 		checkErrorResponse(msg);
 		return cursoReader.ler(bufferStr).get(0);
@@ -68,17 +73,20 @@ public class CursoCenterControle extends BaseCenterControle {
 		jpvmBuffer buffer = new jpvmBuffer();
 		buffer.pack(comando.toString());
 		pvm.pvm_send(buffer, tid, RequestEscravo.UPLOAD.tag());
-		jpvmMessage msg = pvm.pvm_recv();
+		jpvmMessage msg = pvm.pvm_recv(tid);
 		checkErrorResponse(msg);
 	}
 
 	public List<Historico> getHistorico(long codAluno, int codCurso) throws jpvmException {
 		jpvmBuffer buffer = new jpvmBuffer();
-		buffer.pack(String.format("aluno=%d;curso=%d", codAluno, codCurso));
+		buffer.pack(String.format("%s\n%s=%d;%s=%d", //
+				CursoCenter.GET_HISTORICO, //
+				CursoCenter.PARAM_COD_ALUNO, codAluno, //
+				CursoCenter.PARAM_COD_CURSO, codCurso));
 		pvm.pvm_send(buffer, tid, RequestEscravo.GET.tag());
-		jpvmMessage msg = pvm.pvm_recv();
-		final String bufferStr = msg.buffer.upkstr();
+		jpvmMessage msg = pvm.pvm_recv(tid);
 		checkErrorResponse(msg);
+		final String bufferStr = msg.buffer.upkstr();
 		return historicosReader.ler(bufferStr);
 	}
 
@@ -94,7 +102,7 @@ public class CursoCenterControle extends BaseCenterControle {
 		jpvmBuffer buffer = new jpvmBuffer();
 		buffer.pack(comando.toString());
 		pvm.pvm_send(buffer, tid, RequestEscravo.UPLOAD.tag());
-		jpvmMessage msg = pvm.pvm_recv();
+		jpvmMessage msg = pvm.pvm_recv(tid);
 		checkErrorResponse(msg);
 	}
 
@@ -110,8 +118,74 @@ public class CursoCenterControle extends BaseCenterControle {
 		jpvmBuffer buffer = new jpvmBuffer();
 		buffer.pack(comando.toString());
 		pvm.pvm_send(buffer, tid, RequestEscravo.UPLOAD.tag());
-		jpvmMessage msg = pvm.pvm_recv();
+		jpvmMessage msg = pvm.pvm_recv(tid);
 		checkErrorResponse(msg);
+	}
+
+	public boolean alunoCursou(long aluno, int disciplina) throws jpvmException {
+		jpvmBuffer buffer = new jpvmBuffer();
+		buffer.pack(String.format("%s\n%s=%d;%s=%d", // 
+				CursoCenter.GET_ALUNO_CURSOU, // 
+				CursoCenter.PARAM_COD_ALUNO, aluno, //
+				CursoCenter.PARAM_COD_DISCIPLINA, disciplina));
+		pvm.pvm_send(buffer, tid, RequestEscravo.GET.tag());
+		jpvmMessage msg = pvm.pvm_recv(tid);
+		checkErrorResponse(msg);
+		return Boolean.valueOf(msg.buffer.upkstr());
+	}
+
+	/**
+	 * Retorna as disciplinas do histórico do aluno na situação
+	 * {@link SituacaoDisciplina#MATRICULADO} ou
+	 * {@link SituacaoDisciplina#CURSANDO}.
+	 */
+	public List<Historico> getHistoricosAtivos(long codAluno) throws jpvmException {
+		jpvmBuffer buffer = new jpvmBuffer();
+		buffer.pack(String.format("%s\n%s=%d", //
+				CursoCenter.GET_HISTORICOS_ATIVOS, //
+				CursoCenter.PARAM_COD_ALUNO, codAluno));
+		pvm.pvm_send(buffer, tid, RequestEscravo.GET.tag());
+		jpvmMessage msg = pvm.pvm_recv(tid);
+		checkErrorResponse(msg);
+		return historicosReader.ler(msg.buffer.upkstr());
+	}
+
+	/**
+	 * Retorna apenas as disciplinas mais recentes do histórico, ou seja,
+	 * desconsidera duplicatas.
+	 */
+	public List<Historico> getHistoricoMaisRecente(long aluno, int curso) throws jpvmException {
+		jpvmBuffer buffer = new jpvmBuffer();
+		buffer.pack(String.format("%s\n%s=%d;%s=%d", //
+				CursoCenter.GET_HISTORICOS_MAIS_RECENTE, //
+				CursoCenter.PARAM_COD_ALUNO, aluno, // 
+				CursoCenter.PARAM_COD_CURSO, curso));
+		pvm.pvm_send(buffer, tid, RequestEscravo.GET.tag());
+		jpvmMessage msg = pvm.pvm_recv(tid);
+		checkErrorResponse(msg);
+		return historicosReader.ler(msg.buffer.upkstr());
+	}
+
+	public int getTotalDisciplinasCurso(int codCurso) throws jpvmException {
+		jpvmBuffer buffer = new jpvmBuffer();
+		buffer.pack(String.format("%s\n%s=%d", //
+				CursoCenter.GET_TOTAL_DISCIPLINAS_NO_CURSO, // 
+				CursoCenter.PARAM_COD_CURSO, codCurso));
+		pvm.pvm_send(buffer, tid, RequestEscravo.GET.tag());
+		jpvmMessage msg = pvm.pvm_recv(tid);
+		checkErrorResponse(msg);
+		return msg.buffer.upkint();
+	}
+
+	public Disciplina getDisciplina(int codDisciplina) throws jpvmException {
+		jpvmBuffer buffer = new jpvmBuffer();
+		buffer.pack(String.format("%s\n%s=%d", //
+				CursoCenter.GET_DISCIPLINA, //
+				CursoCenter.PARAM_COD_DISCIPLINA, codDisciplina));
+		pvm.pvm_send(buffer, tid, RequestEscravo.GET.tag());
+		jpvmMessage msg = pvm.pvm_recv(tid);
+		checkErrorResponse(msg);
+		return disciplinasReader.ler(msg.buffer.upkstr()).get(0);
 	}
 
 }

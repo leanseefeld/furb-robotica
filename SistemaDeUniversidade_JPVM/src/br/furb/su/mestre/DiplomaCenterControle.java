@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Arrays;
+import java.util.Calendar;
 
 import jpvm.jpvmBuffer;
 import jpvm.jpvmEnvironment;
@@ -12,6 +13,7 @@ import jpvm.jpvmMessage;
 import jpvm.jpvmTaskId;
 import br.furb.su.dataset.reader.SolicitacoesDiplomaReader;
 import br.furb.su.dataset.writer.SolicitacaoDiplomaWriter;
+import br.furb.su.escravo.DiplomaCenter;
 import br.furb.su.escravo.RequestEscravo;
 import br.furb.su.modelo.dados.SolicitacaoDiploma;
 import br.furb.su.operacoes.OperacaoFactory;
@@ -27,7 +29,7 @@ public class DiplomaCenterControle extends BaseCenterControle {
 
 	public SolicitacaoDiploma getSolicitacaoDiploma(long codAluno, int codCurso) throws jpvmException {
 		jpvmBuffer buffer = new jpvmBuffer();
-		buffer.pack(String.format("aluno=%d;curso=%d", codAluno, codCurso));
+		buffer.pack(String.format("%s\ncodAluno=%d;codCurso=%d", DiplomaCenter.GET_DIPLOMA, codAluno, codCurso));
 		pvm.pvm_send(buffer, tid, RequestEscravo.GET.tag());
 		jpvmMessage msg = pvm.pvm_recv();
 		final String bufferStr = msg.buffer.upkstr();
@@ -51,27 +53,15 @@ public class DiplomaCenterControle extends BaseCenterControle {
 	}
 
 	public void setCursoCenter(jpvmTaskId taskId) throws jpvmException {
-		StringBuilder comando = new StringBuilder();
-		comando.append(String.format("cursoCenter.host=%s;cursoCenter.port=%d", taskId.getHost(), taskId.getPort()));
-		jpvmBuffer buffer = new jpvmBuffer();
-		buffer.pack(comando.toString());
-		pvm.pvm_send(buffer, tid, RequestEscravo.SET_SLAVE.tag());
-		jpvmMessage msg = pvm.pvm_recv();
-		checkErrorResponse(msg);
+		super.setEscravo(taskId, "cursoCenter");
 	}
 
 	public void setMensalidadeCenter(jpvmTaskId taskId) throws jpvmException {
-		StringBuilder comando = new StringBuilder();
-		comando.append(String.format("mensalidadeCenter.host=%s;mensalidadeCenter.port=%d", taskId.getHost(), taskId.getPort()));
-		jpvmBuffer buffer = new jpvmBuffer();
-		buffer.pack(comando.toString());
-		pvm.pvm_send(buffer, tid, RequestEscravo.SET_SLAVE.tag());
-		jpvmMessage msg = pvm.pvm_recv();
-		checkErrorResponse(msg);
+		super.setEscravo(taskId, "mensalidadeCenter");
 	}
-	
-	public void processaDiplomas() throws jpvmException {
-		async_enviaOperacao(OperacaoFactory.processarDiplomas());
+
+	public void processaDiplomas(Calendar dataAtual) throws jpvmException {
+		async_enviaOperacao(OperacaoFactory.processarDiplomas(dataAtual));
 	}
 
 }

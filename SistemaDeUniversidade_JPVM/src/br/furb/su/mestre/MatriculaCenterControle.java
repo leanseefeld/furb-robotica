@@ -40,23 +40,11 @@ public class MatriculaCenterControle extends BaseCenterControle {
 	}
 
 	public void setCursoCenter(jpvmTaskId taskId) throws jpvmException {
-		StringBuilder comando = new StringBuilder();
-		comando.append(String.format("cursoCenter.host=%s;cursoCenter.port=%d", taskId.getHost(), taskId.getPort()));
-		jpvmBuffer buffer = new jpvmBuffer();
-		buffer.pack(comando.toString());
-		pvm.pvm_send(buffer, tid, RequestEscravo.SET_SLAVE.tag());
-		jpvmMessage msg = pvm.pvm_recv();
-		checkErrorResponse(msg);
+		super.setEscravo(taskId, "cursoCenter");
 	}
 
 	public void setMensalidadeCenter(jpvmTaskId taskId) throws jpvmException {
-		StringBuilder comando = new StringBuilder();
-		comando.append(String.format("mensalidadeCenter.host=%s;mensalidadeCenter.port=%d", taskId.getHost(), taskId.getPort()));
-		jpvmBuffer buffer = new jpvmBuffer();
-		buffer.pack(comando.toString());
-		pvm.pvm_send(buffer, tid, RequestEscravo.SET_SLAVE.tag());
-		jpvmMessage msg = pvm.pvm_recv();
-		checkErrorResponse(msg);
+		super.setEscravo(taskId, "mensalidadeCenter");
 	}
 
 	public void processarMatriculas() throws jpvmException {

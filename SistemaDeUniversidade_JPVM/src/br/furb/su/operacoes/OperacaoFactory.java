@@ -15,13 +15,16 @@ public final class OperacaoFactory {
 		return op;
 	}
 
-	public static Operacao processarNovasMensalidades() {
+	public static Operacao processarNovasMensalidades(String alunosAtivos, Calendar dataReferencia) {
 		Operacao op = new Operacao(NOME_PROCESS_NOVAS_MENSALIDADES);
+		op.setParam("dataReferencia", dataReferencia);
+		op.setParam("alunosAtivos", alunosAtivos);
 		return op;
 	}
 
-	public static Operacao processarDiplomas() {
+	public static Operacao processarDiplomas(Calendar dataAtual) {
 		Operacao op = new Operacao(NOME_PROCESS_DIPLOMAS);
+		op.setParam("dataAtual", dataAtual);
 		return op;
 	}
 

@@ -1,14 +1,11 @@
 package br.furb.su.mestre;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-
 import jpvm.jpvmBuffer;
 import jpvm.jpvmEnvironment;
 import jpvm.jpvmException;
 import jpvm.jpvmMessage;
 import jpvm.jpvmTaskId;
+import br.furb.su.escravo.EscravoBase;
 import br.furb.su.escravo.LockException;
 import br.furb.su.escravo.RequestEscravo;
 import br.furb.su.escravo.ResponseEscravo;
@@ -29,7 +26,7 @@ public abstract class BaseCenterControle {
 		if (msg.messageTag == ResponseEscravo.LOCKED.tag()) {
 			throw new LockException(msg.buffer.upkstr());
 		}
-		if (msg.messageTag == ResponseEscravo.FAILURE.tag()) {
+		if (msg.messageTag == ResponseEscravo.FAILURE.tag() || msg.messageTag == ResponseEscravo.ERROR.tag()) {
 			throw new SlaveException(msg.buffer.upkstr());
 		}
 	}
@@ -39,13 +36,7 @@ public abstract class BaseCenterControle {
 	}
 
 	public void async_enviaOperacao(Operacao op) throws jpvmException {
-		byte[] bytes;
-		try (ByteArrayOutputStream bos = new ByteArrayOutputStream(); ObjectOutputStream oos = new ObjectOutputStream(bos)) {
-			oos.writeObject(op);
-			bytes = bos.toByteArray();
-		} catch (IOException e) {
-			throw new RuntimeException("Erro ao serializar operação", e);
-		}
+		byte[] bytes = EscravoBase.serializar(op);
 		jpvmBuffer buffer = new jpvmBuffer();
 		buffer.pack(bytes.length);
 		buffer.pack(bytes, bytes.length, 1);
@@ -54,6 +45,16 @@ public abstract class BaseCenterControle {
 
 	public void waitResposta() throws jpvmException {
 		jpvmMessage msg = pvm.pvm_recv(tid);
+		checkErrorResponse(msg);
+	}
+
+	public void setEscravo(jpvmTaskId taskId, String nomeEscravo) throws jpvmException {
+		StringBuilder comando = new StringBuilder();
+		comando.append(String.format("%s.host=%s;%s.port=%d", nomeEscravo, taskId.getHost(), nomeEscravo, taskId.getPort()));
+		jpvmBuffer buffer = new jpvmBuffer();
+		buffer.pack(comando.toString());
+		pvm.pvm_send(buffer, tid, RequestEscravo.SET_SLAVE.tag());
+		jpvmMessage msg = pvm.pvm_recv();
 		checkErrorResponse(msg);
 	}
 }

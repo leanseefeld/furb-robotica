@@ -1,10 +1,14 @@
 package br.furb.su.escravo;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.PrintWriter;
+import java.io.Serializable;
 import java.io.StringWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,6 +20,7 @@ import jpvm.jpvmException;
 import jpvm.jpvmMessage;
 import jpvm.jpvmTaskId;
 import br.furb.su.Sistema;
+import br.furb.su.modelo.Mensagem;
 import br.furb.su.operacoes.Operacao;
 
 public abstract class EscravoBase {
@@ -26,7 +31,11 @@ public abstract class EscravoBase {
 		Sistema.DEBUG = false;
 	}
 
-	protected static final String MSG_OP_NAO_RECONHECIDO = "Operação desconhecida: %s";
+	protected static final String GET_MENSAGENS = "mensagens";
+	protected static final String MSG_PARAM_NAO_ENCONTRADO = "Parâmetro '%s' não encontrado para o item %s.";
+	protected static final String MSG_PARAM_NAO_RECONHECIDO = "Parâmetro '%s' não reconhecido para o item '%s'.";
+	protected static final String MSG_ITEM_NAO_RECONHECIDO = "Item não reconhecido: %s";
+	protected static final String MSG_OP_NAO_RECONHECIDA = "Operação desconhecida: %s";
 	protected static final String MSG_COD_NAO_RECONHECIDO = "Código de requisição desconhecido: %d";
 	protected static final String MSG_COD_NAO_SUPORTADO = "Código de requisição conhecido, mas não suportado: %s (%d)";
 	protected static final String MSG_REGISTRO_LIVRE = "Registro %d está livre.";
@@ -36,6 +45,7 @@ public abstract class EscravoBase {
 	private static final Integer ANY_REGISTER = new Integer(Integer.MIN_VALUE);
 
 	protected final jpvmEnvironment pvm;
+	protected final ArrayList<Mensagem> mensagens = new ArrayList<>();
 
 	private boolean isAtivo, respondido;
 	private jpvmTaskId destinatario;
@@ -51,7 +61,7 @@ public abstract class EscravoBase {
 		try {
 			isAtivo = true;
 			destinatario = pvm.pvm_parent();
-			responder(ResponseEscravo.OK, null);
+			responder(ResponseEscravo.OK);
 			do {
 				respondido = false;
 				jpvmMessage msg = pvm.pvm_recv();
@@ -96,7 +106,7 @@ public abstract class EscravoBase {
 				case GET:
 					bufferStr = buffer.upkstr();
 					last = bufferStr; // TODO: remover
-					doGet(bufferStr);
+					doInternalGet(bufferStr);
 					break;
 				/*case REMOVE:
 					doRemove(bufferStr);
@@ -144,10 +154,10 @@ public abstract class EscravoBase {
 				try (StringWriter sw = new StringWriter(); //
 						PrintWriter pw = new PrintWriter(sw)) {
 					t.printStackTrace(pw);
-					responder(ResponseEscravo.FAILURE, sw.toString()); // tenta stack completa
+					responder(ResponseEscravo.ERROR, sw.toString()); // tenta stack completa
 				} catch (IOException e) {
 					e.printStackTrace();
-					responder(ResponseEscravo.FAILURE, t.toString()); // garante apenas qual é a exceção
+					responder(ResponseEscravo.ERROR, t.toString()); // garante apenas qual é a exceção
 				}
 				isAtivo = false;
 			}
@@ -157,14 +167,29 @@ public abstract class EscravoBase {
 
 	protected void doKill() throws jpvmException {
 		isAtivo = false;
-		responder(ResponseEscravo.OK, null);
+		responder(ResponseEscravo.OK);
 	}
 
 	protected abstract void doUpload(String buffer);
 
 	protected abstract void doDownload(String buffer);
 
-	protected abstract void doGet(String buffer);
+	protected void doInternalGet(String item) {
+		if (item.equalsIgnoreCase(GET_MENSAGENS)) {
+			byte[] bytes = serializar(mensagens);
+			jpvmBuffer buffer = new jpvmBuffer();
+			buffer.pack(bytes.length);
+			buffer.pack(bytes, bytes.length, 1);
+			tryResponder(ResponseEscravo.OK, buffer);
+			mensagens.clear();
+		} else {
+			doGet(item);
+		}
+	}
+
+	protected void doGet(String item) {
+		tryResponder(ResponseEscravo.FAILURE, String.format(MSG_ITEM_NAO_RECONHECIDO, item));
+	}
 
 	/*protected abstract void doRemove(String buffer);
 
@@ -178,6 +203,7 @@ public abstract class EscravoBase {
 	}
 
 	protected void doSetSlave(String slaveName, jpvmTaskId taskId) {
+		tryResponder(ResponseEscravo.OK);
 	}
 
 	protected void lock(jpvmTaskId taskId, Integer key) throws jpvmException {
@@ -213,13 +239,29 @@ public abstract class EscravoBase {
 		return owner.equals(taskId);
 	}
 
+	protected final void responder(ResponseEscravo responseTag, jpvmBuffer buffer) throws jpvmException {
+		pvm.pvm_send(buffer, destinatario, responseTag.tag());
+		respondido = true;
+	}
+
 	protected final void responder(ResponseEscravo responseTag, String mensagem) throws jpvmException {
 		jpvmBuffer buffer = new jpvmBuffer();
 		if (mensagem != null) {
 			buffer.pack(mensagem);
 		}
-		pvm.pvm_send(buffer, destinatario, responseTag.tag());
-		respondido = true;
+		responder(responseTag, buffer);
+	}
+
+	protected final void responder(ResponseEscravo responseTag) throws jpvmException {
+		responder(responseTag, (jpvmBuffer) null);
+	}
+
+	protected final void tryResponder(ResponseEscravo responseTag, jpvmBuffer buffer) {
+		try {
+			responder(responseTag, buffer);
+		} catch (jpvmException e) {
+			e.printStackTrace();
+		}
 	}
 
 	protected final void tryResponder(ResponseEscravo responseTag, String mensagem) {
@@ -230,10 +272,43 @@ public abstract class EscravoBase {
 		}
 	}
 
+	protected final void tryResponder(ResponseEscravo responseTag) {
+		try {
+			responder(responseTag);
+		} catch (jpvmException e) {
+			e.printStackTrace();
+		}
+	}
+
 	private void garantirResposta() throws jpvmException {
 		if (!respondido) {
 			responder(ResponseEscravo.FAILURE, MSG_SEM_RESPOSTA);
 		}
+	}
+
+	public static byte[] serializar(Serializable s) {
+		byte[] bytes;
+		try (ByteArrayOutputStream bos = new ByteArrayOutputStream(); ObjectOutputStream oos = new ObjectOutputStream(bos)) {
+			oos.writeObject(s);
+			bytes = bos.toByteArray();
+		} catch (IOException e) {
+			throw new RuntimeException("Erro ao serializar operação", e);
+		}
+		return bytes;
+	}
+
+	protected static Operacao converterGetParaOperacao(String getCmd) {
+		int idx = Math.max(getCmd.indexOf('\n'), getCmd.length());
+		String nome = getCmd.substring(0, idx).toLowerCase();
+		Operacao getOp = new Operacao(nome);
+
+		String paramsStr = getCmd.substring(idx + 1);
+		String[] params = paramsStr.split(";");
+		for (int i = 0; i < params.length; i++) {
+			String[] values = params[i].split("=");
+			getOp.setParam(values[0], values[1]);
+		}
+		return getOp;
 	}
 
 }

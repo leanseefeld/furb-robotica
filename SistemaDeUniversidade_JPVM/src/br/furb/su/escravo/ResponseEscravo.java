@@ -18,10 +18,15 @@ public enum ResponseEscravo {
 	 */
 	LOCKED,
 	/**
-	 * Ocorreu um problema ao executar o request. Detalhes da falha estão no
+	 * Ocorreu um problema ao executar o request. A stack trace da falha está no
 	 * buffer.
 	 */
-	FAILURE;
+	FAILURE,
+	/**
+	 * Ocorreu um erro irrecuperável no escravo. A stack trace do erro está no
+	 * buffer.
+	 */
+	ERROR;
 
 	public int tag() {
 		return ordinal();

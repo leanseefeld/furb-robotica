@@ -1,6 +1,7 @@
 package br.furb.su.mestre;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import jpvm.jpvmBuffer;
@@ -15,6 +16,7 @@ import br.furb.su.escravo.EscravoBase;
 import br.furb.su.escravo.MatriculaCenter;
 import br.furb.su.escravo.MensalidadeCenter;
 import br.furb.su.escravo.RequestEscravo;
+import br.furb.su.modelo.dados.Aluno;
 import br.furb.su.modelo.dados.Curso;
 import br.furb.su.modelo.dados.Disciplina;
 import br.furb.su.modelo.dados.Historico;
@@ -137,6 +139,7 @@ public class Master {
 		matriculaControle.setMensalidadeCenter(mensalidadeControle.getTaskId());
 		diplomaControle.setCursoCenter(cursoControle.getTaskId());
 		diplomaControle.setMensalidadeCenter(mensalidadeControle.getTaskId());
+		mensalidadeControle.setCursoCenter(cursoControle.getTaskId());
 		Sistema.debug("handshake concluído");
 	}
 
@@ -147,10 +150,11 @@ public class Master {
 		mensalidadeControle.waitResposta();
 
 		matriculaControle.processarMatriculas();
-		diplomaControle.processaDiplomas();
+		diplomaControle.processaDiplomas(Sistema.getDataAtual());
 
 		matriculaControle.waitResposta();
-		mensalidadeControle.processarNovasMensalidades();
+		List<Aluno> alunosAtivos = Sistema.filtraAlunosAtivos(Sistema.inDataset());
+		mensalidadeControle.processarNovasMensalidades(alunosAtivos, Sistema.getDataAtual());
 
 		diplomaControle.waitResposta();
 		mensalidadeControle.waitResposta();
