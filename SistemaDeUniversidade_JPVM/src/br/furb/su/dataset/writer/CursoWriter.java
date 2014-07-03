@@ -1,12 +1,11 @@
 package br.furb.su.dataset.writer;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Iterator;
-import java.util.List;
 
 import br.furb.su.dataset.OutDataset;
 import br.furb.su.modelo.dados.Curso;
-import br.furb.su.modelo.dados.Disciplina;
 
 public class CursoWriter extends DataWriter<Curso> {
 
@@ -16,7 +15,7 @@ public class CursoWriter extends DataWriter<Curso> {
 		sep();
 		pis.print(curso.getNome());
 		sep();
-		pis.print(codsDisciplinas(curso.getDisciplinas()));
+		pis.print(codsDisciplinas(curso.getCodDisciplinas()));
 		nl();
 	}
 
@@ -25,12 +24,14 @@ public class CursoWriter extends DataWriter<Curso> {
 		return null;
 	}
 
-	private static String codsDisciplinas(List<Disciplina> disciplinas) {
+	private static String codsDisciplinas(Collection<Integer> codigos) {
 		StringBuilder sb = new StringBuilder();
-		final int qt = disciplinas.size();
-		for (int i = 0; i < qt; i++) {
-			sb.append(disciplinas.get(i).getCod());
-			if (i < qt - 1) {
+		Iterator<Integer> it = codigos.iterator();
+		boolean hasNext = it.hasNext();
+		while (hasNext) {
+			sb.append(it.next());
+			hasNext = it.hasNext();
+			if (hasNext) {
 				sb.append(';');
 			}
 		}

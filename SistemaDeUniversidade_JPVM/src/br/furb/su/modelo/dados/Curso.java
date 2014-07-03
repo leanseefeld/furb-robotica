@@ -1,6 +1,7 @@
 package br.furb.su.modelo.dados;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -53,6 +54,10 @@ public class Curso {
 		for (Integer codDisciplina : this.disciplinas.keySet()) {
 			this.disciplinas.put(codDisciplina, disciplinas.get(codDisciplina));
 		}
+	}
+
+	public Collection<Integer> getCodDisciplinas() {
+		return this.disciplinas.keySet();
 	}
 
 }
