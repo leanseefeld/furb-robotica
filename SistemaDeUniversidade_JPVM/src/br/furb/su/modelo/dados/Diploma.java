@@ -4,21 +4,21 @@ import java.util.Calendar;
 
 public class Diploma {
 
-	private Aluno aluno;
-	private Curso curso;
+	private long aluno;
+	private int curso;
 	private Calendar data;
 
-	public Diploma(Aluno aluno, Curso curso, Calendar data) {
+	public Diploma(long aluno, int curso, Calendar data) {
 		this.aluno = aluno;
 		this.curso = curso;
 		this.data = data;
 	}
 
-	public final Aluno getAluno() {
+	public final long getCodAluno() {
 		return aluno;
 	}
 
-	public final Curso getCurso() {
+	public final int getCodCurso() {
 		return curso;
 	}
 

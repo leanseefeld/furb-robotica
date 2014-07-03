@@ -16,7 +16,7 @@ public class Mensagem {
 		this(aluno, null, mensagem);
 	}
 
-	public long getAluno() {
+	public long getCodAluno() {
 		return aluno;
 	}
 

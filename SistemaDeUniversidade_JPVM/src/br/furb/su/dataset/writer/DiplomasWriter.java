@@ -16,9 +16,9 @@ public class DiplomasWriter extends DataWriter<Diploma> {
 
 	@Override
 	protected void gravarRegistro(Diploma r) throws IOException {
-		pis.print(r.getAluno().getCod());
+		pis.print(r.getCodAluno());
 		sep();
-		pis.print(r.getCurso().getCod());
+		pis.print(r.getCodCurso());
 		sep();
 		pis.print(Sistema.formatarData(r.getData()));
 		nl();

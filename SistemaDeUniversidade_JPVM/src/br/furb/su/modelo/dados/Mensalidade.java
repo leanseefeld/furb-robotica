@@ -7,10 +7,10 @@ import br.furb.su.Sistema;
 public class Mensalidade {
 
 	private long codAluno;
-	private Aluno aluno;
 	private boolean isPaga;
 	private Calendar vencimento, competencia;
 	private double valor;
+	private boolean atrasada;
 
 	public Mensalidade(long codAluno, double valor, Calendar competencia, Calendar vencimento, boolean isPaga) {
 		this.codAluno = codAluno;
@@ -20,21 +20,8 @@ public class Mensalidade {
 		this.isPaga = isPaga;
 	}
 
-	public Mensalidade(Aluno aluno, double valor, Calendar competencia, Calendar vencimento, boolean isPaga) {
-		this(aluno.getCod(), valor, competencia, vencimento, isPaga);
-		this.aluno = aluno;
-	}
-
 	public long getCodAluno() {
 		return codAluno;
-	}
-
-	public void setAluno(Aluno aluno) {
-		this.aluno = aluno;
-	}
-
-	public Aluno getAluno() {
-		return aluno;
 	}
 
 	public boolean isPaga() {
@@ -55,6 +42,14 @@ public class Mensalidade {
 
 	public double getValor() {
 		return valor;
+	}
+
+	public void setAtrasada(boolean atrasada) {
+		this.atrasada = atrasada;
+	}
+
+	public boolean isAtrasada() {
+		return atrasada;
 	}
 
 }

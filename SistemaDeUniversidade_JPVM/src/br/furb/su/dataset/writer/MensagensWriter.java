@@ -19,7 +19,7 @@ public class MensagensWriter extends DataWriter<Mensagem> {
 
 	@Override
 	protected void gravarRegistro(Mensagem registro) throws IOException {
-		pis.print(registro.getAluno().getCod());
+		pis.print(registro.getCodAluno());
 		sep();
 		pis.print(registro.getEtapa());
 		sep();
