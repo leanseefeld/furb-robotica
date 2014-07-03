@@ -7,6 +7,7 @@ import java.util.List;
 import jpvm.jpvmException;
 import jpvm.jpvmTaskId;
 import br.furb.su.dataset.reader.SolicitacoesDiplomaReader;
+import br.furb.su.dataset.writer.DiplomasWriter;
 import br.furb.su.mestre.CursoCenterControle;
 import br.furb.su.mestre.MensalidadeCenterControle;
 import br.furb.su.modelo.Mensagem;
@@ -24,6 +25,7 @@ public class DiplomaCenter extends EscravoBase {
 	private final SolicitacoesDiplomaReader reader = new SolicitacoesDiplomaReader();
 	private final List<SolicitacaoDiploma> sols = new ArrayList<>();
 	private final List<Diploma> diplomas = new ArrayList<>();
+	private final DiplomasWriter writer = new DiplomasWriter();
 
 	private MensalidadeCenterControle mensalidadeCenter;
 	private CursoCenterControle cursoCenter;
@@ -54,8 +56,11 @@ public class DiplomaCenter extends EscravoBase {
 
 	@Override
 	protected void doDownload(String buffer) {
-		// TODO Auto-generated method stub
-
+		if (buffer.equals("diplomas")) {
+			tryResponder(ResponseEscravo.OK, writeToString(writer, diplomas));
+		} else {
+			super.doDownload(buffer);
+		}
 	}
 
 	@Override

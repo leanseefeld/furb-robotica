@@ -1,7 +1,13 @@
 package br.furb.su.modelo;
 
-public class Mensagem {
+import java.io.Serializable;
 
+public class Mensagem implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private long aluno;
 	private String etapa;
 	private String mensagem;

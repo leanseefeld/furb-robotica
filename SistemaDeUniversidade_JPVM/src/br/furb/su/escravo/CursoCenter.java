@@ -1,8 +1,5 @@
 package br.furb.su.escravo;
 
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -17,7 +14,6 @@ import br.furb.su.dataset.reader.DisciplinasReader;
 import br.furb.su.dataset.reader.HistoricosReader;
 import br.furb.su.dataset.reader.HistoricosWriter;
 import br.furb.su.dataset.writer.CursoWriter;
-import br.furb.su.dataset.writer.DataWriter;
 import br.furb.su.dataset.writer.DisciplinasWriter;
 import br.furb.su.modelo.dados.Curso;
 import br.furb.su.modelo.dados.Disciplina;
@@ -132,12 +128,6 @@ public class CursoCenter extends EscravoBase {
 	}
 
 	@Override
-	protected void doDownload(String buffer) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
 	protected void doGet(String buffer) {
 		Operacao getOp = converterGetParaOperacao(buffer);
 
@@ -232,12 +222,20 @@ public class CursoCenter extends EscravoBase {
 
 	}
 
-	private static <T> String writeToString(DataWriter<T> writer, Collection<T> dados) {
-		try (StringWriter sw = new StringWriter(); PrintWriter pw = new PrintWriter(sw)) {
-			writer.gravarDados(dados, pw);
-			return sw.getBuffer().toString();
-		} catch (IOException e) {
-			throw new RuntimeException("Erro ao gravar dados", e);
+	@Override
+	protected void doDownload(String buffer) {
+		if (buffer.equals("historico")) {
+			List<Historico> todosHistoricos = new ArrayList<Historico>();
+			Collection<Map<Integer, List<Historico>>> alunosHis = historicos.values();
+			for (Map<Integer, List<Historico>> histCurso : alunosHis) {
+				for (List<Historico> histDisciplinas : histCurso.values()) {
+					todosHistoricos.addAll(histDisciplinas);
+				}
+			}
+
+			tryResponder(ResponseEscravo.OK, writeToString(historicosWriter, todosHistoricos));
+		} else {
+			super.doDownload(buffer);
 		}
 	}
 

@@ -9,6 +9,7 @@ import java.io.PrintWriter;
 import java.io.Serializable;
 import java.io.StringWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,6 +21,7 @@ import jpvm.jpvmException;
 import jpvm.jpvmMessage;
 import jpvm.jpvmTaskId;
 import br.furb.su.Sistema;
+import br.furb.su.dataset.writer.DataWriter;
 import br.furb.su.modelo.Mensagem;
 import br.furb.su.operacoes.Operacao;
 
@@ -67,12 +69,16 @@ public abstract class EscravoBase {
 		} catch (Throwable t) {
 			try (StringWriter sw = new StringWriter(); PrintWriter pw = new PrintWriter(sw)) {
 				t.printStackTrace(pw);
-				JOptionPane.showMessageDialog(null, sw.getBuffer().toString()); // TODO: remover
+				if (Sistema.JOPTIONPANE) {
+					JOptionPane.showMessageDialog(null, sw.getBuffer().toString());
+				}
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
-		JOptionPane.showMessageDialog(null, "Saindo normalmente: " + getClass()); // TODO: remover
+		if (Sistema.JOPTIONPANE) {
+			JOptionPane.showMessageDialog(null, "Saindo normalmente: " + getClass());
+		}
 	}
 
 	protected void processaMensagem(jpvmMessage msg) throws jpvmException {
@@ -86,7 +92,6 @@ public abstract class EscravoBase {
 				String bufferStr;
 				switch (req) {
 				case KILL:
-					JOptionPane.showMessageDialog(null, "Recebi o KILL: " + getClass());
 					doKill();
 					break;
 				case UPLOAD:
@@ -170,7 +175,15 @@ public abstract class EscravoBase {
 
 	protected abstract void doUpload(String buffer);
 
-	protected abstract void doDownload(String buffer);
+	protected void doDownload(String buffer) {
+		if (buffer.equals("mensagens")) {
+			byte[] bytes = serializar(mensagens);
+			jpvmBuffer jBuffer = new jpvmBuffer();
+			jBuffer.pack(bytes.length);
+			jBuffer.pack(bytes, bytes.length, 1);
+			tryResponder(ResponseEscravo.OK, jBuffer);
+		}
+	}
 
 	protected void doInternalGet(String item) {
 		if (item.equalsIgnoreCase(GET_MENSAGENS)) {
@@ -308,6 +321,15 @@ public abstract class EscravoBase {
 			getOp.setParam(values[0], values[1]);
 		}
 		return getOp;
+	}
+
+	protected static <T> String writeToString(DataWriter<T> writer, Collection<T> dados) {
+		try (StringWriter sw = new StringWriter(); PrintWriter pw = new PrintWriter(sw)) {
+			writer.gravarDados(dados, pw);
+			return sw.getBuffer().toString();
+		} catch (IOException e) {
+			throw new RuntimeException("Erro ao gravar dados", e);
+		}
 	}
 
 }

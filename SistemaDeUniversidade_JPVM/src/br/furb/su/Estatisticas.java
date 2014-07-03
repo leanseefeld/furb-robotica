@@ -1,12 +1,22 @@
 package br.furb.su;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Estatisticas {
+public class Estatisticas implements Serializable {
 
-	public class Financeiras {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
+	public class Financeiras implements Serializable {
+
+		/**
+		 * 
+		 */
+		private static final long serialVersionUID = 1L;
 		private double totalMulta;
 		private double totalMensalidades;
 		private double totalProxMensalidades;

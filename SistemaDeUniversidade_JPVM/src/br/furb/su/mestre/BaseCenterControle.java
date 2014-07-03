@@ -1,5 +1,11 @@
 package br.furb.su.mestre;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.util.Collection;
+import java.util.List;
+
 import jpvm.jpvmBuffer;
 import jpvm.jpvmEnvironment;
 import jpvm.jpvmException;
@@ -10,6 +16,7 @@ import br.furb.su.escravo.LockException;
 import br.furb.su.escravo.RequestEscravo;
 import br.furb.su.escravo.ResponseEscravo;
 import br.furb.su.escravo.SlaveException;
+import br.furb.su.modelo.Mensagem;
 import br.furb.su.operacoes.Operacao;
 
 public abstract class BaseCenterControle {
@@ -57,4 +64,32 @@ public abstract class BaseCenterControle {
 		jpvmMessage msg = pvm.pvm_recv();
 		checkErrorResponse(msg);
 	}
+
+	public void requestDownload(String artefato) throws jpvmException {
+		jpvmBuffer buffer = new jpvmBuffer();
+		buffer.pack(artefato);
+		pvm.pvm_send(buffer, tid, RequestEscravo.DOWNLOAD.tag());
+
+	}
+
+	@SuppressWarnings("unchecked")
+	public Collection<? extends Mensagem> downloadMensagens() throws jpvmException {
+		requestDownload("mensagens");
+		jpvmMessage msg = pvm.pvm_recv();
+		checkErrorResponse(msg);
+
+		jpvmBuffer buffer = msg.buffer;
+		int bytesCount = buffer.upkint();
+		byte[] bytes = new byte[bytesCount];
+		buffer.unpack(bytes, bytesCount, 1);
+
+		List<Mensagem> mensagens;
+		try (ByteArrayInputStream bis = new ByteArrayInputStream(bytes); ObjectInputStream ois = new ObjectInputStream(bis)) {
+			mensagens = (List<Mensagem>) ois.readObject();
+		} catch (IOException | ClassNotFoundException e) {
+			throw new RuntimeException("Não foi possível recuperar as mensagens");
+		}
+		return mensagens;
+	}
+
 }

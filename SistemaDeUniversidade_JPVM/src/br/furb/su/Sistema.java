@@ -39,6 +39,7 @@ import br.furb.su.modelo.dados.Aluno;
 public final class Sistema {
 
 	public static boolean DEBUG = true;
+	public static boolean JOPTIONPANE = true;
 
 	public static final double PERCENTUAL_MULTA = 1.15;
 	private static final Sistema INSTANCE = new Sistema();
@@ -51,6 +52,7 @@ public final class Sistema {
 	private static Estatisticas estatisticas = new Estatisticas();
 	private static final Collection<Class<? extends EscravoBase>> ESCRAVOS = Arrays.asList(CursoCenter.class, DiplomaCenter.class, MatriculaCenter.class, MensalidadeCenter.class);
 	public static final int NUM_ESCRAVOS = ESCRAVOS.size();
+
 
 	private Sistema() {
 		// no!

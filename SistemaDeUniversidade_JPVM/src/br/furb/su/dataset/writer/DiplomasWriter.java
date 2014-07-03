@@ -14,6 +14,9 @@ public class DiplomasWriter extends DataWriter<Diploma> {
 		super(new File(pastaSaida, "diplomas.csv"));
 	}
 
+	public DiplomasWriter() {
+	}
+
 	@Override
 	protected void gravarRegistro(Diploma r) throws IOException {
 		pis.print(r.getCodAluno());

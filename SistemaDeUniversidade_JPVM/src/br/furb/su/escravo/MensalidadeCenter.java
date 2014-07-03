@@ -11,6 +11,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import jpvm.jpvmBuffer;
 import jpvm.jpvmException;
 import jpvm.jpvmTaskId;
 import br.furb.su.Estatisticas;
@@ -62,7 +63,21 @@ public class MensalidadeCenter extends EscravoBase {
 
 	@Override
 	protected void doDownload(String buffer) {
-		// TODO Auto-generated method stub
+		if (buffer.equals("estatisticas")) {
+			byte[] bytes = serializar(Sistema.estatisticas());
+			jpvmBuffer jBuffer = new jpvmBuffer();
+			jBuffer.pack(bytes.length);
+			jBuffer.pack(bytes, bytes.length, 1);
+			tryResponder(ResponseEscravo.OK, jBuffer);
+		} else if (buffer.equals("mensalidades")) {
+			List<Mensalidade> todasMensalidades = new ArrayList<>();
+			for (Collection<Mensalidade> mensAluno : mensalidades.values()) {
+				todasMensalidades.addAll(mensAluno);
+			}
+			tryResponder(ResponseEscravo.OK, gravarMensalidades(todasMensalidades));
+		} else {
+			super.doDownload(buffer);
+		}
 
 	}
 

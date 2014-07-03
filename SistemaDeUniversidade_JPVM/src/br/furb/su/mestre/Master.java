@@ -1,5 +1,9 @@
 package br.furb.su.mestre;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,16 +12,24 @@ import jpvm.jpvmBuffer;
 import jpvm.jpvmEnvironment;
 import jpvm.jpvmException;
 import jpvm.jpvmTaskId;
+import br.furb.su.Estatisticas;
 import br.furb.su.Sistema;
 import br.furb.su.dataset.InDataset;
+import br.furb.su.dataset.reader.HistoricosWriter;
+import br.furb.su.dataset.writer.DiplomasWriter;
+import br.furb.su.dataset.writer.EstatisticasWriter;
+import br.furb.su.dataset.writer.MensagensWriter;
+import br.furb.su.dataset.writer.MensalidadesWriter;
 import br.furb.su.escravo.CursoCenter;
 import br.furb.su.escravo.DiplomaCenter;
 import br.furb.su.escravo.EscravoBase;
 import br.furb.su.escravo.MatriculaCenter;
 import br.furb.su.escravo.MensalidadeCenter;
 import br.furb.su.escravo.RequestEscravo;
+import br.furb.su.modelo.Mensagem;
 import br.furb.su.modelo.dados.Aluno;
 import br.furb.su.modelo.dados.Curso;
+import br.furb.su.modelo.dados.Diploma;
 import br.furb.su.modelo.dados.Disciplina;
 import br.furb.su.modelo.dados.Historico;
 import br.furb.su.modelo.dados.Mensalidade;
@@ -51,12 +63,34 @@ public class Master {
 			distribuirDados();
 			doHandshake();
 			processar();
+			persistir();
 		} catch (Throwable t) {
 			t.printStackTrace();
 		} finally {
 			shutdownEscravos();
 			pvm.pvm_exit();
 		}
+	}
+
+	private void persistir() throws jpvmException, IOException {
+		Collection<Historico> historicos = cursoControle.downloadHistorico();
+		Collection<Diploma> diplomas = diplomaControle.downloadDiplomas();
+		Collection<Mensalidade> mensalidades = mensalidadeControle.downloadMensalidades();
+		Estatisticas estatisticas = mensalidadeControle.downloadEstatisticas();
+
+		Collection<Mensagem> mensagens = new ArrayList<>();
+		mensagens.addAll(cursoControle.downloadMensagens());
+		mensagens.addAll(diplomaControle.downloadMensagens());
+		mensagens.addAll(mensalidadeControle.downloadMensagens());
+		mensagens.addAll(matriculaControle.downloadMensagens());
+
+		final File pastaSaida = Sistema.getPastaSaida();
+
+		new HistoricosWriter(pastaSaida).gravarArquivo(historicos);
+		new DiplomasWriter(pastaSaida).gravarArquivo(diplomas);
+		new MensalidadesWriter(pastaSaida).gravarArquivo(mensalidades);
+		new EstatisticasWriter(pastaSaida).gravarArquivo(estatisticas.financeiras().toList());
+		new MensagensWriter(pastaSaida).gravarArquivo(mensagens);
 	}
 
 	private void shutdownEscravos() {

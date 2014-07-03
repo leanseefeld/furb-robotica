@@ -1,10 +1,13 @@
 package br.furb.su.mestre;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
@@ -13,6 +16,7 @@ import jpvm.jpvmEnvironment;
 import jpvm.jpvmException;
 import jpvm.jpvmMessage;
 import jpvm.jpvmTaskId;
+import br.furb.su.Estatisticas;
 import br.furb.su.Sistema;
 import br.furb.su.dataset.reader.MensalidadesReader;
 import br.furb.su.dataset.writer.MensalidadesWriter;
@@ -93,6 +97,32 @@ public class MensalidadeCenterControle extends BaseCenterControle {
 
 	public void setCursoCenter(jpvmTaskId taskId) throws jpvmException {
 		super.setEscravo(taskId, "cursoCenter");
+	}
+
+	public Collection<Mensalidade> downloadMensalidades() throws jpvmException {
+		super.requestDownload("mensalidades");
+		jpvmMessage msg = pvm.pvm_recv();
+		checkErrorResponse(msg);
+		return mensReader.ler(msg.buffer.upkstr());
+	}
+
+	public Estatisticas downloadEstatisticas() throws jpvmException {
+		super.requestDownload("estatisticas");
+		jpvmMessage msg = pvm.pvm_recv();
+		checkErrorResponse(msg);
+
+		jpvmBuffer buffer = msg.buffer;
+		int bytesCount = buffer.upkint();
+		byte[] bytes = new byte[bytesCount];
+		buffer.unpack(bytes, bytesCount, 1);
+
+		Estatisticas es;
+		try (ByteArrayInputStream bis = new ByteArrayInputStream(bytes); ObjectInputStream ois = new ObjectInputStream(bis)) {
+			es = (Estatisticas) ois.readObject();
+		} catch (IOException | ClassNotFoundException e) {
+			throw new RuntimeException("Não foi possível recuperar as estatísticas");
+		}
+		return es;
 	}
 
 }

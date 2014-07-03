@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import jpvm.jpvmBuffer;
@@ -186,6 +187,13 @@ public class CursoCenterControle extends BaseCenterControle {
 		jpvmMessage msg = pvm.pvm_recv(tid);
 		checkErrorResponse(msg);
 		return disciplinasReader.ler(msg.buffer.upkstr()).get(0);
+	}
+
+	public Collection<Historico> downloadHistorico() throws jpvmException {
+		super.requestDownload("historico");
+		jpvmMessage msg = pvm.pvm_recv(tid);
+		checkErrorResponse(msg);
+		return historicosReader.ler(msg.buffer.upkstr());
 	}
 
 }

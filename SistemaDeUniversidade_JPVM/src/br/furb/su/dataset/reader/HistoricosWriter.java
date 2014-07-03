@@ -1,5 +1,6 @@
 package br.furb.su.dataset.reader;
 
+import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
 
@@ -9,6 +10,15 @@ import br.furb.su.dataset.writer.DataWriter;
 import br.furb.su.modelo.dados.Historico;
 
 public class HistoricosWriter extends DataWriter<Historico> {
+
+	public static final String FILE_NAME = "estatisticas.txt";
+
+	public HistoricosWriter() {
+	}
+
+	public HistoricosWriter(File pastaSaida) {
+		super(new File(pastaSaida, FILE_NAME));
+	}
 
 	@Override
 	protected void gravarRegistro(Historico h) throws IOException {

@@ -35,6 +35,12 @@ public abstract class DataWriter<T> {
 		}
 	}
 
+	public void gravarArquivo(Collection<T> dados) throws IOException {
+		try (PrintWriter pw = new PrintWriter(arquivoSaida)) {
+			gravarDados(dados, pw);
+		}
+	}
+
 	public void gravarDados(Collection<T> dados, PrintWriter out) throws IOException {
 		try {
 			this.pis = out;

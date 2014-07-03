@@ -38,11 +38,6 @@ public class MatriculaCenter extends EscravoBase {
 	}
 
 	@Override
-	protected void doDownload(String buffer) {
-		// TODO Auto-generated method stub
-	}
-
-	@Override
 	protected void doSetSlave(String slaveName, jpvmTaskId taskId) {
 		if (slaveName.equals("mensalidadeCenter")) {
 			mensalidadeCenter = new MensalidadeCenterControle(pvm, taskId);
