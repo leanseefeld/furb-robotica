@@ -26,14 +26,10 @@
 
 package jpvm;
 
-import jpvm.jpvmTaskId;
-import jpvm.jpvmMessage;
-import jpvm.jpvmMessageQueue;
-import jpvm.jpvmConnectionSet;
-import jpvm.jpvmConnectionServer;
-import jpvm.jpvmConfiguration;
-import jpvm.jpvmTaskStatus;
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 
 public class jpvmEnvironment {
 	public static final jpvmTaskId PvmNoParent = null;
@@ -363,8 +359,8 @@ public class jpvmEnvironment {
 		String osName = System.getProperty("os.name");
 		String userName = System.getProperty("user.name");
 		String fileName = null;
-		if (osName.equals("Windows 95") || osName.equals("Windows NT") || true || osName.equals("Windows 3.1")) {
-			fileName = "c:\\temp\\jpvmd-" + userName + ".txt";
+		if (osName.contains("Windows")) {
+			fileName = System.getProperty("java.io.tmpdir") + "jpvmd-" + userName + ".txt";
 		} else {
 			fileName = "/tmp/jpvmd." + userName;
 		}
