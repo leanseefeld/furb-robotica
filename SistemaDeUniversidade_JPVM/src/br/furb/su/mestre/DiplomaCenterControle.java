@@ -14,6 +14,7 @@ import br.furb.su.dataset.reader.SolicitacoesDiplomaReader;
 import br.furb.su.dataset.writer.SolicitacaoDiplomaWriter;
 import br.furb.su.escravo.RequestEscravo;
 import br.furb.su.modelo.dados.SolicitacaoDiploma;
+import br.furb.su.operacoes.OperacaoFactory;
 
 public class DiplomaCenterControle extends BaseCenterControle {
 
@@ -70,13 +71,7 @@ public class DiplomaCenterControle extends BaseCenterControle {
 	}
 	
 	public void processaDiplomas() throws jpvmException {
-		StringBuilder comando = new StringBuilder();
-		comando.append("processaDiplomas");
-		jpvmBuffer buffer = new jpvmBuffer();
-		buffer.pack(comando.toString());
-		pvm.pvm_send(buffer, tid, RequestEscravo.OPERATION.tag());
-		jpvmMessage msg = pvm.pvm_recv();
-		checkErrorResponse(msg);
+		async_enviaOperacao(OperacaoFactory.processarDiplomas());
 	}
 
 }

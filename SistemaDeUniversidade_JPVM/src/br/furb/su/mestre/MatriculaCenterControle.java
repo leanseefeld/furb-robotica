@@ -10,9 +10,11 @@ import jpvm.jpvmEnvironment;
 import jpvm.jpvmException;
 import jpvm.jpvmMessage;
 import jpvm.jpvmTaskId;
+import br.furb.su.Sistema;
 import br.furb.su.dataset.reader.SolicitacoesMatriculaWriter;
 import br.furb.su.escravo.RequestEscravo;
 import br.furb.su.modelo.dados.SolicitacaoMatricula;
+import br.furb.su.operacoes.OperacaoFactory;
 
 public class MatriculaCenterControle extends BaseCenterControle {
 
@@ -55,6 +57,10 @@ public class MatriculaCenterControle extends BaseCenterControle {
 		pvm.pvm_send(buffer, tid, RequestEscravo.SET_SLAVE.tag());
 		jpvmMessage msg = pvm.pvm_recv();
 		checkErrorResponse(msg);
+	}
+
+	public void processarMatriculas() throws jpvmException {
+		async_enviaOperacao(OperacaoFactory.processarMatriculas(Sistema.getDataAtual()));
 	}
 
 }

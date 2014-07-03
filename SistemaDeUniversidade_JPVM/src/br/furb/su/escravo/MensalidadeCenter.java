@@ -3,6 +3,8 @@ package br.furb.su.escravo;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import javax.swing.JOptionPane;
+
 import jpvm.jpvmException;
 import br.furb.su.dataset.reader.MensalidadesReader;
 import br.furb.su.modelo.dados.Mensalidade;
@@ -45,13 +47,7 @@ public class MensalidadeCenter extends EscravoBase {
 
 	@Override
 	protected void doOperation(Operacao op) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	protected void doSetSlave(String buffer) {
-		// TODO Auto-generated method stub
+		JOptionPane.showMessageDialog(null, op, "CursoCenter", JOptionPane.INFORMATION_MESSAGE);
 
 	}
 

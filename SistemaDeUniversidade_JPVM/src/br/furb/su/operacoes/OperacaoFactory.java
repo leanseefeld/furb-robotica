@@ -4,6 +4,7 @@ import java.util.Calendar;
 
 public final class OperacaoFactory {
 
+	public static final String NOME_PROCESS_MATRICULAS = "processarMatriculas";
 	public static final String NOME_PROCESS_DIPLOMAS = "processarDiplomas";
 	public static final String NOME_PROCESS_NOVAS_MENSALIDADES = "processarNovasMensalidades";
 	public static final String NOME_PROCESS_MENSALIDADES_ATRASADAS = "processarMensalidadesAtrasadas";
@@ -21,6 +22,12 @@ public final class OperacaoFactory {
 
 	public static Operacao processarDiplomas() {
 		Operacao op = new Operacao(NOME_PROCESS_DIPLOMAS);
+		return op;
+	}
+
+	public static Operacao processarMatriculas(Calendar dataAtual) {
+		Operacao op = new Operacao(NOME_PROCESS_MATRICULAS);
+		op.setParam("dataAtual", dataAtual);
 		return op;
 	}
 

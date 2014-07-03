@@ -26,6 +26,7 @@ public abstract class EscravoBase {
 		Sistema.DEBUG = false;
 	}
 
+	protected static final String MSG_OP_NAO_RECONHECIDO = "Operação desconhecida: %s";
 	protected static final String MSG_COD_NAO_RECONHECIDO = "Código de requisição desconhecido: %d";
 	protected static final String MSG_COD_NAO_SUPORTADO = "Código de requisição conhecido, mas não suportado: %s (%d)";
 	protected static final String MSG_REGISTRO_LIVRE = "Registro %d está livre.";
@@ -123,7 +124,17 @@ public abstract class EscravoBase {
 				case SET_SLAVE:
 					bufferStr = buffer.upkstr();
 					last = bufferStr; // TODO: remover
-					doSetSlave(bufferStr);
+
+					String[] setCmd = bufferStr.split(";");
+					final String hostPart = setCmd[0];
+					final String portPart = setCmd[1];
+					int idx = hostPart.indexOf("=");
+					String slaveName = hostPart.substring(0, idx);
+					String host = hostPart.substring(idx + 1);
+					int port = Integer.parseInt(portPart.substring(portPart.indexOf("=") + 1));
+					jpvmTaskId taskId = new jpvmTaskId(host, port);
+
+					doSetSlave(slaveName, taskId);
 					break;
 				default:
 					responder(ResponseEscravo.FAILURE, String.format(MSG_COD_NAO_SUPORTADO, req.name(), req.tag()));
@@ -163,9 +174,11 @@ public abstract class EscravoBase {
 
 	protected abstract void doUnlock(jpvmTaskId taskId, String buffer);*/
 
-	protected abstract void doOperation(Operacao op);
+	protected void doOperation(Operacao op) {
+	}
 
-	protected abstract void doSetSlave(String buffer);
+	protected void doSetSlave(String slaveName, jpvmTaskId taskId) {
+	}
 
 	protected void lock(jpvmTaskId taskId, Integer key) throws jpvmException {
 		if (checkLocked(taskId, key)) {

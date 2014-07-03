@@ -140,8 +140,20 @@ public class Master {
 		Sistema.debug("handshake concluído");
 	}
 
-	public void processar() {
+	public void processar() throws jpvmException {
 		Sistema.debug("iniciando processamento");
+
+		mensalidadeControle.processaMensalidadesAtrasadas();
+		mensalidadeControle.waitResposta();
+
+		matriculaControle.processarMatriculas();
+		diplomaControle.processaDiplomas();
+
+		matriculaControle.waitResposta();
+		mensalidadeControle.processarNovasMensalidades();
+
+		diplomaControle.waitResposta();
+		mensalidadeControle.waitResposta();
 
 		Sistema.debug("processamento concluído");
 	}

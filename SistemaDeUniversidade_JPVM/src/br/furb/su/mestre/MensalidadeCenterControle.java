@@ -11,10 +11,12 @@ import jpvm.jpvmEnvironment;
 import jpvm.jpvmException;
 import jpvm.jpvmMessage;
 import jpvm.jpvmTaskId;
+import br.furb.su.Sistema;
 import br.furb.su.dataset.reader.MensalidadesReader;
 import br.furb.su.dataset.writer.MensalidadesWriter;
 import br.furb.su.escravo.RequestEscravo;
 import br.furb.su.modelo.dados.Mensalidade;
+import br.furb.su.operacoes.OperacaoFactory;
 
 public class MensalidadeCenterControle extends BaseCenterControle {
 
@@ -48,6 +50,14 @@ public class MensalidadeCenterControle extends BaseCenterControle {
 		pvm.pvm_send(buffer, tid, RequestEscravo.UPLOAD.tag());
 		jpvmMessage msg = pvm.pvm_recv();
 		checkErrorResponse(msg);
+	}
+
+	public void processaMensalidadesAtrasadas() throws jpvmException {
+		async_enviaOperacao(OperacaoFactory.processarMensalidadesAtrasadas(Sistema.getDataAtual()));
+	}
+
+	public void processarNovasMensalidades() throws jpvmException {
+		async_enviaOperacao(OperacaoFactory.processarNovasMensalidades());
 	}
 
 }

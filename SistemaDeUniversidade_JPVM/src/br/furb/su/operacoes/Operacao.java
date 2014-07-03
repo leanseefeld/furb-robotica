@@ -9,7 +9,7 @@ public class Operacao implements Serializable {
 	/**
 	 * 
 	 */
-	private static final long serialVersionUID = 654853120729087154L;
+	private static final long serialVersionUID = -3566612867383090653L;
 	private String nome;
 	private Map<String, Serializable> params;
 
@@ -36,6 +36,11 @@ public class Operacao implements Serializable {
 
 	public void removeParam(String nome) {
 		params.remove(nome.toUpperCase());
+	}
+
+	@Override
+	public String toString() {
+		return "nome=" + getNome() + ",params=" + params.toString();
 	}
 
 }

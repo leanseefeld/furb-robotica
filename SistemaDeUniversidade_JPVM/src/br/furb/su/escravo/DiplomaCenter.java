@@ -30,15 +30,7 @@ public class DiplomaCenter extends EscravoBase {
 	}
 
 	@Override
-	protected void doSetSlave(String buffer) {
-		String[] setCmd = buffer.split(";");
-		final String hostPart = setCmd[0];
-		final String portPart = setCmd[1];
-		int idx = hostPart.indexOf("=");
-		String slaveName = hostPart.substring(0, idx);
-		String host = hostPart.substring(idx + 1);
-		int port = Integer.parseInt(portPart.substring(portPart.indexOf("=") + 1));
-		jpvmTaskId taskId = new jpvmTaskId(host, port);
+	protected void doSetSlave(String slaveName, jpvmTaskId taskId) {
 		if (slaveName.equals("mensalidadeCenter")) {
 			mensalidadeCenter = taskId;
 		} else if (slaveName.equals("cursoCenter")) {

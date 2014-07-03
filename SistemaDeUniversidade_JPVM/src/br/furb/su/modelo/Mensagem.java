@@ -1,20 +1,22 @@
 package br.furb.su.modelo;
 
-import br.furb.su.modelo.dados.Aluno;
-
 public class Mensagem {
 
-	private Aluno aluno;
+	private long aluno;
 	private String etapa;
 	private String mensagem;
 
-	public Mensagem(Aluno aluno, String etapa, String mensagem) {
+	public Mensagem(long aluno, String etapa, String mensagem) {
 		this.aluno = aluno;
 		this.etapa = etapa;
 		this.mensagem = mensagem;
 	}
 
-	public Aluno getAluno() {
+	public Mensagem(long aluno, String mensagem) {
+		this(aluno, null, mensagem);
+	}
+
+	public long getAluno() {
 		return aluno;
 	}
 
