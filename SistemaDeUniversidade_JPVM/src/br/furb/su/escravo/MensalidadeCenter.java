@@ -28,8 +28,9 @@ import br.furb.su.operacoes.OperacaoFactory;
 
 public class MensalidadeCenter extends EscravoBase {
 
-	public static final String GET_ALUNO_POSSUI_ATRASO = "alunoPossuiAtraso";
+	public static final String GET_ALUNO_POSSUI_ATRASO = "aluno_possui_ptraso";
 	public static final String GET_MENSALIDADE = "mensalidade";
+	public static final String PARAM_COD_ALUNO = "codAluno";
 
 	private final Map<Long, Collection<Mensalidade>> mensalidades = new HashMap<>();
 	private final MensalidadesReader mensReader = new MensalidadesReader();
@@ -41,12 +42,8 @@ public class MensalidadeCenter extends EscravoBase {
 		super();
 	}
 
-	public static void main(String[] args) {
-		try {
-			new MensalidadeCenter().run();
-		} catch (jpvmException e) {
-			e.printStackTrace();
-		}
+	public static void main(String[] args) throws jpvmException {
+		new MensalidadeCenter().run();
 	}
 
 	@Override
@@ -71,40 +68,27 @@ public class MensalidadeCenter extends EscravoBase {
 
 	@Override
 	protected void doGet(String buffer) {
-		int idx = Math.max(buffer.indexOf('\n'), buffer.length());
-		String item = buffer.substring(0, idx).toLowerCase();
-		String paramsStr;
-		String[] values;
-		switch (item) {
+		Operacao op = converterGetParaOperacao(buffer);
+		switch (op.getNome()) {
 		case GET_MENSALIDADE:
-			paramsStr = buffer.substring(idx + 1);
-			values = paramsStr.split("=");
-			if (!values[0].equals("codAluno")) {
-				tryResponder(ResponseEscravo.FAILURE, String.format(MSG_PARAM_NAO_RECONHECIDO, values[0], item));
-			} else {
-				Collection<Mensalidade> mensAluno = mensalidades.get(Long.parseLong(values[1]));
-				tryResponder(ResponseEscravo.OK, gravarMensalidades(mensAluno));
-			}
+			Collection<Mensalidade> mensAluno = mensalidades.get(Long.parseLong((String) op.getParam(PARAM_COD_ALUNO)));
+			tryResponder(ResponseEscravo.OK, gravarMensalidades(mensAluno));
 			break;
 		case GET_ALUNO_POSSUI_ATRASO:
-			paramsStr = buffer.substring(idx + 1);
-			values = paramsStr.split("=");
-			if (!values[0].equals("codAluno")) {
-				tryResponder(ResponseEscravo.FAILURE, String.format(MSG_PARAM_NAO_RECONHECIDO, values[0], item));
-			} else {
-				Collection<Mensalidade> mensAluno = mensalidades.get(Long.parseLong(values[1]));
-				String response = Boolean.FALSE.toString();
+			mensAluno = mensalidades.get(Long.parseLong((String) op.getParam(PARAM_COD_ALUNO)));
+			String response = Boolean.FALSE.toString();
+			if (mensAluno != null) {
 				for (Mensalidade m : mensAluno) {
 					if (m.isAtrasada()) {
 						response = Boolean.TRUE.toString();
 						break;
 					}
 				}
-				tryResponder(ResponseEscravo.OK, response);
 			}
+			tryResponder(ResponseEscravo.OK, response);
 			break;
 		default:
-			super.doGet(item);
+			super.doGet(buffer);
 			return;
 		}
 	}
@@ -141,7 +125,7 @@ public class MensalidadeCenter extends EscravoBase {
 
 	private void processaNovasMensalidades(Operacao op) {
 		List<Long> alunos = lerCodigos((String) op.getParam("alunosAtivos"));
-		Calendar dataAtual = Sistema.getDataAtual();
+		Calendar dataAtual = (Calendar) op.getParam("dataReferencia");
 		double totalMensalidades = 0;
 		double totalMatriculas = 0;
 

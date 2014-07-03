@@ -32,12 +32,8 @@ public class DiplomaCenter extends EscravoBase {
 		super();
 	}
 
-	public static void main(String[] args) {
-		try {
-			new DiplomaCenter().run();
-		} catch (jpvmException e) {
-			e.printStackTrace();
-		}
+	public static void main(String[] args) throws jpvmException {
+		new DiplomaCenter().run();
 	}
 
 	@Override

@@ -141,15 +141,16 @@ public class CursoCenter extends EscravoBase {
 	protected void doGet(String buffer) {
 		Operacao getOp = converterGetParaOperacao(buffer);
 
-		int codCurso = ((Integer) getOp.getParam(PARAM_COD_CURSO)).intValue();
 		escolha: switch (getOp.getNome()) {
 		case GET_CURSO:
+			int codCurso = Integer.parseInt((String) getOp.getParam(PARAM_COD_CURSO));
 			Curso curso = cursos.get(codCurso);
 			tryResponder(ResponseEscravo.OK, writeToString(cursoWriter, Arrays.asList(curso)));
 			break;
 		case GET_HISTORICO:
 			Map<Integer, List<Historico>> alunoHis = historicos.get(getOp.getParam(PARAM_COD_ALUNO));
 			if (alunoHis != null) {
+				codCurso = Integer.parseInt((String) getOp.getParam(PARAM_COD_CURSO));
 				List<Historico> curHis = alunoHis.get(codCurso);
 				if (curHis != null && !curHis.isEmpty()) {
 					tryResponder(ResponseEscravo.OK, writeToString(historicosWriter, curHis));
@@ -197,6 +198,7 @@ public class CursoCenter extends EscravoBase {
 
 			alunoHis = historicos.get(getOp.getParam(PARAM_COD_ALUNO));
 			if (alunoHis != null) {
+				codCurso = Integer.parseInt((String) getOp.getParam(PARAM_COD_CURSO));
 				List<Historico> historicoCurso = alunoHis.get(codCurso);
 				if (historicoCurso != null) {
 					Map<Integer, Historico> historicoDisciplinas = new HashMap<>();
@@ -213,6 +215,7 @@ public class CursoCenter extends EscravoBase {
 			tryResponder(ResponseEscravo.OK, writeToString(historicosWriter, historicosRecentes));
 			break;
 		case GET_TOTAL_DISCIPLINAS_NO_CURSO:
+			codCurso = Integer.parseInt((String) getOp.getParam(PARAM_COD_CURSO));
 			curso = cursos.get(codCurso);
 			if (curso == null) {
 				tryResponder(ResponseEscravo.FAILURE, "curso não cadastrado: " + codCurso);

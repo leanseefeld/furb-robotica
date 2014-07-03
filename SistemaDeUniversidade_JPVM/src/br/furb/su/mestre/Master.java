@@ -51,8 +51,8 @@ public class Master {
 			distribuirDados();
 			doHandshake();
 			processar();
-		} catch (Exception e) {
-			e.printStackTrace();
+		} catch (Throwable t) {
+			t.printStackTrace();
 		} finally {
 			shutdownEscravos();
 			pvm.pvm_exit();
@@ -146,16 +146,23 @@ public class Master {
 	public void processar() throws jpvmException {
 		Sistema.debug("iniciando processamento");
 
+		Sistema.debug("processamento mensalidades atrasadas");
 		mensalidadeControle.processaMensalidadesAtrasadas();
+		Sistema.debug("aguardando mensalidades atrasadas");
 		mensalidadeControle.waitResposta();
 
+		Sistema.debug("processamento matrículas");
 		matriculaControle.processarMatriculas();
+		Sistema.debug("processamento diplomas");
 		diplomaControle.processaDiplomas(Sistema.getDataAtual());
 
+		Sistema.debug("aguardando matrículas");
 		matriculaControle.waitResposta();
 		List<Aluno> alunosAtivos = Sistema.filtraAlunosAtivos(Sistema.inDataset());
+		Sistema.debug("processando novas mensalidades");
 		mensalidadeControle.processarNovasMensalidades(alunosAtivos, Sistema.getDataAtual());
 
+		Sistema.debug("aguardando diplomas");
 		diplomaControle.waitResposta();
 		mensalidadeControle.waitResposta();
 

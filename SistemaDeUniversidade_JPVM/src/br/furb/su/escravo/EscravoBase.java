@@ -27,10 +27,6 @@ public abstract class EscravoBase {
 
 	public static String last;
 
-	static {
-		Sistema.DEBUG = false;
-	}
-
 	protected static final String GET_MENSAGENS = "mensagens";
 	protected static final String MSG_PARAM_NAO_ENCONTRADO = "Parâmetro '%s' não encontrado para o item %s.";
 	protected static final String MSG_PARAM_NAO_RECONHECIDO = "Parâmetro '%s' não reconhecido para o item '%s'.";
@@ -53,6 +49,7 @@ public abstract class EscravoBase {
 	private final Map<Integer, jpvmTaskId> locks;
 
 	public EscravoBase() throws jpvmException {
+		Sistema.DEBUG = false;
 		pvm = new jpvmEnvironment();
 		locks = new HashMap<>();
 	}
@@ -61,7 +58,6 @@ public abstract class EscravoBase {
 		try {
 			isAtivo = true;
 			destinatario = pvm.pvm_parent();
-			responder(ResponseEscravo.OK);
 			do {
 				respondido = false;
 				jpvmMessage msg = pvm.pvm_recv();
@@ -76,6 +72,7 @@ public abstract class EscravoBase {
 				e.printStackTrace();
 			}
 		}
+		JOptionPane.showMessageDialog(null, "Saindo normalmente: " + getClass()); // TODO: remover
 	}
 
 	protected void processaMensagem(jpvmMessage msg) throws jpvmException {
@@ -89,6 +86,7 @@ public abstract class EscravoBase {
 				String bufferStr;
 				switch (req) {
 				case KILL:
+					JOptionPane.showMessageDialog(null, "Recebi o KILL: " + getClass());
 					doKill();
 					break;
 				case UPLOAD:
@@ -138,10 +136,9 @@ public abstract class EscravoBase {
 					String[] setCmd = bufferStr.split(";");
 					final String hostPart = setCmd[0];
 					final String portPart = setCmd[1];
-					int idx = hostPart.indexOf("=");
-					String slaveName = hostPart.substring(0, idx);
-					String host = hostPart.substring(idx + 1);
-					int port = Integer.parseInt(portPart.substring(portPart.indexOf("=") + 1));
+					String slaveName = hostPart.substring(0, hostPart.indexOf('.'));
+					String host = hostPart.substring(hostPart.indexOf('=') + 1);
+					int port = Integer.parseInt(portPart.substring(portPart.indexOf('=') + 1));
 					jpvmTaskId taskId = new jpvmTaskId(host, port);
 
 					doSetSlave(slaveName, taskId);
@@ -154,6 +151,7 @@ public abstract class EscravoBase {
 				try (StringWriter sw = new StringWriter(); //
 						PrintWriter pw = new PrintWriter(sw)) {
 					t.printStackTrace(pw);
+					JOptionPane.showMessageDialog(null, "Erro em " + getClass() + ":\n" + sw.toString());
 					responder(ResponseEscravo.ERROR, sw.toString()); // tenta stack completa
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -253,7 +251,8 @@ public abstract class EscravoBase {
 	}
 
 	protected final void responder(ResponseEscravo responseTag) throws jpvmException {
-		responder(responseTag, (jpvmBuffer) null);
+		jpvmBuffer emptyBuffer = new jpvmBuffer();
+		responder(responseTag, emptyBuffer);
 	}
 
 	protected final void tryResponder(ResponseEscravo responseTag, jpvmBuffer buffer) {
@@ -298,7 +297,7 @@ public abstract class EscravoBase {
 	}
 
 	protected static Operacao converterGetParaOperacao(String getCmd) {
-		int idx = Math.max(getCmd.indexOf('\n'), getCmd.length());
+		int idx = getCmd.indexOf('\n');
 		String nome = getCmd.substring(0, idx).toLowerCase();
 		Operacao getOp = new Operacao(nome);
 

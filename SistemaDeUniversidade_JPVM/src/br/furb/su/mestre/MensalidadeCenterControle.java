@@ -33,7 +33,9 @@ public class MensalidadeCenterControle extends BaseCenterControle {
 
 	public List<Mensalidade> getMensalidade(int codAluno) throws jpvmException {
 		jpvmBuffer buffer = new jpvmBuffer();
-		buffer.pack(String.format("%s\ncodAluno=%d", MensalidadeCenter.GET_MENSALIDADE, codAluno));
+		buffer.pack(String.format("%s\n%s=%d", //
+				MensalidadeCenter.GET_MENSALIDADE, // 
+				MensalidadeCenter.PARAM_COD_ALUNO, codAluno));
 		pvm.pvm_send(buffer, tid, RequestEscravo.GET.tag());
 		jpvmMessage msg = pvm.pvm_recv(tid);
 		final String bufferStr = msg.buffer.upkstr();
@@ -80,7 +82,9 @@ public class MensalidadeCenterControle extends BaseCenterControle {
 
 	public boolean alunoPossuiAtraso(long aluno) throws jpvmException {
 		jpvmBuffer buffer = new jpvmBuffer();
-		buffer.pack(String.format("%s\ncodAluno=%d", MensalidadeCenter.GET_ALUNO_POSSUI_ATRASO, aluno));
+		buffer.pack(String.format("%s\n%s=%d", // 
+				MensalidadeCenter.GET_ALUNO_POSSUI_ATRASO, // 
+				MensalidadeCenter.PARAM_COD_ALUNO, aluno));
 		pvm.pvm_send(buffer, tid, RequestEscravo.GET.tag());
 		jpvmMessage msg = pvm.pvm_recv(tid);
 		checkErrorResponse(msg);
