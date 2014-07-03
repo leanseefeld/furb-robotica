@@ -43,7 +43,7 @@ public enum RequestEscravo {
 	 */
 	UNLOCK,
 	/**
-	 * Executa a operação indicada no buffer, com os respectivos parâmetros.
+	 * Executa a operação serializada no buffer, com os respectivos parâmetros.
 	 */
 	OPERATION,
 	/**

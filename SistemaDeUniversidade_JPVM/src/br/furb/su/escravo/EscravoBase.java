@@ -1,6 +1,8 @@
 package br.furb.su.escravo;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.HashMap;
@@ -8,15 +10,16 @@ import java.util.Map;
 
 import javax.swing.JOptionPane;
 
-import br.furb.su.Sistema;
 import jpvm.jpvmBuffer;
 import jpvm.jpvmEnvironment;
 import jpvm.jpvmException;
 import jpvm.jpvmMessage;
 import jpvm.jpvmTaskId;
+import br.furb.su.Sistema;
+import br.furb.su.operacoes.Operacao;
 
 public abstract class EscravoBase {
-	
+
 	public static String last;
 
 	static {
@@ -43,7 +46,7 @@ public abstract class EscravoBase {
 		locks = new HashMap<>();
 	}
 
-	public void run() throws jpvmException {
+	public void run() {
 		try {
 			isAtivo = true;
 			destinatario = pvm.pvm_parent();
@@ -57,7 +60,7 @@ public abstract class EscravoBase {
 		} catch (Throwable t) {
 			try (StringWriter sw = new StringWriter(); PrintWriter pw = new PrintWriter(sw)) {
 				t.printStackTrace(pw);
-				JOptionPane.showMessageDialog(null, sw.getBuffer().toString());
+				JOptionPane.showMessageDialog(null, sw.getBuffer().toString()); // TODO: remover
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -71,23 +74,27 @@ public abstract class EscravoBase {
 			responder(ResponseEscravo.FAILURE, String.format(MSG_COD_NAO_RECONHECIDO, messageTag));
 		} else {
 			try {
-				String bufferStr = buffer.upkstr();
-				last = bufferStr; // TODO: remover
-//				JOptionPane.showMessageDialog(null, bufferStr);
 				RequestEscravo req = RequestEscravo.values()[messageTag];
+				String bufferStr;
 				switch (req) {
 				case KILL:
 					doKill();
 					break;
 				case UPLOAD:
+					bufferStr = buffer.upkstr();
+					last = bufferStr; // TODO: remover
 					doUpload(bufferStr);
 					break;
 				case DOWNLOAD:
+					bufferStr = buffer.upkstr();
+					last = bufferStr; // TODO: remover
 					if (checkLocked(destinatario, ANY_REGISTER)) {
 						doDownload(bufferStr);
 					}
 					break;
 				case GET:
+					bufferStr = buffer.upkstr();
+					last = bufferStr; // TODO: remover
 					doGet(bufferStr);
 					break;
 				/*case REMOVE:
@@ -103,9 +110,19 @@ public abstract class EscravoBase {
 					doUnlock(destinatario, bufferStr);
 					break;*/
 				case OPERATION:
-					doOperation(bufferStr);
+					int bytesCount = buffer.upkint();
+					byte[] bytes = new byte[bytesCount];
+					buffer.unpack(bytes, bytesCount, 1);
+
+					Operacao op;
+					try (ByteArrayInputStream bis = new ByteArrayInputStream(bytes); ObjectInputStream ois = new ObjectInputStream(bis)) {
+						op = (Operacao) ois.readObject();
+					}
+					doOperation(op);
 					break;
 				case SET_SLAVE:
+					bufferStr = buffer.upkstr();
+					last = bufferStr; // TODO: remover
 					doSetSlave(bufferStr);
 					break;
 				default:
@@ -146,7 +163,7 @@ public abstract class EscravoBase {
 
 	protected abstract void doUnlock(jpvmTaskId taskId, String buffer);*/
 
-	protected abstract void doOperation(String buffer);
+	protected abstract void doOperation(Operacao op);
 
 	protected abstract void doSetSlave(String buffer);
 
@@ -191,7 +208,7 @@ public abstract class EscravoBase {
 		pvm.pvm_send(buffer, destinatario, responseTag.tag());
 		respondido = true;
 	}
-	
+
 	protected final void tryResponder(ResponseEscravo responseTag, String mensagem) {
 		try {
 			responder(responseTag, mensagem);

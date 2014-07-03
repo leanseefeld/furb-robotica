@@ -10,6 +10,7 @@ import br.furb.su.dataset.reader.HistoricosReader;
 import br.furb.su.modelo.dados.Curso;
 import br.furb.su.modelo.dados.Disciplina;
 import br.furb.su.modelo.dados.Historico;
+import br.furb.su.operacoes.Operacao;
 
 /**
  * Armazena {@link Curso Cursos}, {@link Disciplina Disciplinas} e
@@ -92,7 +93,7 @@ public class CursoCenter extends EscravoBase {
 	}
 
 	@Override
-	protected void doOperation(String buffer) {
+	protected void doOperation(Operacao op) {
 		// TODO Auto-generated method stub
 
 	}

@@ -7,6 +7,7 @@ import jpvm.jpvmException;
 import jpvm.jpvmTaskId;
 import br.furb.su.dataset.reader.SolicitacoesDiplomaReader;
 import br.furb.su.modelo.dados.SolicitacaoDiploma;
+import br.furb.su.operacoes.Operacao;
 
 public class DiplomaCenter extends EscravoBase {
 
@@ -73,7 +74,7 @@ public class DiplomaCenter extends EscravoBase {
 	}
 
 	@Override
-	protected void doOperation(String buffer) {
+	protected void doOperation(Operacao op) {
 		// TODO Auto-generated method stub
 
 	}

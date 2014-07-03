@@ -6,6 +6,7 @@ import java.util.Collection;
 import jpvm.jpvmException;
 import br.furb.su.dataset.reader.MensalidadesReader;
 import br.furb.su.modelo.dados.Mensalidade;
+import br.furb.su.operacoes.Operacao;
 
 public class MensalidadeCenter extends EscravoBase {
 
@@ -43,7 +44,7 @@ public class MensalidadeCenter extends EscravoBase {
 	}
 
 	@Override
-	protected void doOperation(String buffer) {
+	protected void doOperation(Operacao op) {
 		// TODO Auto-generated method stub
 
 	}

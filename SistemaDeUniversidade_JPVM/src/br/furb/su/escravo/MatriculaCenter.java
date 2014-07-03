@@ -5,10 +5,11 @@ import java.util.Collection;
 
 import br.furb.su.dataset.reader.SolicitacoesMatriculaReader;
 import br.furb.su.modelo.dados.SolicitacaoMatricula;
+import br.furb.su.operacoes.Operacao;
 import jpvm.jpvmException;
 
 public class MatriculaCenter extends EscravoBase {
-	
+
 	private final Collection<SolicitacaoMatricula> sols = new ArrayList<SolicitacaoMatricula>();
 	private final SolicitacoesMatriculaReader reader = new SolicitacoesMatriculaReader();
 
@@ -44,7 +45,7 @@ public class MatriculaCenter extends EscravoBase {
 	}
 
 	@Override
-	protected void doOperation(String buffer) {
+	protected void doOperation(Operacao op) {
 		// TODO Auto-generated method stub
 
 	}
