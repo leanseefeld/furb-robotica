@@ -17,8 +17,8 @@ import br.furb.su.modelo.dados.SolicitacaoDiploma;
 
 public class DiplomaCenterControle extends BaseCenterControle {
 
-	private SolicitacoesDiplomaReader solReader;
-	private SolicitacaoDiplomaWriter solWriter;
+	private final SolicitacoesDiplomaReader solReader = new SolicitacoesDiplomaReader();
+	private final SolicitacaoDiplomaWriter solWriter = new SolicitacaoDiplomaWriter();
 
 	public DiplomaCenterControle(jpvmEnvironment pvm, jpvmTaskId tid) {
 		super(pvm, tid);

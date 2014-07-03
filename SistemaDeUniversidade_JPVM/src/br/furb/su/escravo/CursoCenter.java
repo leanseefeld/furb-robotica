@@ -1,5 +1,6 @@
 package br.furb.su.escravo;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import jpvm.jpvmException;
@@ -23,9 +24,9 @@ public class CursoCenter extends EscravoBase {
 	public static final String TIPO_DISCIPLINA = "disciplina";
 	public static final String TIPO_HISTORICO = "historico";
 
-	private List<Curso> cursos;
-	private List<Disciplina> disciplinas;
-	private List<Historico> historicos;
+	private final List<Curso> cursos;
+	private final List<Disciplina> disciplinas;
+	private final List<Historico> historicos;
 	private final CursoReader cursoReader;
 	private final DisciplinasReader disciplinasReader;
 	private final HistoricosReader historicosReader;
@@ -35,15 +36,13 @@ public class CursoCenter extends EscravoBase {
 		cursoReader = new CursoReader();
 		disciplinasReader = new DisciplinasReader();
 		historicosReader = new HistoricosReader();
+		cursos = new ArrayList<>();
+		disciplinas = new ArrayList<>();
+		historicos = new ArrayList<>();
 	}
 
-	public static void main(String[] args) {
-		try {
-			new CursoCenter().run();
-		} catch (jpvmException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	public static void main(String[] args) throws jpvmException {
+		new CursoCenter().run();
 	}
 
 	public void insereCurso(Curso curso) {
@@ -62,7 +61,8 @@ public class CursoCenter extends EscravoBase {
 	protected void doUpload(String buffer) {
 		int lineBreak = buffer.indexOf("\n");
 		String tipo = buffer.substring(0, lineBreak).toLowerCase();
-		String registros = buffer.substring(lineBreak);
+		String registros = buffer.substring(lineBreak + 1);
+		last = buffer;
 		switch (tipo) {
 		case TIPO_CURSO:
 			cursos.addAll(cursoReader.ler(registros));
@@ -74,14 +74,9 @@ public class CursoCenter extends EscravoBase {
 			historicos.addAll(historicosReader.ler(registros));
 			break;
 		default:
-			try {
-				responder(ResponseEscravo.FAILURE, String.format(MSG_TIPO_NAO_RECONHECIDO, tipo));
-			} catch (jpvmException e) {
-				// suprime, não há pra quem responder...
-				e.printStackTrace();
-			}
+			tryResponder(ResponseEscravo.FAILURE, String.format(MSG_TIPO_NAO_RECONHECIDO, tipo));
 		}
-
+		tryResponder(ResponseEscravo.OK, null);
 	}
 
 	@Override

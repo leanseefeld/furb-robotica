@@ -1,14 +1,22 @@
 package br.furb.su.escravo;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
 import jpvm.jpvmException;
+import br.furb.su.dataset.reader.MensalidadesReader;
+import br.furb.su.modelo.dados.Mensalidade;
 
 public class MensalidadeCenter extends EscravoBase {
+
+	private final Collection<Mensalidade> mensalidades = new ArrayList<>();
+	private final MensalidadesReader reader = new MensalidadesReader();
 
 	public MensalidadeCenter() throws jpvmException {
 		super();
 	}
 
-	public static void main(String[] args){
+	public static void main(String[] args) {
 		try {
 			new MensalidadeCenter().run();
 		} catch (jpvmException e) {
@@ -18,8 +26,8 @@ public class MensalidadeCenter extends EscravoBase {
 
 	@Override
 	protected void doUpload(String buffer) {
-		// TODO Auto-generated method stub
-
+		mensalidades.addAll(reader.ler(buffer));
+		tryResponder(ResponseEscravo.OK, null);
 	}
 
 	@Override

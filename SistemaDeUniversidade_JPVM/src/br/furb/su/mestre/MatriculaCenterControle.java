@@ -11,13 +11,12 @@ import jpvm.jpvmException;
 import jpvm.jpvmMessage;
 import jpvm.jpvmTaskId;
 import br.furb.su.dataset.reader.SolicitacoesMatriculaWriter;
-import br.furb.su.escravo.CursoCenter;
 import br.furb.su.escravo.RequestEscravo;
 import br.furb.su.modelo.dados.SolicitacaoMatricula;
 
 public class MatriculaCenterControle extends BaseCenterControle {
 
-	private SolicitacoesMatriculaWriter writer;
+	private final SolicitacoesMatriculaWriter writer = new SolicitacoesMatriculaWriter();
 
 	public MatriculaCenterControle(jpvmEnvironment pvm, jpvmTaskId tid) {
 		super(pvm, tid);
@@ -25,7 +24,6 @@ public class MatriculaCenterControle extends BaseCenterControle {
 
 	public void insereSolicitacaoMatricula(SolicitacaoMatricula sol) throws jpvmException {
 		StringBuilder comando = new StringBuilder();
-		comando.append(CursoCenter.TIPO_CURSO).append('\n');
 		try (StringWriter sw = new StringWriter(); PrintWriter pw = new PrintWriter(sw)) {
 			writer.gravarDados(Arrays.asList(sol), pw);
 			comando.append(sw.getBuffer().toString());

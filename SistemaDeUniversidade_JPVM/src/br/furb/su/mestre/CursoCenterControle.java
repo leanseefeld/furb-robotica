@@ -11,6 +11,7 @@ import jpvm.jpvmEnvironment;
 import jpvm.jpvmException;
 import jpvm.jpvmMessage;
 import jpvm.jpvmTaskId;
+import br.furb.su.Sistema;
 import br.furb.su.dataset.reader.CursoReader;
 import br.furb.su.dataset.reader.HistoricosReader;
 import br.furb.su.dataset.reader.HistoricosWriter;
@@ -99,7 +100,7 @@ public class CursoCenterControle extends BaseCenterControle {
 
 	public void insereDisciplina(Disciplina disciplina) throws jpvmException {
 		StringBuilder comando = new StringBuilder();
-		comando.append(CursoCenter.TIPO_HISTORICO).append('\n');
+		comando.append(CursoCenter.TIPO_DISCIPLINA).append('\n');
 		try (StringWriter sw = new StringWriter(); PrintWriter pw = new PrintWriter(sw)) {
 			disciplinasWriter.gravarDados(Arrays.asList(disciplina), pw);
 			comando.append(sw.getBuffer().toString());

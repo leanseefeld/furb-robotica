@@ -18,8 +18,8 @@ import br.furb.su.modelo.dados.Mensalidade;
 
 public class MensalidadeCenterControle extends BaseCenterControle {
 
-	private MensalidadesReader reader;
-	private MensalidadesWriter writer;
+	private final MensalidadesReader reader = new MensalidadesReader();
+	private final MensalidadesWriter writer = new MensalidadesWriter();
 
 	public MensalidadeCenterControle(jpvmEnvironment pvm, jpvmTaskId tid) {
 		super(pvm, tid);
