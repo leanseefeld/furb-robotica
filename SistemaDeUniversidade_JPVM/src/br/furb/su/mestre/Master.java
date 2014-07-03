@@ -51,6 +51,7 @@ public class Master {
 			processar();
 		} catch (Exception e) {
 			e.printStackTrace();
+		} finally {
 			shutdownEscravos();
 			pvm.pvm_exit();
 		}
