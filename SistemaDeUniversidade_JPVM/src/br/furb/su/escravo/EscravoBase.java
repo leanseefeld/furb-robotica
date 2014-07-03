@@ -6,6 +6,9 @@ import java.io.StringWriter;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.swing.JOptionPane;
+
+import br.furb.su.Sistema;
 import jpvm.jpvmBuffer;
 import jpvm.jpvmEnvironment;
 import jpvm.jpvmException;
@@ -13,6 +16,12 @@ import jpvm.jpvmMessage;
 import jpvm.jpvmTaskId;
 
 public abstract class EscravoBase {
+	
+	public static String last;
+
+	static {
+		Sistema.DEBUG = false;
+	}
 
 	protected static final String MSG_COD_NAO_RECONHECIDO = "Código de requisição desconhecido: %d";
 	protected static final String MSG_COD_NAO_SUPORTADO = "Código de requisição conhecido, mas não suportado: %s (%d)";
@@ -30,18 +39,29 @@ public abstract class EscravoBase {
 	private final Map<Integer, jpvmTaskId> locks;
 
 	public EscravoBase() throws jpvmException {
-		pvm = new jpvmEnvironment(true);
+		pvm = new jpvmEnvironment();
 		locks = new HashMap<>();
 	}
 
 	public void run() throws jpvmException {
-		isAtivo = true;
-		do {
-			respondido = false;
-			jpvmMessage msg = pvm.pvm_recv();
-			destinatario = msg.sourceTid;
-			processaMensagem(msg);
-		} while (isAtivo);
+		try {
+			isAtivo = true;
+			destinatario = pvm.pvm_parent();
+			responder(ResponseEscravo.OK, null);
+			do {
+				respondido = false;
+				jpvmMessage msg = pvm.pvm_recv();
+				destinatario = msg.sourceTid;
+				processaMensagem(msg);
+			} while (isAtivo);
+		} catch (Throwable t) {
+			try (StringWriter sw = new StringWriter(); PrintWriter pw = new PrintWriter(sw)) {
+				t.printStackTrace(pw);
+				JOptionPane.showMessageDialog(null, sw.getBuffer().toString());
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+		}
 	}
 
 	protected void processaMensagem(jpvmMessage msg) throws jpvmException {
@@ -52,6 +72,8 @@ public abstract class EscravoBase {
 		} else {
 			try {
 				String bufferStr = buffer.upkstr();
+				last = bufferStr; // TODO: remover
+//				JOptionPane.showMessageDialog(null, bufferStr);
 				RequestEscravo req = RequestEscravo.values()[messageTag];
 				switch (req) {
 				case KILL:
@@ -99,6 +121,7 @@ public abstract class EscravoBase {
 					e.printStackTrace();
 					responder(ResponseEscravo.FAILURE, t.toString()); // garante apenas qual é a exceção
 				}
+				isAtivo = false;
 			}
 			garantirResposta();
 		}
@@ -167,6 +190,14 @@ public abstract class EscravoBase {
 		}
 		pvm.pvm_send(buffer, destinatario, responseTag.tag());
 		respondido = true;
+	}
+	
+	protected final void tryResponder(ResponseEscravo responseTag, String mensagem) {
+		try {
+			responder(responseTag, mensagem);
+		} catch (jpvmException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private void garantirResposta() throws jpvmException {

@@ -24,7 +24,7 @@
 package jpvm;
 
 public final class jpvmDebug {
-	public static final boolean on = true;
+	public static final boolean on = false;
 
 	public static final void note(String message) {
 		if (on) {

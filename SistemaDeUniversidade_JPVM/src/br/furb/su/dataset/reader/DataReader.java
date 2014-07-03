@@ -5,9 +5,13 @@ import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.regex.Pattern;
+
+import javax.swing.JOptionPane;
 
 import br.furb.su.Sistema;
 import br.furb.su.dataset.InDataset;
+import br.furb.su.escravo.EscravoBase;
 
 /**
  * @author William Leander Seefeld
@@ -19,6 +23,7 @@ public abstract class DataReader<T> {
 
 	private final File arquivoOrigem;
 	protected Scanner scanner;
+	private static final Pattern NON_BLANK_LINE = Pattern.compile("\\S+");
 
 	public DataReader(File arquivoOrigem) {
 		this.arquivoOrigem = arquivoOrigem;
@@ -42,7 +47,7 @@ public abstract class DataReader<T> {
 				inicializa(inDataset);
 
 				T registro;
-				while (sc.hasNextLine() && (registro = lerRegistro()) != null) {
+				while (sc.hasNext(NON_BLANK_LINE) && (registro = lerRegistro()) != null) {
 					insereRegistro(registro);
 				}
 			} finally {
@@ -63,8 +68,13 @@ public abstract class DataReader<T> {
 			configScanner(sc);
 
 			T registro;
-			while (sc.hasNextLine() && (registro = lerRegistro()) != null) {
-				registros.add(registro);
+			try {
+				while (sc.hasNext(NON_BLANK_LINE) && (registro = lerRegistro()) != null) {
+					registros.add(registro);
+				}
+			} catch (RuntimeException e) {
+				JOptionPane.showMessageDialog(null, EscravoBase.last);
+				throw e;
 			}
 		}
 		Sistema.debug("leitura finalizada (" + getClass().getName() + ")");
