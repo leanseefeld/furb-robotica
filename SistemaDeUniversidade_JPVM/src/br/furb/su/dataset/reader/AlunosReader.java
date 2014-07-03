@@ -12,6 +12,9 @@ public class AlunosReader extends DataReader<Aluno> {
 	public static final String FILE_NAME = "alunos.csv";
 	private Map<Long, Aluno> alunosMap;
 
+	public AlunosReader() {
+	}
+
 	public AlunosReader(File pastaOrigem) {
 		super(new File(pastaOrigem, FILE_NAME));
 	}
