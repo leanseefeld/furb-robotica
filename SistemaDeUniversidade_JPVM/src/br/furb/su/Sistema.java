@@ -148,18 +148,27 @@ public final class Sistema {
 
 	public static void inicializar() {
 		debug("requisitando parâmetros");
-		try (Scanner scanner = new Scanner(System.in)) {
-			System.out.print("Informe a pasta de origem dos dados: ");
-			File pastaOrigem = new File(scanner.nextLine());
+		File pastaOrigem, pastaDestino;
+		Calendar data;
+		if (DEBUG) {
+			debug("\t- usando parâmetros predefinidos");
+			pastaOrigem = new File("C:\\Users\\Leander\\git\\furb-bcc\\SistemaDeUniversidade_JPVM\\casosteste\\in");
+			pastaDestino = new File("C:\\Users\\Leander\\git\\furb-bcc\\SistemaDeUniversidade_JPVM\\casosteste\\out");
+			data = Sistema.converterData_mes("05/2014");
+		} else {
+			try (Scanner scanner = new Scanner(System.in)) {
+				System.out.print("Informe a pasta de origem dos dados: ");
+				pastaOrigem = new File(scanner.nextLine());
 
-			System.out.print("Informe a pasta de destino dos dados: ");
-			File pastaDestino = new File(scanner.nextLine());
+				System.out.print("Informe a pasta de destino dos dados: ");
+				pastaDestino = new File(scanner.nextLine());
 
-			System.out.print("Informe a data atual no format 'MM/AAAA': ");
-			Calendar data = Sistema.converterData_mes(scanner.nextLine());
-
-			load(pastaOrigem, pastaDestino, data);
+				System.out.print("Informe a data atual no formato 'MM/AAAA': ");
+				data = Sistema.converterData_mes(scanner.nextLine());
+			}
 		}
+
+		load(pastaOrigem, pastaDestino, data);
 		try {
 			Sistema.lerDados(inDataset());
 		} catch (FileNotFoundException e) {
@@ -209,7 +218,7 @@ public final class Sistema {
 	 * @return calendário configurado com a data.
 	 */
 	public static Calendar converterData(String str) {
-		Matcher m = Pattern.compile("(\\d{2})/(\\d{2})/(\\d{4})").matcher(str);
+		Matcher m = Pattern.compile("(\\d{1,2})/(\\d{1,2})/(\\d{4})").matcher(str);
 		if (!m.matches()) {
 			throw new IllegalArgumentException("data não reconhecida: " + str);
 		}
