@@ -16,6 +16,9 @@ public class SolicitacoesMatriculaReader extends DataReader<SolicitacaoMatricula
 		super(new File(pastaOrigem, FILE_NAME));
 	}
 
+	public SolicitacoesMatriculaReader() {
+	}
+
 	@Override
 	protected SolicitacaoMatricula lerRegistro() {
 		Scanner sc = scanner;

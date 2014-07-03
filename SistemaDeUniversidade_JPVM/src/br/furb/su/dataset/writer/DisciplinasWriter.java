@@ -12,6 +12,8 @@ public class DisciplinasWriter extends DataWriter<Disciplina> {
 	protected void gravarRegistro(Disciplina registro) throws IOException {
 		pis.print(registro.getCod());
 		sep();
+		pis.print(registro.getNome());
+		sep();
 		pis.print(registro.getValorMatricula());
 		sep();
 		pis.print(registro.getValorMensal());

@@ -15,6 +15,9 @@ public class MensalidadesWriter extends DataWriter<Mensalidade> {
 		super(new File(pastaSaida, MensalidadesReader.FILE_NAME));
 	}
 
+	public MensalidadesWriter() {
+	}
+
 	@Override
 	protected void gravarRegistro(Mensalidade mensalidade) throws IOException {
 		pis.print(mensalidade.getCodAluno());

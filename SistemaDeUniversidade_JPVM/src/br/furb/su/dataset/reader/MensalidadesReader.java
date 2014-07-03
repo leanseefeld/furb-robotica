@@ -13,6 +13,9 @@ public class MensalidadesReader extends DataReader<Mensalidade> {
 	public static final String FILE_NAME = "mensalidades.csv";
 
 	private List<Mensalidade> mensalidades;
+	
+	public MensalidadesReader() {
+	}
 
 	public MensalidadesReader(File pastaEntrada) {
 		super(new File(pastaEntrada, FILE_NAME));
