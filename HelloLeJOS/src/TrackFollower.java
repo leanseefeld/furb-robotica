@@ -7,47 +7,32 @@ import lejos.nxt.SensorPort;
 public class TrackFollower {
 
 	private static enum Direcao {
-		FRENTE, DIREITA, ESQUERDA
+		ESQUERDA, DIREITA;
 	}
 
-	private static int FORWARD_TIME = 50;
-	private static int ROTATION_TIME = 20;
-
-	private static int SPEED = 200;
-	private static int ROTATION_SPEED = 600;
-	private static int DEFAULT_ROTATION = 30;
-	private static int BLACK = 400;
-
-	private static ColorSensor colorSensor;
-	private static int estado = 1;
-	private static Direcao direcao = Direcao.FRENTE;
-	private static int count = 0;
-
-	static boolean teste = false;
+	private int ROTATION_TIME = 20;
+	private int ROTATION_SPEED = 600;
+	private int BLACK = 400;
+	private ColorSensor colorSensor;
+	private int estado = 1;
+	private int count = 0;
 
 	public static void main(String[] args) throws InterruptedException {
-
-		if (teste) {
-			teste();
-			return;
-		}
-
-		colorSensor = new ColorSensor(SensorPort.S1);
-		colorSensor.setFloodlight(true);
+		TrackFollower follower = new TrackFollower();
+		
 		System.out.println("Ready to go! Press the main button");
 		Button.ENTER.waitForPressAndRelease();
+		
+		follower.run();
+	}
 
-		/*
-		 * System.out.println("Posicione na cor escura... ");
-		 * Button.ENTER.waitForPressAndRelease(); int lightValue =
-		 * colorSensor.getLightValue(); colorSensor.setLow(lightValue);
-		 * System.out.print("\nPosicione na cor clara... ");
-		 * Button.ENTER.waitForPressAndRelease(); lightValue =
-		 * colorSensor.getLightValue(); colorSensor.setHigh(lightValue);
-		 * System.out.println();
-		 */
-		setSpeed(ROTATION_SPEED);
+	public TrackFollower() {
+		colorSensor = new ColorSensor(SensorPort.S1);
+	}
 
+	public void run() throws InterruptedException {
+		colorSensor.setFloodlight(true);
+		setVelocidade(ROTATION_SPEED);
 		while (true) {
 			System.out.println("Estado: " + estado);
 			switch (estado) {
@@ -79,30 +64,18 @@ public class TrackFollower {
 		}
 	}
 
-	private static void setSpeed(int velocidade) {
-		Motor.A.setSpeed(velocidade);
-		Motor.B.setSpeed(velocidade);
+	public void direita() throws InterruptedException {
+		girar(Direcao.DIREITA);
 	}
 
-	/*public static void frente() throws InterruptedException {
-		 Motor.A.forward();
-		 Motor.B.forward();
-		 sleep(FORWARD_TIME);
-	}*/
-
-	public static void direita() throws InterruptedException {
-		rotate(false);
+	public void esquerda() throws InterruptedException {
+		girar(Direcao.ESQUERDA);
 	}
 
-	public static void esquerda() throws InterruptedException {
-		rotate(true);
-	}
-
-	private static void rotate(boolean esquerda) throws InterruptedException {
-		if (esquerda) {
+	private void girar(Direcao direcao) throws InterruptedException {
+		if (direcao == Direcao.ESQUERDA) {
 			Motor.B.forward();
 			Motor.A.stop();
-			// Motor.B.rotate(DEFAULT_ROTATION);
 		} else {
 			Motor.A.forward();
 			Motor.B.stop();
@@ -110,23 +83,19 @@ public class TrackFollower {
 		sleep(ROTATION_TIME);
 	}
 
-	public static boolean isBranco() {
+	public boolean isBranco() {
 		return !isPreto();
 	}
 
-	public static boolean isPreto() {
+	public boolean isPreto() {
 		int lightValue = colorSensor.getNormalizedLightValue();
 		System.out.println(count++ + "    LV: " + lightValue);
 		return lightValue < BLACK;
 	}
 
-	private static void teste() throws InterruptedException {
-		setSpeed(100);
-		// frente();
-		sleep(2000);
-		setSpeed(1000);
-		direita();
-		sleep(5000);
+	private static void setVelocidade(int velocidade) {
+		Motor.A.setSpeed(velocidade);
+		Motor.B.setSpeed(velocidade);
 	}
 
 }
