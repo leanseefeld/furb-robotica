@@ -10,19 +10,19 @@ public class TrackFollower {
 		ESQUERDA, DIREITA;
 	}
 
-	private int ROTATION_TIME = 20;
-	private int ROTATION_SPEED = 600;
-	private int BLACK = 400;
 	private ColorSensor colorSensor;
+	private int rotationTime = 20;
+	private int rotationSpeed = 600;
+	private int black = 400;
 	private int estado = 1;
 	private int count = 0;
 
 	public static void main(String[] args) throws InterruptedException {
 		TrackFollower follower = new TrackFollower();
-		
+
 		System.out.println("Ready to go! Press the main button");
 		Button.ENTER.waitForPressAndRelease();
-		
+
 		follower.run();
 	}
 
@@ -32,7 +32,7 @@ public class TrackFollower {
 
 	public void run() throws InterruptedException {
 		colorSensor.setFloodlight(true);
-		setVelocidade(ROTATION_SPEED);
+		setVelocidade(rotationSpeed);
 		while (true) {
 			System.out.println("Estado: " + estado);
 			switch (estado) {
@@ -80,7 +80,6 @@ public class TrackFollower {
 			Motor.A.forward();
 			Motor.B.stop();
 		}
-		sleep(ROTATION_TIME);
 	}
 
 	public boolean isBranco() {
@@ -90,7 +89,7 @@ public class TrackFollower {
 	public boolean isPreto() {
 		int lightValue = colorSensor.getNormalizedLightValue();
 		System.out.println(count++ + "    LV: " + lightValue);
-		return lightValue < BLACK;
+		return lightValue < black;
 	}
 
 	private static void setVelocidade(int velocidade) {
