@@ -1,38 +1,36 @@
-import static java.lang.Thread.sleep;
 import lejos.nxt.Button;
 import lejos.nxt.ColorSensor;
 import lejos.nxt.Motor;
 import lejos.nxt.SensorPort;
 
-public class TrackFollower {
+public class SeguidorTrilha {
 
 	private static enum Direcao {
 		ESQUERDA, DIREITA;
 	}
 
-	private ColorSensor colorSensor;
-	private int rotationTime = 20;
-	private int rotationSpeed = 600;
-	private int black = 400;
+	private ColorSensor sensorCor;
+	private int velocidadeRotacao = 600;
+	private int corPreta = 400;
 	private int estado = 1;
-	private int count = 0;
+	private int contagem = 0;
 
 	public static void main(String[] args) throws InterruptedException {
-		TrackFollower follower = new TrackFollower();
+		SeguidorTrilha seguidor = new SeguidorTrilha();
 
-		System.out.println("Ready to go! Press the main button");
+		System.out.println("Pronto! Aperte ENTER");
 		Button.ENTER.waitForPressAndRelease();
 
-		follower.run();
+		seguidor.executar();
 	}
 
-	public TrackFollower() {
-		colorSensor = new ColorSensor(SensorPort.S1);
+	public SeguidorTrilha() {
+		sensorCor = new ColorSensor(SensorPort.S1);
 	}
 
-	public void run() throws InterruptedException {
-		colorSensor.setFloodlight(true);
-		setVelocidade(rotationSpeed);
+	public void executar() throws InterruptedException {
+		sensorCor.setFloodlight(true);
+		setVelocidade(velocidadeRotacao);
 		while (true) {
 			System.out.println("Estado: " + estado);
 			switch (estado) {
@@ -87,9 +85,9 @@ public class TrackFollower {
 	}
 
 	public boolean isPreto() {
-		int lightValue = colorSensor.getNormalizedLightValue();
-		System.out.println(count++ + "    LV: " + lightValue);
-		return lightValue < black;
+		int lightValue = sensorCor.getNormalizedLightValue();
+		System.out.println(contagem++ + "    LV: " + lightValue);
+		return lightValue < corPreta;
 	}
 
 	private static void setVelocidade(int velocidade) {
