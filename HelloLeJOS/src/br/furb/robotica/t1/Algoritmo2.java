@@ -2,6 +2,7 @@ package br.furb.robotica.t1;
 
 import lejos.nxt.Button;
 import lejos.nxt.ColorSensor;
+import lejos.nxt.LCD;
 import lejos.nxt.Motor;
 import lejos.nxt.SensorPort;
 
@@ -11,11 +12,19 @@ import lejos.nxt.SensorPort;
  */
 public class Algoritmo2 {
 
-	private int RAPIDO = 500;
-	private int DEVAGAR = RAPIDO / 5;
-	private int BLACK = 375;
+	private static final int VEL_RETA = 700;
+	private static final int VEL_CURVA = 500;
+	private int RAPIDO = VEL_CURVA;
+	private int DEVAGAR = RAPIDO / 7;
+	private int PRETO = 430;
 	private ColorSensor colorSensor;
 	private int estado = 1;
+
+	private static long INTERVALO = 300;
+	private long proxMedicao;
+	private long variacao;
+	private long GATILHO_RETA = 4;
+	private boolean DIRECAO;
 
 	private static final boolean ESQUERDA = true;
 	private static final boolean DIREITA = false;
@@ -36,6 +45,7 @@ public class Algoritmo2 {
 		colorSensor.setFloodlight(true);
 		System.out.println("Pressione ENTER para começar!");
 		Button.ENTER.waitForPressAndRelease();
+		proxMedicao = System.currentTimeMillis() + INTERVALO;
 		while (true) {
 			switch (estado) {
 			case 1:
@@ -49,31 +59,53 @@ public class Algoritmo2 {
 				girar(DIREITA);
 				if (isBranco()) {
 					estado = 3;
+					variacao++;
 				}
 				break;
 			case 3:
 				girar(ESQUERDA);
 				if (isPreto()) {
 					estado = 2;
+					variacao++;
 				}
 				break;
 			case 4:
 				girar(DIREITA);
 				if (isPreto()) {
 					estado = 5;
+					variacao++;
 				}
 				break;
 			case 5:
 				girar(ESQUERDA);
 				if (isBranco()) {
 					estado = 4;
+					variacao++;
 				}
+			}
+			long mili = System.currentTimeMillis();
+			if (mili >= proxMedicao) {
+				if (variacao > GATILHO_RETA) {
+					RAPIDO = VEL_RETA;
+					LCD.clearDisplay();
+					LCD.drawString("RETA", 0, 0);
+				} else {
+					RAPIDO = VEL_CURVA;
+					LCD.clearDisplay();
+					LCD.drawString("CURVA", 0, 0);
+				}
+//				System.out.println(variacao);
+				DEVAGAR = RAPIDO / 7;
+				girar(DIRECAO);
+				variacao = 0;
+				proxMedicao = mili + INTERVALO;
 			}
 		}
 	}
 
-	private void girar(boolean esquerda) {
-		if (esquerda) {
+	private void girar(boolean ehEsquerda) {
+		DIRECAO = ehEsquerda;
+		if (ehEsquerda) {
 			Motor.B.setSpeed(RAPIDO);
 			Motor.B.forward();
 			Motor.A.setSpeed(DEVAGAR);
@@ -91,13 +123,11 @@ public class Algoritmo2 {
 
 	public boolean isBranco() {
 		int lightValue = colorSensor.getNormalizedLightValue();
-		System.out.println(lightValue);
-		return lightValue >= BLACK;
+		return lightValue >= PRETO;
 	}
 
 	public boolean isPreto() {
 		int lightValue = colorSensor.getNormalizedLightValue();
-		System.out.println(lightValue);
-		return lightValue < BLACK;
+		return lightValue < PRETO;
 	}
 }
