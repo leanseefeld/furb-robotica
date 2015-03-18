@@ -1,29 +1,36 @@
 package br.furb.robotica.t1;
 
+import static java.lang.System.currentTimeMillis;
 import lejos.nxt.Button;
 import lejos.nxt.ColorSensor;
-import lejos.nxt.LCD;
 import lejos.nxt.Motor;
 import lejos.nxt.SensorPort;
 
 /**
  * Variação do Algoritmo2: Esse funciona para o lado interno e externo. O lado
- * será escolhido um no inicio
+ * será escolhido no início.
+ * <p>
+ * <h5>Melhorias implementadas (indicar como sugestões)</h5>
+ * <ul>
+ * <li>
+ * Incremento gradual de velocidade: a cada ciclo em que um estado se mantém, a
+ * velocidade aumenta, até que se chegue a um limite</li>
+ * </ul>
+ * </p>
  */
 public class Algoritmo2 {
 
-	private static final int VEL_RETA = 700;
-	private static final int VEL_CURVA = 500;
-	private int RAPIDO = VEL_CURVA;
-	private int DEVAGAR = RAPIDO / 7;
-	private int PRETO = 430;
-	private ColorSensor colorSensor;
-	private int estado = 1;
+	private static long DURACAO_CICLO = 200;
+	private static final int VEL_NORMAL = 500;
+	private static final int VEL_MAXIMA = 700;
+	private static final int PROPORCAO_PIVO = 7;
+	// conclui o aumento em 200 * 5 ms
+	private static final double VEL_INCREMENTO = (VEL_MAXIMA - VEL_NORMAL) / 5;
+	private static final int PRETO = 430;
+	private int velRotacao = VEL_NORMAL;
+	private int velRotacaoPivo = velRotacao / PROPORCAO_PIVO;
+	private final ColorSensor colorSensor;
 
-	private static long INTERVALO = 300;
-	private long proxMedicao;
-	private long variacao;
-	private long GATILHO_RETA = 4;
 	private boolean DIRECAO;
 
 	private static final boolean ESQUERDA = true;
@@ -39,14 +46,47 @@ public class Algoritmo2 {
 	}
 
 	public void executa() throws InterruptedException {
-		aplicarVelocidadePadrao();
+		Motor.A.setSpeed(velRotacao);
+		Motor.B.setSpeed(velRotacao);
+
 		System.out.println("Pressione ENTER para ligar a luz");
 		Button.ENTER.waitForPressAndRelease();
 		colorSensor.setFloodlight(true);
+
 		System.out.println("Pressione ENTER para começar!");
 		Button.ENTER.waitForPressAndRelease();
-		proxMedicao = System.currentTimeMillis() + INTERVALO;
+
+		Motor.A.forward();
+		Motor.B.forward();
+
+		long fimCiclo = currentTimeMillis() + DURACAO_CICLO;
+		int estado = 1;
+		int estadoAnterior = estado;
+
 		while (true) {
+			if (currentTimeMillis() >= fimCiclo) {
+				if (estadoAnterior == estado) {
+					velRotacao += VEL_INCREMENTO;
+					velRotacao = velRotacao > VEL_MAXIMA ? VEL_MAXIMA
+							: velRotacao; // Math.min
+					velRotacaoPivo = velRotacao / PROPORCAO_PIVO;
+
+					girar(DIRECAO); // atualiza velocidades
+					fimCiclo = currentTimeMillis() + DURACAO_CICLO;
+				}
+			} else if (estadoAnterior != estado) {
+				velRotacao = VEL_NORMAL;
+				velRotacaoPivo = velRotacao / PROPORCAO_PIVO;
+
+				girar(DIRECAO);
+				fimCiclo = currentTimeMillis() + DURACAO_CICLO;
+			}
+			estadoAnterior = estado;
+
+			if (Button.ESCAPE.isDown()) {
+				break;
+			}
+
 			switch (estado) {
 			case 1:
 				if (isBranco()) {
@@ -59,46 +99,25 @@ public class Algoritmo2 {
 				girar(DIREITA);
 				if (isBranco()) {
 					estado = 3;
-					variacao++;
 				}
 				break;
 			case 3:
 				girar(ESQUERDA);
 				if (isPreto()) {
 					estado = 2;
-					variacao++;
 				}
 				break;
 			case 4:
 				girar(DIREITA);
 				if (isPreto()) {
 					estado = 5;
-					variacao++;
 				}
 				break;
 			case 5:
 				girar(ESQUERDA);
 				if (isBranco()) {
 					estado = 4;
-					variacao++;
 				}
-			}
-			long mili = System.currentTimeMillis();
-			if (mili >= proxMedicao) {
-				if (variacao > GATILHO_RETA) {
-					RAPIDO = VEL_RETA;
-					LCD.clearDisplay();
-					LCD.drawString("RETA", 0, 0);
-				} else {
-					RAPIDO = VEL_CURVA;
-					LCD.clearDisplay();
-					LCD.drawString("CURVA", 0, 0);
-				}
-//				System.out.println(variacao);
-				DEVAGAR = RAPIDO / 7;
-				girar(DIRECAO);
-				variacao = 0;
-				proxMedicao = mili + INTERVALO;
 			}
 		}
 	}
@@ -106,19 +125,12 @@ public class Algoritmo2 {
 	private void girar(boolean ehEsquerda) {
 		DIRECAO = ehEsquerda;
 		if (ehEsquerda) {
-			Motor.B.setSpeed(RAPIDO);
-			Motor.B.forward();
-			Motor.A.setSpeed(DEVAGAR);
+			Motor.B.setSpeed(velRotacao);
+			Motor.A.setSpeed(velRotacaoPivo);
 		} else {
-			Motor.A.setSpeed(RAPIDO);
-			Motor.A.forward();
-			Motor.B.setSpeed(DEVAGAR);
+			Motor.A.setSpeed(velRotacao);
+			Motor.B.setSpeed(velRotacaoPivo);
 		}
-	}
-
-	private void aplicarVelocidadePadrao() {
-		Motor.A.setSpeed(RAPIDO);
-		Motor.B.setSpeed(RAPIDO);
 	}
 
 	public boolean isBranco() {
@@ -130,4 +142,5 @@ public class Algoritmo2 {
 		int lightValue = colorSensor.getNormalizedLightValue();
 		return lightValue < PRETO;
 	}
+
 }
