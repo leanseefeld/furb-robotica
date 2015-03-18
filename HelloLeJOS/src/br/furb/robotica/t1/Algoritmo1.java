@@ -19,8 +19,8 @@ public class Algoritmo1 {
 	 * Toda vez q mudar de estado, as velocidades das rodas recebem o valor maximo padrão
 	 */
 
-	private int MAX_ESPEED = 600;
-	private int MAX_SPEED_WHITE = 200;
+	private int MAX_SPEED = 300;
+	private int MAX_SPEED_WHITE = 100;
 	private int REDUCAO_POR_CICLO = 5;
 	private int BLACK = 400;
 	private ColorSensor colorSensor;
@@ -102,8 +102,8 @@ public class Algoritmo1 {
 	}
 
 	private void aplicarVelocidadePadrao() {
-		Motor.A.setSpeed(MAX_ESPEED);
-		Motor.B.setSpeed(MAX_ESPEED);
+		Motor.A.setSpeed(MAX_SPEED);
+		Motor.B.setSpeed(MAX_SPEED);
 	}
 
 	public boolean isBranco() {
