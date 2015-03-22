@@ -1,3 +1,4 @@
+package br.furb.robotica.t1;
 import lejos.nxt.Button;
 import lejos.nxt.ColorSensor;
 import lejos.nxt.Motor;
