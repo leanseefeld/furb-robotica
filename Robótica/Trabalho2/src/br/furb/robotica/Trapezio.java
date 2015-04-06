@@ -64,19 +64,22 @@ public class Trapezio {
 		pontosMedios = new LinkedList<>();
 		for (int c = 0; c < mapa.length; c++) {
 			int primeiraLinLivre = -1;
+			int ultimaLinLivre = -1;
 			for (int l = 0; l < mapa[c].length; l++) {
 				if (ehLivre(mapa[c][l])) {
 					if (primeiraLinLivre == -1) {
 						primeiraLinLivre = l;
 					}
+					ultimaLinLivre = l;
 				}
 
 				// Se existe linha livre encontrada E
-				// Essa é a ultima linha do grid OU a proxima linha do grid não é livro
-				if ((primeiraLinLivre != -1 && (l == mapa[c].length - 1 || !ehLivre(mapa[c][l + 1])))) {
-					int medio = (l + primeiraLinLivre) / 2; // trunca pra baixo
+				// a linha atual não é livre OU essa é a ultima linha do grid 
+				if ((ultimaLinLivre != -1 && (ultimaLinLivre != l || l == mapa[c].length - 1))) {
+					int medio = (ultimaLinLivre + primeiraLinLivre) / 2; // trunca pra baixo
 					pontosMedios.add(new int[] { c, medio });
 					primeiraLinLivre = -1;
+					ultimaLinLivre = -1;
 				}
 			}
 		}
