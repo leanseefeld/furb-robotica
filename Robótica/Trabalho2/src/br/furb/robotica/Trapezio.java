@@ -11,7 +11,7 @@ public class Trapezio {
 	private static final int V = 0; // Livre/Vazio
 
 	// Inverte as colunas por linhas
-	private static int[][] InverteMatriz(int[][] matriz) {
+	private static int[][] inverteMatriz(int[][] matriz) {
 		int[][] novaMatriz = new int[matriz[0].length][matriz.length];
 		for (int i = 0; i < matriz.length; i++) {
 			for (int j = 0; j < matriz[i].length; j++) {
@@ -30,7 +30,7 @@ public class Trapezio {
 				{ V, V, V, V, X, V }, //
 				{ X, V, X, V, V, V }, //
 				{ R, V, V, X, V, X } };
-		cenarioA = InverteMatriz(cenarioA);
+		cenarioA = inverteMatriz(cenarioA);
 		int[][] cenarioB = new int[][]
 		/*  */{ { V, V, V, V, V, V }, //
 				{ V, V, X, V, V, V }, //
@@ -39,28 +39,26 @@ public class Trapezio {
 				{ V, V, X, V, V, V }, //
 				{ V, V, V, V, X, V }, //
 				{ V, V, V, X, V, O } };
-		cenarioB = InverteMatriz(cenarioB);
+		cenarioB = inverteMatriz(cenarioB);
 
-		Trapezio(cenarioA);
 		System.out.println("Cenário A");
-		ImprimePontosMedios();
-		Trapezio(cenarioB);
+		new Trapezio(cenarioA).imprimePontosMedios();
 		System.out.println("Cenário B");
-		ImprimePontosMedios();
+		new Trapezio(cenarioB).imprimePontosMedios();
 
 		int medio = (1 + 6) / 2;
 		System.out.println(medio);
 	}
 
-	private static void ImprimePontosMedios() {
+	public void imprimePontosMedios() {
 		for (int[] ponto : pontosMedios) {
 			System.out.println("Col: " + ponto[0] + " Lin: " + ponto[1]);
 		}
 	}
 
-	private static List<int[]> pontosMedios = new LinkedList<>();
+	private List<int[]> pontosMedios = new LinkedList<>();
 
-	public static void Trapezio(int[][] mapa) {
+	public Trapezio(int[][] mapa) {
 		pontosMedios = new LinkedList<>();
 		for (int c = 0; c < mapa.length; c++) {
 			int primeiraLinLivre = -1;
@@ -74,9 +72,11 @@ public class Trapezio {
 				}
 
 				// Se existe linha livre encontrada E
-				// a linha atual não é livre OU essa é a ultima linha do grid 
+				// a linha atual não é livre OU essa é a ultima linha do grid
 				if ((ultimaLinLivre != -1 && (ultimaLinLivre != l || l == mapa[c].length - 1))) {
-					int medio = (ultimaLinLivre + primeiraLinLivre) / 2; // trunca pra baixo
+					int medio = (ultimaLinLivre + primeiraLinLivre) / 2; // trunca
+																			// pra
+																			// baixo
 					pontosMedios.add(new int[] { c, medio });
 					primeiraLinLivre = -1;
 					ultimaLinLivre = -1;
