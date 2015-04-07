@@ -6,53 +6,10 @@ import java.util.List;
 
 public class Trapezio {
 
-	private static final int X = -1; // Obstáculo
-	private static final int R = -2; // Origem - Robo
-	private static final int O = 2; // Objetivo
-	private static final int V = 0; // Livre/Vazio
-
 	private List<int[]> pontosMedios;
 	private int[][] mapa;
 	private final int[] inicio;
 	private final int[] fim;
-
-	// Inverte as colunas por linhas
-	private static int[][] inverteMatriz(int[][] matriz) {
-		int[][] novaMatriz = new int[matriz[0].length][matriz.length];
-		for (int i = 0; i < matriz.length; i++) {
-			for (int j = 0; j < matriz[i].length; j++) {
-				novaMatriz[j][i] = matriz[i][j];
-			}
-		}
-		return novaMatriz;
-	}
-
-	public static void main(String[] args) throws Exception {
-		int[][] cenarioA = new int[][]
-		/*  */{ { V, X, V, V, V, V }, //
-				{ V, V, V, X, V, V }, //
-				{ V, V, V, V, X, O }, //
-				{ V, V, X, V, V, V }, //
-				{ V, V, V, V, X, V }, //
-				{ X, V, X, V, V, V }, //
-				{ R, V, V, X, V, X } };
-		cenarioA = inverteMatriz(cenarioA);
-		int[][] cenarioB = new int[][]
-		/*  */{ { V, V, V, V, V, V }, //
-				{ V, V, X, V, V, V }, //
-				{ V, V, V, X, V, V }, //
-				{ R, X, V, V, X, V }, //
-				{ V, V, X, V, V, V }, //
-				{ V, V, V, V, X, V }, //
-				{ V, V, V, X, V, O } };
-		cenarioB = inverteMatriz(cenarioB);
-
-		System.out.println("Cenário A");
-		Trapezio trap = new Trapezio(cenarioA);
-		System.out.println("\r\n\r\n");
-		System.out.println("Cenário B");
-		trap = new Trapezio(cenarioB);
-	}
 
 	public void imprimePontosMedios() {
 		for (int[] ponto : pontosMedios) {
@@ -72,6 +29,19 @@ public class Trapezio {
 		return linhasDestinos;
 	}
 
+	private Caminho montaCaminho() throws Exception
+	{
+		int incrementCol = movimentoMatrisColuna(this.inicio[0], this.fim[1]);
+		List<int[]> pontosDestinos = pontosMediosDaColuna(this.inicio[1], this.inicio[0] + incrementCol);
+		for (int[] pontoDestino : pontosDestinos) {
+			Caminho caminhoEncontrado = montaCaminhoRecursivo(this.inicio.clone(), pontoDestino, new Caminho());
+			if (caminhoEncontrado != null)
+				return caminhoEncontrado;
+		}
+		System.out.println("Não foi encontrado nenhum caminho possível");
+		return null;
+	}
+	
 	private Caminho montaCaminhoRecursivo(int[] posicaoAtual, int[] destino, Caminho caminho) throws Exception {
 		int linhaAtual = posicaoAtual[1];
 		int colunaAtual = posicaoAtual[0];
@@ -82,7 +52,7 @@ public class Trapezio {
 		while (true) {
 
 			caminho.addPasso(colunaAtual, linhaAtual);
-			
+
 			if (linhaAtual == destino[1] && colunaAtual == destino[0]) {
 				System.out.println("Chegou a coluna e linha esperada");
 				break;
@@ -127,9 +97,9 @@ public class Trapezio {
 		int[][] origemDestino = new int[2][2];
 		for (int i = 0; i < mapa.length; i++) {
 			for (int j = 0; j < mapa[i].length; j++) {
-				if (mapa[i][j] == O)
+				if (mapa[i][j] == Main.O)
 					origemDestino[1] = new int[] { i, j };// Objetivo
-				else if (mapa[i][j] == R)
+				else if (mapa[i][j] == Main.R)
 					origemDestino[0] = new int[] { i, j };// Robo
 			}
 		}
@@ -146,7 +116,8 @@ public class Trapezio {
 		pontosMedios = new LinkedList<>();
 
 		montarPontosMedios();
-		montaCaminhoRecursivo(this.inicio, this.inicio, new Caminho());
+		//montaCaminhoRecursivo(this.inicio, this.inicio, new Caminho());
+		montaCaminho();
 	}
 
 	private void montarPontosMedios() {
@@ -177,7 +148,7 @@ public class Trapezio {
 	}
 
 	private static boolean ehLivre(int celula) {
-		return X != celula;// && R != celula;
+		return Main.X != celula;// && R != celula;
 	}
 
 	private int movimentoMatrisLinha(int linhaOrigem, int linhaDestino) {
@@ -195,54 +166,4 @@ public class Trapezio {
 			return +1;
 		}
 	}
-	/*
-	 * private Caminho montaCaminho() throws Exception { Caminho caminho = new
-	 * Caminho(); int incrementCol = movimentoMatrisColuna(this.inicio[0],
-	 * this.fim[0]);
-	 * 
-	 * System.out.println("Origem " + inicio[0] + " " + inicio[1]);
-	 * System.out.println("Destino " + fim[0] + " " + fim[1]);
-	 * 
-	 * caminho.addPasso(inicio);
-	 * 
-	 * int linhaAtual = inicio[1]; int colunaAtual = inicio[0]; while (true) {
-	 * int colunaDestino = colunaAtual + 1; int linhaDestino =
-	 * pontoMedioMaisProximo(linhaAtual, colunaDestino);
-	 * 
-	 * int incremetLin = 0; if (linhaAtual > linhaDestino) { incremetLin = -1;
-	 * // sobe } else { incremetLin = +1; // desce } // monta o caminho até esse
-	 * ponto encontrado while (true) { if (linhaAtual != linhaDestino &&
-	 * ehLivre(mapa[colunaAtual][linhaAtual + incremetLin])) { linhaAtual +=
-	 * incremetLin; } else if (colunaAtual != colunaDestino &&
-	 * ehLivre(mapa[colunaAtual + incrementCol][linhaAtual])) { colunaAtual +=
-	 * incrementCol; } else { throw new
-	 * Exception("Não foi possível formar um caminho de col:" + colunaAtual +
-	 * " lin:" + linhaAtual + " até col:" + colunaDestino + " lin:" +
-	 * linhaDestino); } caminho.addPasso(new int[] { colunaAtual, linhaAtual });
-	 * 
-	 * System.out.println(colunaAtual + " " + linhaAtual + " - " + colunaDestino
-	 * + " " + linhaDestino);
-	 * 
-	 * if (linhaAtual == linhaDestino && colunaAtual == colunaDestino) {
-	 * System.out.println("OK :D"); break; } }
-	 * 
-	 * if (colunaAtual == fim[0] && linhaAtual != linhaDestino) { // E se tiver
-	 * algum obstáculo no caminho? throw new Exception(
-	 * "Não implementado!\r\nFazer robo descer ou subir para alcançar o objetivo"
-	 * ); }
-	 * 
-	 * if (colunaAtual == fim[0] && linhaAtual == fim[1]) break; }
-	 * 
-	 * return caminho; }
-	 * 
-	 * private int pontoMedioMaisProximo(int linhaAtual, int colunaDestino) { //
-	 * Procura o ponto médio mais proximo na proxima coluna int linhaDestino =
-	 * Integer.MAX_VALUE; int menorDiferenca = Integer.MAX_VALUE; for (int[]
-	 * ponto : pontosMedios) { if (ponto[0] == colunaDestino) { int diferenca =
-	 * Math.abs(linhaAtual - ponto[1]); if (diferenca < menorDiferenca) {
-	 * menorDiferenca = diferenca; linhaDestino = ponto[1]; } // Da pra melhorar
-	 * quando for igual // Se for igual pegar o ponto que está mais proximo do
-	 * // destino } } return linhaDestino; }
-	 */
-
 }
