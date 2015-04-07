@@ -48,7 +48,7 @@ public class Main {
 					{ V, X, V, X, V, V }, //
 					{ R, X, V, X, V, V } };
 			cenarioC = inverteMatriz(cenarioC);
-			
+
 			int[][] cenarioD = new int[][]
 			/*  */{ { V, X, V, V, V, V }, //
 					{ V, V, V, V, X, V }, //
@@ -58,22 +58,81 @@ public class Main {
 					{ V, X, V, V, V, X }, //
 					{ R, X, V, V, V, O } };
 			cenarioD = inverteMatriz(cenarioD);
-			
-			/*System.out.println("Cenário A");
-			new Trapezio(cenarioA);
-			System.out.println("\r\n\r\n");
-			System.out.println("Cenário B");
-			new Trapezio(cenarioB);
-			System.out.println("\r\n\r\n");
-			System.out.println("Cenário C");
-			new Trapezio(cenarioC);
-			System.out.println("\r\n\r\n");
-			System.out.println("Cenário D");*/
-			new Trapezio(cenarioD);
+
+			int[][] cenarioE = new int[][]
+			/*  */{ { V, X, V, V, V, V, V, V }, //
+					{ V, V, V, V, X, V, V, V }, //
+					{ V, X, V, X, V, V, V, V }, //
+					{ V, X, V, V, V, V, V, V }, //
+					{ V, V, X, V, V, V, V, V }, //
+					{ V, X, V, V, V, X, V, V }, //
+					{ V, X, V, V, V, X, X, V }, //
+					{ R, X, V, V, V, V, V, O } };
+			cenarioE = inverteMatriz(cenarioE);
+
+			int[][] cenarioF = new int[][]
+			/*  */{ { V, V, V, V, V, V, V, V }, //
+					{ V, X, V, V, V, V, V, V }, //
+					{ V, V, X, V, X, V, V, V }, //
+					{ V, X, V, X, R, X, V, V }, //
+					{ V, X, V, V, V, V, X, V }, //
+					{ V, V, X, V, V, X, V, V }, //
+					{ V, X, V, X, V, X, V, V }, //
+					{ V, V, V, V, V, X, V, O } };
+			cenarioF = inverteMatriz(cenarioF);
+
+			// new Trapezio(cenarioA);
+			// new Trapezio(cenarioB);
+			// new Trapezio(cenarioC);
+			// new Trapezio(cenarioD);
+			// new Trapezio(cenarioE);
+			// new Trapezio(cenarioF);
+
+			int[][] cenarioY = new int[][]
+			/*  */{ { V, V, V, V, V, V, V, V }, //
+					{ 4, X, V, V, V, V, V, V }, //
+					{ V, V, X, V, X, V, V, V }, //
+					{ V, X, V, X, R, X, V, V }, //
+					{ V, X, V, V, V, V, 50, V }, //
+					{ V, V, X, V, 10, X, V, V }, //
+					{ V, X, V, X, V, X, V, V }, //
+					{ V, V, V, V, V, X, V, O } };
+			cenarioY = inverteMatriz(cenarioY);
+
+			ImprimirCenario(cenarioY);
 		} catch (Exception ex) {
 			System.out.println("Erro:\r\n" + ex.getMessage());
 
 		}
 	}
 
+	public static void ImprimirCenario(int[][] mapa) {
+		for (int col = 0; col < mapa.length; col++) {
+			for (int lin = 0; lin < mapa[col].length; lin++) {
+				System.out.print(celulaToString(mapa[col][lin]));
+			}
+			System.out.println();
+		}
+	}
+
+	private static String celulaToString(int valorCelula) {
+		String saida = " - ";
+		switch (valorCelula) {
+		case X:
+			saida = " X ";
+			break;
+		case V:
+			saida = " V ";
+			break;
+		case R:
+			saida = " R ";
+			break;
+		case O:
+			saida = " O ";
+			break;
+		default:
+			saida = String.valueOf(valorCelula);
+		}
+		return saida;
+	}
 }
