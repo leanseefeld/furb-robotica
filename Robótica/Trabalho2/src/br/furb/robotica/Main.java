@@ -81,7 +81,7 @@ public class Main {
 					{ V, V, V, V, V, X, V, O } };
 			cenarioF = inverteMatriz(cenarioF);
 
-			// new Trapezio(cenarioA);
+			//			 new Trapezio(cenarioA);
 			// new Trapezio(cenarioB);
 			// new Trapezio(cenarioC);
 			// new Trapezio(cenarioD);
@@ -99,14 +99,14 @@ public class Main {
 					{ V, V, V, V, V, X, V, O } };
 			cenarioY = inverteMatriz(cenarioY);
 
-			ImprimirCenario(cenarioY);
+			imprimirCenario(cenarioY);
 		} catch (Exception ex) {
 			System.out.println("Erro:\r\n" + ex.getMessage());
 
 		}
 	}
 
-	public static void ImprimirCenario(int[][] mapa) {
+	public static void imprimirCenario(int[][] mapa) {
 		for (int col = 0; col < mapa.length; col++) {
 			for (int lin = 0; lin < mapa[col].length; lin++) {
 				System.out.print(celulaToString(mapa[col][lin]));
@@ -115,7 +115,7 @@ public class Main {
 		}
 	}
 
-	private static String celulaToString(int valorCelula) {
+	public static String celulaToString(int valorCelula) {
 		String saida = " - ";
 		switch (valorCelula) {
 		case X:
@@ -131,7 +131,7 @@ public class Main {
 			saida = " O ";
 			break;
 		default:
-			saida = String.valueOf(valorCelula);
+			saida = " " + valorCelula + " ";
 		}
 		return saida;
 	}

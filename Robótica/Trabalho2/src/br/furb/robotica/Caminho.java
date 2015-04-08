@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Caminho {
+
 	private List<int[]> caminho;
 	private int numeroPassos;
 
@@ -12,23 +13,17 @@ public class Caminho {
 	}
 
 	public void addPasso(int coluna, int linha) {
-		this.caminho.add(new int[] { coluna, linha });
-		System.out.println(this.toString());
+		addPasso(new int[] { coluna, linha });
 	}
 
 	public void addPasso(int[] posicao) {
 		this.caminho.add(posicao);
 		this.numeroPassos++;
+		System.out.println(this.toString());
 	}
 
-	public void imprimeCaminho() throws Exception {
-		try {
-			System.out.println(this.toString());
-		} catch (Exception ex) {
-			// System.out.println("Erro ao montar o caminho\r\n" +
-			// ex.getMessage());
-			throw ex;
-		}
+	public void imprimeCaminho() {
+		System.out.println(toString());
 	}
 
 	@Override
