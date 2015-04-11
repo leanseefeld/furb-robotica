@@ -28,12 +28,6 @@ public class Trapezio {
 		// TODO: Ordernar pela proximidade com a linha atual
 		return linhasDestinos;
 	}
-	
-	public Caminho montaCaminhoOtimizado()
-	{
-		//TODO: Reduzir o caminho quando o robo passa pelo mesmo lugar 2 vezes
-		return null;
-	}
 
 	public Caminho montaCaminho()
 	{

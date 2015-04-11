@@ -34,18 +34,69 @@ public class Main {
 		}
 	}
 
-	public static int[][] getCenarioY() {
-		int[][] cenarioY = new int[][]
-		/*  */{ { V, V, V, V, V, V, V, V }, //
-				{ 4, X, V, V, V, V, V, V }, //
-				{ V, V, X, V, X, V, V, V }, //
-				{ V, X, V, X, R, X, V, V }, //
-				{ V, X, V, V, V, V, 50, V }, //
-				{ V, V, X, V, 10, X, V, V }, //
-				{ V, X, V, X, V, X, V, V }, //
-				{ V, V, V, V, V, X, V, O } };
-		cenarioY = inverteMatriz(cenarioY);
-		return cenarioY;
+	public static int[][] getCenarioA() {
+		int[][] mapa = new int[][]
+		/*  */{ { V, X, V, V, V, V }, //
+				{ V, V, V, X, V, V }, //
+				{ V, V, V, V, X, O }, //
+				{ V, V, X, V, V, V }, //
+				{ V, V, V, V, X, V }, //
+				{ X, V, X, V, V, V }, //
+				{ R, V, V, X, V, X } };
+		mapa = inverteMatriz(mapa);
+		return mapa;
+	}
+
+	public static int[][] getCenarioB() {
+		int[][] mapa = new int[][]
+		/*  */{ { V, V, V, V, V, V }, //
+				{ V, V, X, V, V, V }, //
+				{ V, V, V, X, V, V }, //
+				{ R, X, V, V, X, V }, //
+				{ V, V, X, V, V, V }, //
+				{ V, V, V, V, X, V }, //
+				{ V, V, V, X, V, O } };
+		mapa = inverteMatriz(mapa);
+		return mapa;
+	}
+
+	public static int[][] getCenarioC() {
+		int[][] mapa = new int[][]
+		/*  */{ { V, X, V, V, V, V }, //
+				{ V, X, V, X, V, O }, //
+				{ V, V, V, X, V, X }, //
+				{ V, X, V, X, V, V }, //
+				{ V, V, V, X, V, V }, //
+				{ V, X, V, X, V, V }, //
+				{ R, X, V, X, V, V } };
+		mapa = inverteMatriz(mapa);
+		return mapa;
+	}
+
+	public static int[][] getCenarioD() {
+		int[][] cenarioD = new int[][]
+		/*  */{ { V, X, V, V, V, V }, //
+				{ V, V, V, V, X, V }, //
+				{ V, X, V, X, V, V }, //
+				{ V, X, V, V, V, V }, //
+				{ V, V, X, V, V, V }, //
+				{ V, X, V, V, V, X }, //
+				{ R, X, V, V, V, O } };
+		cenarioD = inverteMatriz(cenarioD);
+		return cenarioD;
+	}
+
+	public static int[][] getCenarioE() {
+		int[][] mapa = new int[][]
+		/*  */{ { V, V, V, V, V, O }, //
+				{ V, X, V, X, V, V }, //
+				{ V, X, V, X, V, V }, //
+				{ V, X, V, X, V, V }, //
+				{ V, X, V, X, V, V }, //
+				{ V, X, V, X, V, V }, //
+				{ R, X, V, X, V, V } };
+		mapa = inverteMatriz(mapa);
+		return mapa;
 	}
 
 	public static int[][] getCenarioF() {
@@ -62,8 +113,8 @@ public class Main {
 		return cenarioF;
 	}
 
-	public static int[][] getCenarioE() {
-		int[][] cenarioE = new int[][]
+	public static int[][] getCenarioG() {
+		int[][] mapa = new int[][]
 		/*  */{ { V, X, V, V, V, V, V, V }, //
 				{ V, V, V, V, X, V, V, V }, //
 				{ V, X, V, X, V, V, V, V }, //
@@ -72,60 +123,22 @@ public class Main {
 				{ V, X, V, V, V, X, V, V }, //
 				{ V, X, V, V, V, X, X, V }, //
 				{ R, X, V, V, V, V, V, O } };
-		cenarioE = inverteMatriz(cenarioE);
-		return cenarioE;
+		mapa = inverteMatriz(mapa);
+		return mapa;
 	}
 
-	public static int[][] getCenarioD() {
-		int[][] cenarioD = new int[][]
-		/*  */{ { V, X, V, V, V, V }, //
-				{ V, V, V, V, X, V }, //
-				{ V, X, V, X, V, V }, //
-				{ V, X, V, V, V, V }, //
-				{ V, V, X, V, V, V }, //
-				{ V, X, V, V, V, X }, //
-				{ R, X, V, V, V, O } };
-		cenarioD = inverteMatriz(cenarioD);
-		return cenarioD;
-	}
-
-	public static int[][] getCenarioC() {
-		int[][] cenarioC = new int[][]
-		/*  */{ { V, X, V, V, V, V }, //
-				{ V, X, V, X, V, O }, //
-				{ V, V, V, X, V, X }, //
-				{ V, X, V, X, V, V }, //
-				{ V, V, V, X, V, V }, //
-				{ V, X, V, X, V, V }, //
-				{ R, X, V, X, V, V } };
-		cenarioC = inverteMatriz(cenarioC);
-		return cenarioC;
-	}
-
-	public static int[][] getCenarioB() {
-		int[][] cenarioB = new int[][]
-		/*  */{ { V, V, V, V, V, V }, //
-				{ V, V, X, V, V, V }, //
-				{ V, V, V, X, V, V }, //
-				{ R, X, V, V, X, V }, //
-				{ V, V, X, V, V, V }, //
-				{ V, V, V, V, X, V }, //
-				{ V, V, V, X, V, O } };
-		cenarioB = inverteMatriz(cenarioB);
-		return cenarioB;
-	}
-
-	public static int[][] getCenarioA() {
-		int[][] cenarioA = new int[][]
-		/*  */{ { V, X, V, V, V, V }, //
-				{ V, V, V, X, V, V }, //
-				{ V, V, V, V, X, O }, //
-				{ V, V, X, V, V, V }, //
-				{ V, V, V, V, X, V }, //
-				{ X, V, X, V, V, V }, //
-				{ R, V, V, X, V, X } };
-		cenarioA = inverteMatriz(cenarioA);
-		return cenarioA;
+	public static int[][] getCenarioY() {
+		int[][] cenarioY = new int[][]
+		/*  */{ { V, V, V, V, V, V, V, V }, //
+				{ 4, X, V, V, V, V, V, V }, //
+				{ V, V, X, V, X, V, V, V }, //
+				{ V, X, V, X, R, X, V, V }, //
+				{ V, X, V, V, V, V, 50, V }, //
+				{ V, V, X, V, 10, X, V, V }, //
+				{ V, X, V, X, V, X, V, V }, //
+				{ V, V, V, V, V, X, V, O } };
+		cenarioY = inverteMatriz(cenarioY);
+		return cenarioY;
 	}
 
 	public static void imprimirCenario(int[][] mapa) {

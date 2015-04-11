@@ -20,10 +20,13 @@ public class PercorrerMapa {
 		System.out.println("PRESSIONE ENTER");
 		// Button.ENTER.waitForPressAndRelease();
 
-		int[][] mapa = Main.getCenarioA();
+		int[][] mapa = Main.getCenarioE();
 		Trapezio trap = new Trapezio(mapa);
 		Caminho caminho = trap.montaCaminho();
 		System.out.println("Caminho a seguir:");
+		System.out.println(caminho.toString());
+		caminho.Otimizar();
+		System.out.println("Caminho a seguir otimizado:");
 		System.out.println(caminho.toString());
 		System.out.println();
 

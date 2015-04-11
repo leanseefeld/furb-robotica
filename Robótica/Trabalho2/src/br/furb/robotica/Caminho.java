@@ -2,14 +2,12 @@ package br.furb.robotica;
 
 import java.util.ArrayList;
 import java.util.Enumeration;
-import java.util.Iterator;
 import java.util.List;
 
 public class Caminho implements Enumeration<int[]> {
 
 	private List<int[]> caminho;
 	private int index;
-	private int numeroPassos;
 
 	public Caminho() {
 		caminho = new ArrayList<int[]>();
@@ -21,8 +19,7 @@ public class Caminho implements Enumeration<int[]> {
 
 	public void addPasso(int[] posicao) {
 		this.caminho.add(posicao);
-		this.numeroPassos++;
-		//System.out.println(this.toString());
+		// System.out.println(this.toString());
 	}
 
 	public void imprimeCaminho() {
@@ -42,7 +39,6 @@ public class Caminho implements Enumeration<int[]> {
 	protected Caminho clone() {
 		Caminho caminhoClone = new Caminho();
 		caminhoClone.caminho = new ArrayList<int[]>(this.caminho);
-		caminhoClone.numeroPassos = this.numeroPassos;
 		return caminhoClone;
 	}
 
@@ -61,5 +57,21 @@ public class Caminho implements Enumeration<int[]> {
 
 	public void toFirst() {
 		this.index = 0;
+	}
+
+	/**
+	 * Retirar passos duplicados
+	 */
+	public void Otimizar() {
+		for (int i = 1; i < caminho.size() - 1; i++) {
+			if (caminho.get(i - 1)[0] == caminho.get(i + 1)[0] && 
+					caminho.get(i - 1)[1] == caminho.get(i + 1)[1]) {
+				//Remove a ponta
+				caminho.remove(i);
+				//Aqui irá ficar 2 celulas com mesmo valor, então remove também
+				caminho.remove(i);
+				i-=2;
+			}
+		}
 	}
 }
