@@ -28,10 +28,16 @@ public class Trapezio {
 		// TODO: Ordernar pela proximidade com a linha atual
 		return linhasDestinos;
 	}
-
-	private Caminho montaCaminho() throws Exception
+	
+	public Caminho montaCaminhoOtimizado()
 	{
-		int incrementCol = movimentoMatrisColuna(this.inicio[0], this.fim[1]);
+		//TODO: Reduzir o caminho quando o robo passa pelo mesmo lugar 2 vezes
+		return null;
+	}
+
+	public Caminho montaCaminho()
+	{
+		/*int incrementCol = movimentoMatrisColuna(this.inicio[0], this.fim[1]);
 		List<int[]> pontosDestinos = pontosMediosDaColuna(this.inicio[1], this.inicio[0] + incrementCol);
 		for (int[] pontoDestino : pontosDestinos) {
 			Caminho caminhoEncontrado = montaCaminhoRecursivo(this.inicio.clone(), pontoDestino, new Caminho());
@@ -39,10 +45,13 @@ public class Trapezio {
 				return caminhoEncontrado;
 		}
 		System.out.println("Não foi encontrado nenhum caminho possível");
-		return null;
+		return null;*/
+		Caminho caminho = new Caminho();
+		caminho.addPasso(this.inicio);
+		return montaCaminhoRecursivo(this.inicio, this.inicio, caminho);
 	}
 	
-	private Caminho montaCaminhoRecursivo(int[] posicaoAtual, int[] destino, Caminho caminho) throws Exception {
+	private Caminho montaCaminhoRecursivo(int[] posicaoAtual, int[] destino, Caminho caminho) {
 		int linhaAtual = posicaoAtual[1];
 		int colunaAtual = posicaoAtual[0];
 		int incrementCol = movimentoMatrisColuna(colunaAtual, destino[0]);
@@ -51,10 +60,8 @@ public class Trapezio {
 		// monta o caminho até o ponto de destino
 		while (true) {
 
-			caminho.addPasso(colunaAtual, linhaAtual);
-
 			if (linhaAtual == destino[1] && colunaAtual == destino[0]) {
-				System.out.println("Chegou a coluna e linha esperada");
+				log("Chegou a coluna e linha esperada");
 				break;
 			}
 
@@ -63,9 +70,11 @@ public class Trapezio {
 			} else if (colunaAtual != destino[0] && ehLivre(mapa[colunaAtual + incrementCol][linhaAtual])) {
 				colunaAtual += incrementCol;
 			} else {
-				System.out.println("Caminho inválido");
+				log("Caminho inválido");
 				return null; // Sem caminho livre
 			}
+			
+			caminho.addPasso(colunaAtual, linhaAtual);
 
 		}
 
@@ -79,7 +88,7 @@ public class Trapezio {
 
 		// Verifica se chegou ao destino
 		if (colunaAtual == this.fim[0] && linhaAtual == this.fim[1]) {
-			System.out.println("Solução encontrada!");
+			log("Solução encontrada!");
 			return caminho;
 		}
 
@@ -91,6 +100,10 @@ public class Trapezio {
 		}
 
 		return null; // nenhum caminho livre por aqui
+	}
+
+	private void log(String msg) {
+		//System.out.println(msg);
 	}
 
 	private int[][] BuscarOrigemEDestino() {

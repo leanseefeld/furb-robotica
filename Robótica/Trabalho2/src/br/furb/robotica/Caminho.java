@@ -1,11 +1,14 @@
 package br.furb.robotica;
 
 import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Iterator;
 import java.util.List;
 
-public class Caminho {
+public class Caminho implements Enumeration<int[]> {
 
 	private List<int[]> caminho;
+	private int index;
 	private int numeroPassos;
 
 	public Caminho() {
@@ -19,7 +22,7 @@ public class Caminho {
 	public void addPasso(int[] posicao) {
 		this.caminho.add(posicao);
 		this.numeroPassos++;
-		System.out.println(this.toString());
+		//System.out.println(this.toString());
 	}
 
 	public void imprimeCaminho() {
@@ -41,5 +44,22 @@ public class Caminho {
 		caminhoClone.caminho = new ArrayList<int[]>(this.caminho);
 		caminhoClone.numeroPassos = this.numeroPassos;
 		return caminhoClone;
+	}
+
+	@Override
+	public boolean hasMoreElements() {
+		return index < caminho.size();
+	}
+
+	@Override
+	public int[] nextElement() {
+		if (hasMoreElements()) {
+			return caminho.get(index++);
+		}
+		return null;
+	}
+
+	public void toFirst() {
+		this.index = 0;
 	}
 }
