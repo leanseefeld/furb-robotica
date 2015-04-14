@@ -1,11 +1,13 @@
 package br.furb.robotica;
 
-public class Main {
+import static br.furb.robotica.Constantes.O;
+import static br.furb.robotica.Constantes.R;
+import static br.furb.robotica.Constantes.V;
+import static br.furb.robotica.Constantes.X;
+import br.furb.robotica.algoritmos.Trapezio;
+import br.furb.robotica.algoritmos.Wavefront;
 
-	public static final int X = -1; // Obstáculo
-	public static final int R = -2; // Origem - Robo
-	public static final int O = 2; // Objetivo
-	public static final int V = 0; // Livre/Vazio
+public class Cenarios {
 
 	// Inverte as colunas por linhas
 	private static int[][] inverteMatriz(int[][] matriz) {
@@ -20,15 +22,10 @@ public class Main {
 
 	public static void main(String[] args) {
 		try {
+			imprimirCenario(getCenarioB());
 
-			// new Trapezio(getCenarioA());
-			// new Trapezio(cenarioB);
-			// new Trapezio(cenarioC);
-			// new Trapezio(cenarioD);
-			// new Trapezio(cenarioE);
-			// new Trapezio(cenarioF);
+			System.out.println(new Wavefront(getCenarioA()).buscarCaminho().toString());
 
-			imprimirCenario(getCenarioY());
 		} catch (Exception ex) {
 			System.out.println("Erro:\r\n" + ex.getMessage());
 		}

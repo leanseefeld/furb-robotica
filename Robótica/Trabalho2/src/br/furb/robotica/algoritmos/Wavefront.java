@@ -1,7 +1,9 @@
-package br.furb.robotica;
+package br.furb.robotica.algoritmos;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import br.furb.robotica.Cenarios;
 
 public class Wavefront {
 
@@ -140,7 +142,7 @@ public class Wavefront {
 
 		if (log) {
 			System.out.println();
-			Main.imprimirCenario(mapaValorado);
+			Cenarios.imprimirCenario(mapaValorado);
 			System.out.println();
 		}
 	}

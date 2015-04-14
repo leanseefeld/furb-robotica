@@ -1,4 +1,8 @@
-package br.furb.robotica;
+package br.furb.robotica.algoritmos;
+
+import static br.furb.robotica.Constantes.O;
+import static br.furb.robotica.Constantes.R;
+import static br.furb.robotica.Constantes.X;
 
 import java.util.ArrayList;
 import java.util.LinkedList;
@@ -25,7 +29,7 @@ public class Trapezio {
 				linhasDestinos.add(ponto);
 			}
 		}
-		// TODO: Ordernar pela proximidade com a linha atual
+		// TODO: Ordernar pela proximidade com a linha atual	
 		return linhasDestinos;
 	}
 
@@ -104,9 +108,9 @@ public class Trapezio {
 		int[][] origemDestino = new int[2][2];
 		for (int i = 0; i < mapa.length; i++) {
 			for (int j = 0; j < mapa[i].length; j++) {
-				if (mapa[i][j] == Main.O)
+				if (mapa[i][j] == O)
 					origemDestino[1] = new int[] { i, j };// Objetivo
-				else if (mapa[i][j] == Main.R)
+				else if (mapa[i][j] == R)
 					origemDestino[0] = new int[] { i, j };// Robo
 			}
 		}
@@ -155,7 +159,7 @@ public class Trapezio {
 	}
 
 	private static boolean ehLivre(int celula) {
-		return Main.X != celula;// && R != celula;
+		return X != celula;// && R != celula;
 	}
 
 	private int movimentoMatrisLinha(int linhaOrigem, int linhaDestino) {
