@@ -29,7 +29,7 @@ public class Trapezio {
 				linhasDestinos.add(ponto);
 			}
 		}
-		
+
 		int[] pesos = new int[linhasDestinos.size()];
 
 		//Adiciona um peso para cada linha de destino
@@ -38,7 +38,7 @@ public class Trapezio {
 			pesos[i] = Math.abs(linhasDestinos.get(i)[1] - linhaAtual);
 			pesos[i] += Math.abs(linhasDestinos.get(i)[1] - fim[1]);
 		}
-		
+
 		//Ordena pelo peso desc
 		for (int i = 0; i < pesos.length; i++) {
 			for (int j = i; j < pesos.length; j++) {
@@ -57,8 +57,7 @@ public class Trapezio {
 		return linhasDestinos;
 	}
 
-	public Caminho montaCaminho()
-	{
+	public Caminho montaCaminho() {
 		/*int incrementCol = movimentoMatrisColuna(this.inicio[0], this.fim[1]);
 		List<int[]> pontosDestinos = pontosMediosDaColuna(this.inicio[1], this.inicio[0] + incrementCol);
 		for (int[] pontoDestino : pontosDestinos) {
@@ -72,8 +71,9 @@ public class Trapezio {
 		caminho.addPasso(this.inicio);
 		return montaCaminhoRecursivo(this.inicio, this.inicio, caminho);
 	}
-	
-	private Caminho montaCaminhoRecursivo(int[] posicaoAtual, int[] destino, Caminho caminho) {
+
+	private Caminho montaCaminhoRecursivo(int[] posicaoAtual, int[] destino,
+			Caminho caminho) {
 		int linhaAtual = posicaoAtual[1];
 		int colunaAtual = posicaoAtual[0];
 		int incrementCol = movimentoMatrisColuna(colunaAtual, destino[0]);
@@ -87,15 +87,17 @@ public class Trapezio {
 				break;
 			}
 
-			if (linhaAtual != destino[1] && ehLivre(mapa[colunaAtual][linhaAtual + incremetLin])) {
+			if (linhaAtual != destino[1]
+					&& ehLivre(mapa[colunaAtual][linhaAtual + incremetLin])) {
 				linhaAtual += incremetLin;
-			} else if (colunaAtual != destino[0] && ehLivre(mapa[colunaAtual + incrementCol][linhaAtual])) {
+			} else if (colunaAtual != destino[0]
+					&& ehLivre(mapa[colunaAtual + incrementCol][linhaAtual])) {
 				colunaAtual += incrementCol;
 			} else {
 				log("Caminho inválido");
 				return null; // Sem caminho livre
 			}
-			
+
 			caminho.addPasso(colunaAtual, linhaAtual);
 
 		}
@@ -114,9 +116,11 @@ public class Trapezio {
 			return caminho;
 		}
 
-		List<int[]> pontosDestinos = pontosMediosDaColuna(linhaAtual, colunaAtual + incrementCol);
+		List<int[]> pontosDestinos = pontosMediosDaColuna(linhaAtual,
+				colunaAtual + incrementCol);
 		for (int[] pontoDestino : pontosDestinos) {
-			Caminho caminhoEncontrado = montaCaminhoRecursivo(new int[] { colunaAtual, linhaAtual }, pontoDestino, caminho.clone());
+			Caminho caminhoEncontrado = montaCaminhoRecursivo(new int[] {
+					colunaAtual, linhaAtual }, pontoDestino, caminho.clone());
 			if (caminhoEncontrado != null)
 				return caminhoEncontrado;
 		}
@@ -141,7 +145,7 @@ public class Trapezio {
 		return origemDestino;
 	}
 
-	public Trapezio(int[][] mapa) throws Exception {
+	public Trapezio(int[][] mapa) {
 		this.mapa = mapa;
 
 		int[][] origemDestino = BuscarOrigemEDestino();
