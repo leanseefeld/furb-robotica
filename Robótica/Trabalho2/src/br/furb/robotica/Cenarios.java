@@ -4,13 +4,12 @@ import static br.furb.robotica.Constantes.O;
 import static br.furb.robotica.Constantes.R;
 import static br.furb.robotica.Constantes.V;
 import static br.furb.robotica.Constantes.X;
-import br.furb.robotica.algoritmos.Trapezio;
 import br.furb.robotica.algoritmos.Wavefront;
 
 public class Cenarios {
 
 	// Inverte as colunas por linhas
-	private static int[][] inverteMatriz(int[][] matriz) {
+	public static int[][] inverteMatriz(int[][] matriz) {
 		int[][] novaMatriz = new int[matriz[0].length][matriz.length];
 		for (int i = 0; i < matriz.length; i++) {
 			for (int j = 0; j < matriz[i].length; j++) {
@@ -24,7 +23,7 @@ public class Cenarios {
 		try {
 			imprimirCenario(getCenarioB());
 
-			System.out.println(new Wavefront(getCenarioA()).buscarCaminho().toString());
+			System.out.println(new Wavefront(getCenarioA()).gerarCaminho().toString());
 
 		} catch (Exception ex) {
 			System.out.println("Erro:\r\n" + ex.getMessage());

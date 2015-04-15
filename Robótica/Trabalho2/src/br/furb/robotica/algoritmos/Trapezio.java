@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-public class Trapezio {
+public class Trapezio implements GeradorCaminho {
 
 	private List<int[]> pontosMedios;
 	private int[][] mapa;
@@ -57,7 +57,7 @@ public class Trapezio {
 		return linhasDestinos;
 	}
 
-	public Caminho montaCaminho() {
+	public Caminho gerarCaminho() {
 		/*int incrementCol = movimentoMatrisColuna(this.inicio[0], this.fim[1]);
 		List<int[]> pontosDestinos = pontosMediosDaColuna(this.inicio[1], this.inicio[0] + incrementCol);
 		for (int[] pontoDestino : pontosDestinos) {
@@ -156,7 +156,7 @@ public class Trapezio {
 
 		montarPontosMedios();
 		//montaCaminhoRecursivo(this.inicio, this.inicio, new Caminho());
-		montaCaminho();
+		gerarCaminho();
 	}
 
 	private void montarPontosMedios() {

@@ -3,7 +3,7 @@ package br.furb.robotica;
 import lejos.nxt.Button;
 import lejos.nxt.Motor;
 import br.furb.robotica.algoritmos.Caminho;
-import br.furb.robotica.algoritmos.Wavefront;
+import br.furb.robotica.algoritmos.Trapezio;
 
 public class Seguidor {
 
@@ -32,11 +32,11 @@ public class Seguidor {
 	}
 
 	private static Caminho getCaminho(int[][] mapa) {
-		//		Trapezio trapezio = new Trapezio(mapa);
-		//		return trapezio.montaCaminho();
+		Trapezio trapezio = new Trapezio(mapa);
+		return trapezio.gerarCaminho();
 
-		Wavefront wavefront = new Wavefront(mapa);
-		return wavefront.buscarCaminho();
+		//		Wavefront wavefront = new Wavefront(mapa);
+		//		return wavefront.buscarCaminho();
 	}
 
 	private void MoverEmFrente() {
@@ -124,4 +124,25 @@ public class Seguidor {
 				+ " Linha:" + this.posicaoAtual[1]);
 		System.out.println("Sentido Atual: " + this.sentido.name());
 	}
+
+	private static class Mapa {
+
+		private int[][] celulas;
+		private String nome;
+
+		public Mapa(String nome, int[][] celulas) {
+			this.nome = nome;
+			this.celulas = celulas;
+		}
+
+		public int[][] getCelulas() {
+			return celulas;
+		}
+
+		public String getNome() {
+			return nome;
+		}
+
+	}
+
 }

@@ -7,7 +7,7 @@ import java.util.Queue;
 
 import br.furb.robotica.Cenarios;
 
-public class Wavefront {
+public class Wavefront implements GeradorCaminho {
 
 	static boolean log = true;
 
@@ -35,21 +35,16 @@ public class Wavefront {
 		this.mapaOriginal = mapa;
 	}
 
-	public Caminho buscarCaminho() {
-		return buscarCaminho(localizarNoMapa(mapaOriginal, R));
+	@Override
+	public Caminho gerarCaminho() {
+		return gerarCaminho(localizarNoMapa(mapaOriginal, R));
 	}
 
-	/**
-	 * @return lista das células a serem percorridas
-	 */
-	public Caminho buscarCaminho(int[] origem) {
+	public Caminho gerarCaminho(int[] origem) {
 		reset(this.mapaOriginal);
 		configurar();
 		valorarMapa();
-		return gerarCaminho(origem);
-	}
 
-	protected Caminho gerarCaminho(int[] origem) {
 		Caminho caminho = new Caminho();
 
 		int[] passo = origem.clone();
