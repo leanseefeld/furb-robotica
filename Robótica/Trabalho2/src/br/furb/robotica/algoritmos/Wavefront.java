@@ -1,7 +1,9 @@
 package br.furb.robotica.algoritmos;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Queue;
 
 import br.furb.robotica.Cenarios;
 
@@ -27,6 +29,7 @@ public class Wavefront {
 
 	private int[][] mapaOriginal;
 	private int[][] mapaValorado;
+	private Queue<int[]> vizinhosPendentes = new Queue<int[]>();
 
 	public Wavefront(int[][] mapa) {
 		this.mapaOriginal = mapa;
@@ -109,8 +112,8 @@ public class Wavefront {
 
 	protected final boolean isIndicesValidos(int[] indices) {
 		return indices[COL] < mapaValorado.length
-				&& indices[LINHA] < mapaValorado[0].length && indices[COL] >= 0
-				&& indices[LINHA] >= 0;
+				&& indices[LINHA] < mapaValorado[0].length // 
+				&& indices[COL] >= 0 && indices[LINHA] >= 0;
 	}
 
 	public void reset(int[][] mapa) {
@@ -158,8 +161,16 @@ public class Wavefront {
 		//			return;
 		//		}
 		int[] celula = localizarNoMapa(mapaOriginal, O);
-		int[] menorVizinho = getMenorVizinhoValorado(acharVizinhos(celula));
-		escorrerValores(menorVizinho);
+		for (int[] v : acharVizinhos(celula)) {
+			vizinhosPendentes.push(v);
+		}
+
+		while (!vizinhosPendentes.isEmpty()) {
+			int[] vizinho = (int[]) vizinhosPendentes.pop();
+			if (valorCelula(vizinho) == V) {
+				escorrerValores(vizinho);
+			}
+		}
 	}
 
 	private void escorrerValores(int[] celula) {
@@ -173,10 +184,10 @@ public class Wavefront {
 		int[] menorVizinho = getMenorVizinhoValorado(vizinhos);
 		mapaValorado[celula[COL]][celula[LINHA]] = valorCelula(menorVizinho) + 1;
 
-		// após atribuir o valor, ir para os próximos vizinhos vazios (recursão)
+		// após atribuir o valor, ir para os próximos vizinhos vazios
 		for (int[] vizinho : vizinhos) {
 			if (valorCelula(vizinho) == V) {
-				escorrerValores(vizinho);
+				vizinhosPendentes.push(vizinho);
 			}
 		}
 	}
