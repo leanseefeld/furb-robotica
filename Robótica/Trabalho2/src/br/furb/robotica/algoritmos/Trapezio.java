@@ -29,7 +29,31 @@ public class Trapezio {
 				linhasDestinos.add(ponto);
 			}
 		}
-		// TODO: Ordernar pela proximidade com a linha atual	
+		
+		int[] pesos = new int[linhasDestinos.size()];
+
+		//Adiciona um peso para cada linha de destino
+		//O peso é a aproximidade com o nó atual e a Aproximidade com o nó Destino
+		for (int i = 0; i < linhasDestinos.size(); i++) {
+			pesos[i] = Math.abs(linhasDestinos.get(i)[1] - linhaAtual);
+			pesos[i] += Math.abs(linhasDestinos.get(i)[1] - fim[1]);
+		}
+		
+		//Ordena pelo peso desc
+		for (int i = 0; i < pesos.length; i++) {
+			for (int j = i; j < pesos.length; j++) {
+				if (pesos[i] < pesos[j]) {
+					int aux = pesos[i];
+					pesos[i] = pesos[j];
+					pesos[j] = aux;
+
+					int[] aux2 = linhasDestinos.get(i);
+					linhasDestinos.set(i, linhasDestinos.get(j));
+					linhasDestinos.set(j, aux2);
+				}
+			}
+		}
+
 		return linhasDestinos;
 	}
 
