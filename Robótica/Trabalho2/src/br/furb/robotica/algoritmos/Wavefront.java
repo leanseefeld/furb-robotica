@@ -22,8 +22,10 @@ public class Wavefront implements GeradorCaminho {
 	 * Célula vazia no mapa.
 	 */
 	public static final int V = 0;
-	private static final int COL = 0;
-	private static final int LINHA = 1;
+	/** Índice para acessar a coluna de uma coordenada. */
+	public static final int COL = 0;
+	/** Índice para acessar a linha de uma coordenada. */
+	public static final int LINHA = 1;
 	private static final int O = 2;
 
 	private int[][] mapaOriginal;
@@ -39,6 +41,14 @@ public class Wavefront implements GeradorCaminho {
 		return gerarCaminho(localizarNoMapa(mapaOriginal, R));
 	}
 
+	/**
+	 * Gera um caminho de {@code origem} até o objetivo definido no mapa.
+	 * 
+	 * @param origem
+	 *            coordenada da origem. Acessada pelos índices {@link #COL} e
+	 *            {@link #LINHA}.
+	 * @return caminho de {@code origem} até o objetivo definido no mapa.
+	 */
 	public Caminho gerarCaminho(int[] origem) {
 		reset(this.mapaOriginal);
 		configurar();
@@ -115,6 +125,10 @@ public class Wavefront implements GeradorCaminho {
 		this.mapaOriginal = mapa;
 	}
 
+	/**
+	 * Cria o mapa valorado contendo a mesma quantidade de linhas e colunas que
+	 * o mapa original, copiando apenas as células onde existam obstáculos.
+	 */
 	protected void configurar() {
 		this.mapaValorado = new int[this.mapaOriginal.length][this.mapaOriginal[0].length];
 		for (int col = 0; col < mapaOriginal.length; col++) {
@@ -133,8 +147,6 @@ public class Wavefront implements GeradorCaminho {
 		}
 		mapaValorado[objetivo[COL]][objetivo[LINHA]] = O;
 
-		//		valorarComFors(objetivo);
-
 		escorrerValores();
 
 		if (log) {
@@ -149,11 +161,6 @@ public class Wavefront implements GeradorCaminho {
 	 * valoradas.
 	 */
 	private void escorrerValores() {
-		// encontrar célula vazia
-		//		int[] celula = localizarNoMapa(mapaValorado, V);
-		//		if (celula == null) {
-		//			return;
-		//		}
 		int[] celula = localizarNoMapa(mapaOriginal, O);
 		for (int[] v : acharVizinhos(celula)) {
 			vizinhosPendentes.push(v);

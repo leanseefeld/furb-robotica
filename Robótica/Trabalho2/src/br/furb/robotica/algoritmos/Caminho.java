@@ -4,6 +4,10 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
+/**
+ * Objeto que armazena a sequência de passos para que o robô se desloque de uma
+ * posição até outra.
+ */
 public class Caminho implements Enumeration<int[]> {
 
 	private List<int[]> caminho;
@@ -60,7 +64,7 @@ public class Caminho implements Enumeration<int[]> {
 	}
 
 	/**
-	 * Retirar passos duplicados
+	 * Retira passos duplicados.
 	 */
 	public void otimizar() {
 		for (int i = 1; i < caminho.size() - 1; i++) {

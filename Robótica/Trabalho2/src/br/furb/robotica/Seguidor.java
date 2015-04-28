@@ -3,19 +3,24 @@ package br.furb.robotica;
 import lejos.nxt.Button;
 import lejos.nxt.Motor;
 import br.furb.robotica.algoritmos.Caminho;
+import br.furb.robotica.algoritmos.GeradorCaminho;
 import br.furb.robotica.algoritmos.Trapezio;
 
+/**
+ * Classe principal para testar os algoritmos com os diferentes cenários. <br>
+ * Para alterar o algoritmo e o cenário utilizados, altere a implementação no
+ * método {@link #getCaminho()}.
+ */
 public class Seguidor {
 
-	private int SPEED = 400;
-	private Sentido sentido = Sentido.NORTE;
 	private static final int _90GRAUS = 200;
 	private static final int PASSO = 600;
+
+	private int SPEED = 300;
+	private Sentido sentido = Sentido.NORTE;
 	private int[] posicaoAtual;
 
 	public static void main(String[] args) throws Exception {
-		Seguidor seguidor = new Seguidor();
-
 		System.out.println("PRESSIONE ENTER");
 		Button.ENTER.waitForPressAndRelease();
 
@@ -27,20 +32,30 @@ public class Seguidor {
 		System.out.println(caminho.toString());
 		System.out.println();
 
+		Seguidor seguidor = new Seguidor();
 		seguidor.percorrer(caminho);
 	}
 
+	/**
+	 * Obtém um caminho a ser seguido pelo robô.<br>
+	 * Altere a implementação deste método para mudar o algoritmo e o cenário
+	 * usados na geração do caminho.
+	 * 
+	 * @return caminho a ser seguido pelo robô.
+	 */
 	private static Caminho getCaminho() {
 		int[][] mapa = Cenarios.getCenarioA();
-		Trapezio trapezio = new Trapezio(mapa);
-		Caminho caminho = trapezio.gerarCaminho();
+
+		GeradorCaminho geradorCaminho;
+		// geradorCaminho = new Wavefront(mapa);
+		geradorCaminho = new Trapezio(mapa);
+
+		Caminho caminho = geradorCaminho.gerarCaminho();
 		caminho.otimizar();
-		//Wavefront wavefront = new Wavefront(mapa);
-		//caminho = wavefront.buscarCaminho();
 		return caminho;
 	}
 
-	private void MoverEmFrente() {
+	private void moverEmFrente() {
 		System.out.println("Moveu para frente");
 		Motor.A.rotate(PASSO, true);
 		Motor.B.rotate(PASSO);
@@ -102,7 +117,7 @@ public class Seguidor {
 		while ((proximaPosicao = caminho.nextElement()) != null) {
 			Sentido novoSentido = getSentido(this.posicaoAtual, proximaPosicao);
 			girar(novoSentido);
-			MoverEmFrente();
+			moverEmFrente();
 			this.sentido = novoSentido;
 			this.posicaoAtual = proximaPosicao;
 			printPosicaoAtual();
