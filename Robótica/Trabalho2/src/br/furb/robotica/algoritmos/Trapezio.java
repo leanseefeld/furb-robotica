@@ -30,7 +30,7 @@ public class Trapezio implements GeradorCaminho {
 	public Trapezio(int[][] mapa) {
 		this.mapa = mapa;
 
-		int[][] origemDestino = BuscarOrigemEDestino();
+		int[][] origemDestino = buscarOrigemEDestino();
 		this.inicio = origemDestino[0];
 		this.fim = origemDestino[1];
 
@@ -193,7 +193,7 @@ public class Trapezio implements GeradorCaminho {
 	 * coluna inicio = int[0][0] linha inicio = int[0][1]
 	 * coluna fim = int[1][0] linha fim = int[1][1]
 	 */
-	private int[][] BuscarOrigemEDestino() {
+	private int[][] buscarOrigemEDestino() {
 		int[][] origemDestino = new int[2][2];
 		for (int i = 0; i < mapa.length; i++) {
 			for (int j = 0; j < mapa[i].length; j++) {
