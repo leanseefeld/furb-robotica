@@ -42,7 +42,7 @@ public class Trapezio implements GeradorCaminho {
 		//Ordena pelo peso desc
 		for (int i = 0; i < pesos.length; i++) {
 			for (int j = i; j < pesos.length; j++) {
-				if (pesos[i] < pesos[j]) {
+				if (pesos[i] > pesos[j]) {
 					int aux = pesos[i];
 					pesos[i] = pesos[j];
 					pesos[j] = aux;
