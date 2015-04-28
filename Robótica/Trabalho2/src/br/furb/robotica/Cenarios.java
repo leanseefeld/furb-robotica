@@ -5,6 +5,9 @@ import static br.furb.robotica.Constantes.R;
 import static br.furb.robotica.Constantes.V;
 import static br.furb.robotica.Constantes.X;
 
+/**
+ * Classe com mapas para testes, incluindo os cenários do enunciado do trabalho.
+ */
 public class Cenarios {
 
 	// Inverte as colunas por linhas
