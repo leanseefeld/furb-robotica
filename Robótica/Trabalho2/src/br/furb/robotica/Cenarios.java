@@ -4,7 +4,6 @@ import static br.furb.robotica.Constantes.O;
 import static br.furb.robotica.Constantes.R;
 import static br.furb.robotica.Constantes.V;
 import static br.furb.robotica.Constantes.X;
-import br.furb.robotica.algoritmos.Wavefront;
 
 public class Cenarios {
 

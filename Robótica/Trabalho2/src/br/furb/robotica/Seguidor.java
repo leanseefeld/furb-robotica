@@ -19,8 +19,7 @@ public class Seguidor {
 		System.out.println("PRESSIONE ENTER");
 		Button.ENTER.waitForPressAndRelease();
 
-		int[][] mapa = Cenarios.getCenarioA();
-		Caminho caminho = getCaminho(mapa);
+		Caminho caminho = getCaminho();
 		System.out.println("Caminho a seguir:");
 		System.out.println(caminho.toString());
 		caminho.otimizar();
@@ -31,10 +30,10 @@ public class Seguidor {
 		seguidor.percorrer(caminho);
 	}
 
-	private static Caminho getCaminho(int[][] mapa) {
-		Caminho caminho;
+	private static Caminho getCaminho() {
+		int[][] mapa = Cenarios.getCenarioA();
 		Trapezio trapezio = new Trapezio(mapa);
-		caminho = trapezio.gerarCaminho();
+		Caminho caminho = trapezio.gerarCaminho();
 		caminho.otimizar();
 		//Wavefront wavefront = new Wavefront(mapa);
 		//caminho = wavefront.buscarCaminho();
@@ -100,16 +99,6 @@ public class Seguidor {
 		this.sentido = Sentido.NORTE;
 		printPosicaoAtual();
 
-		/*Girar(Sentido.Leste);
-		System.out.println("PRESSIONE ENTER");
-		Button.ENTER.waitForPressAndRelease();
-		Girar(Sentido.Norte);
-		System.out.println("PRESSIONE ENTER");
-		Button.ENTER.waitForPressAndRelease();
-		MoverEmFrente();
-		System.out.println("PRESSIONE ENTER");
-		Button.ENTER.waitForPressAndRelease();*/
-
 		while ((proximaPosicao = caminho.nextElement()) != null) {
 			Sentido novoSentido = getSentido(this.posicaoAtual, proximaPosicao);
 			girar(novoSentido);
@@ -118,33 +107,13 @@ public class Seguidor {
 			this.posicaoAtual = proximaPosicao;
 			printPosicaoAtual();
 		}
-		System.out.println("CHEGOU AO DESTINO!!");
+		System.out.println("CHEGOU AO DESTINO!");
 	}
 
 	public void printPosicaoAtual() {
 		System.out.println("Posicao Atual: Coluna:" + this.posicaoAtual[0]
 				+ " Linha:" + this.posicaoAtual[1]);
 		System.out.println("Sentido Atual: " + this.sentido.name());
-	}
-
-	private static class Mapa {
-
-		private int[][] celulas;
-		private String nome;
-
-		public Mapa(String nome, int[][] celulas) {
-			this.nome = nome;
-			this.celulas = celulas;
-		}
-
-		public int[][] getCelulas() {
-			return celulas;
-		}
-
-		public String getNome() {
-			return nome;
-		}
-
 	}
 
 }
