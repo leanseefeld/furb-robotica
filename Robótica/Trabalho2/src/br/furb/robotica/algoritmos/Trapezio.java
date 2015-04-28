@@ -8,8 +8,16 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
+import br.furb.robotica.Cenarios;
+
 public class Trapezio implements GeradorCaminho {
 
+	/*public static void main(String[] args)
+	{
+		System.out.println(
+				new Trapezio(Cenarios.getCenarioA()).gerarCaminho().toString());
+	}*/
+	
 	private List<int[]> pontosMedios;
 	private int[][] mapa;
 	private final int[] inicio;
@@ -35,8 +43,8 @@ public class Trapezio implements GeradorCaminho {
 		//Adiciona um peso para cada linha de destino
 		//O peso é a aproximidade com o nó atual e a Aproximidade com o nó Destino
 		for (int i = 0; i < linhasDestinos.size(); i++) {
-			pesos[i] = Math.abs(linhasDestinos.get(i)[1] - linhaAtual);
-			pesos[i] += Math.abs(linhasDestinos.get(i)[1] - fim[1]);
+			pesos[i] = Math.abs(linhaAtual - linhasDestinos.get(i)[1]);
+			//pesos[i] += Math.abs(linhasDestinos.get(i)[1] - fim[1]);
 		}
 
 		//Ordena pelo peso desc
@@ -121,7 +129,7 @@ public class Trapezio implements GeradorCaminho {
 	}
 
 	private void log(String msg) {
-		//System.out.println(msg);
+		System.out.println(msg);
 	}
 
 	private int[][] BuscarOrigemEDestino() {
