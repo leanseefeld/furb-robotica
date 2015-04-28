@@ -23,13 +23,31 @@ public class Trapezio implements GeradorCaminho {
 	private final int[] inicio;
 	private final int[] fim;
 
-	public void imprimePontosMedios() {
-		for (int[] ponto : pontosMedios) {
-			System.out.println("Col: " + ponto[0] + " Lin: " + ponto[1]);
-		}
+	/**
+	 * @param mapa
+	 * Mapa que será buscado os pontos médios para montar o caminho
+	 */
+	public Trapezio(int[][] mapa) {
+		this.mapa = mapa;
+
+		int[][] origemDestino = BuscarOrigemEDestino();
+		this.inicio = origemDestino[0];
+		this.fim = origemDestino[1];
+
+		pontosMedios = new LinkedList<>();
+
+		montarPontosMedios();
 	}
 
-	// Traz os pontos médios da coluna
+	/**
+	 * Retorna uma lista com os pontos médios da coluna
+	 * @param linhaAtual 
+	 * Usada para ordernar a lista com os pontos mais próximos da linha atual
+	 * @param colunaDestino
+	 * Coluna em que será buscado os pontos médios
+	 * @return 
+	 * Lista com os pontos médios ordenados pela aproximidade com a linha atual e a linha de destino
+	 */
 	private List<int[]> pontosMediosDaColuna(int linhaAtual, int colunaDestino) {
 		ArrayList<int[]> linhasDestinos = new ArrayList<>();
 		for (int[] ponto : pontosMedios) {
@@ -65,6 +83,9 @@ public class Trapezio implements GeradorCaminho {
 		return linhasDestinos;
 	}
 
+	/**
+	 * Gera o caminho a ser seguido baseado nos pontos médios gerados
+	 */
 	public Caminho gerarCaminho() {
 		Caminho caminho = new Caminho();
 		caminho.addPasso(this.inicio);
@@ -128,35 +149,9 @@ public class Trapezio implements GeradorCaminho {
 		return null; // nenhum caminho livre por aqui
 	}
 
-	private void log(String msg) {
-		System.out.println(msg);
-	}
-
-	private int[][] BuscarOrigemEDestino() {
-		int[][] origemDestino = new int[2][2];
-		for (int i = 0; i < mapa.length; i++) {
-			for (int j = 0; j < mapa[i].length; j++) {
-				if (mapa[i][j] == O)
-					origemDestino[1] = new int[] { i, j };// Objetivo
-				else if (mapa[i][j] == R)
-					origemDestino[0] = new int[] { i, j };// Robo
-			}
-		}
-		return origemDestino;
-	}
-
-	public Trapezio(int[][] mapa) {
-		this.mapa = mapa;
-
-		int[][] origemDestino = BuscarOrigemEDestino();
-		this.inicio = origemDestino[0];
-		this.fim = origemDestino[1];
-
-		pontosMedios = new LinkedList<>();
-
-		montarPontosMedios();
-	}
-
+	/**
+	 * Busca todos os pontos médios do mapa
+	 */
 	private void montarPontosMedios() {
 		for (int c = 0; c < mapa.length; c++) {
 			int primeiraLinLivre = -1;
@@ -181,13 +176,51 @@ public class Trapezio implements GeradorCaminho {
 				}
 			}
 		}
-
+	}
+	
+	/**
+	 * Imprime os pontos médios do mapa passado no construtor
+	 */
+	public void imprimePontosMedios() {
+		for (int[] ponto : pontosMedios) {
+			System.out.println("Col: " + ponto[0] + " Lin: " + ponto[1]);
+		}
 	}
 
+	/**
+	 * Localiza o Inicio(Robô) e o Fim(Destino) do mapa
+	 * @return 
+	 * coluna inicio = int[0][0] linha inicio = int[0][1]
+	 * coluna fim = int[1][0] linha fim = int[1][1]
+	 */
+	private int[][] BuscarOrigemEDestino() {
+		int[][] origemDestino = new int[2][2];
+		for (int i = 0; i < mapa.length; i++) {
+			for (int j = 0; j < mapa[i].length; j++) {
+				if (mapa[i][j] == O)
+					origemDestino[1] = new int[] { i, j };// Objetivo
+				else if (mapa[i][j] == R)
+					origemDestino[0] = new int[] { i, j };// Robo
+			}
+		}
+		return origemDestino;
+	}
+	
+	/**
+	 * Verifica se a celula atual é está livre
+	 * @param celula ponto X e Y do mapa
+	 * @return
+	 */
 	private static boolean ehLivre(int celula) {
 		return X != celula;// && R != celula;
 	}
 
+	/**
+	 * Verifica se a linhaDestino está acima ou abaixo da linhaOrigem
+	 * @param linhaOrigem
+	 * @param linhaDestino
+	 * @return
+	 */
 	private int movimentoMatrisLinha(int linhaOrigem, int linhaDestino) {
 		if (linhaOrigem > linhaDestino) {
 			return -1;
@@ -196,6 +229,12 @@ public class Trapezio implements GeradorCaminho {
 		}
 	}
 
+	/**
+	 * Verifica se a colunaOrigem está acima ou abaixo da colunaDestino
+	 * @param colunaOrigem
+	 * @param colunaDestino
+	 * @return
+	 */
 	private int movimentoMatrisColuna(int colunaOrigem, int colunaDestino) {
 		if (colunaOrigem > colunaDestino) {
 			return -1;
@@ -203,4 +242,13 @@ public class Trapezio implements GeradorCaminho {
 			return +1;
 		}
 	}
+	
+	/**
+	 * Apenas para testes
+	 * @param msg Mensagem que será exibida no console
+	 */
+	private void log(String msg) {
+		System.out.println(msg);
+	}
+
 }
