@@ -32,11 +32,13 @@ public class Seguidor {
 	}
 
 	private static Caminho getCaminho(int[][] mapa) {
+		Caminho caminho;
 		Trapezio trapezio = new Trapezio(mapa);
-		return trapezio.gerarCaminho();
-
-		//		Wavefront wavefront = new Wavefront(mapa);
-		//		return wavefront.buscarCaminho();
+		caminho = trapezio.gerarCaminho();
+		caminho.otimizar();
+		//Wavefront wavefront = new Wavefront(mapa);
+		//caminho = wavefront.buscarCaminho();
+		return caminho;
 	}
 
 	private void MoverEmFrente() {

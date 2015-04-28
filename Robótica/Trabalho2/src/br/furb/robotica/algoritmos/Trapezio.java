@@ -58,18 +58,10 @@ public class Trapezio implements GeradorCaminho {
 	}
 
 	public Caminho gerarCaminho() {
-		/*int incrementCol = movimentoMatrisColuna(this.inicio[0], this.fim[1]);
-		List<int[]> pontosDestinos = pontosMediosDaColuna(this.inicio[1], this.inicio[0] + incrementCol);
-		for (int[] pontoDestino : pontosDestinos) {
-			Caminho caminhoEncontrado = montaCaminhoRecursivo(this.inicio.clone(), pontoDestino, new Caminho());
-			if (caminhoEncontrado != null)
-				return caminhoEncontrado;
-		}
-		System.out.println("Não foi encontrado nenhum caminho possível");
-		return null;*/
 		Caminho caminho = new Caminho();
 		caminho.addPasso(this.inicio);
-		return montaCaminhoRecursivo(this.inicio, this.inicio, caminho);
+		caminho = montaCaminhoRecursivo(this.inicio, this.inicio, caminho);
+		return caminho;
 	}
 
 	private Caminho montaCaminhoRecursivo(int[] posicaoAtual, int[] destino,
@@ -155,8 +147,6 @@ public class Trapezio implements GeradorCaminho {
 		pontosMedios = new LinkedList<>();
 
 		montarPontosMedios();
-		//montaCaminhoRecursivo(this.inicio, this.inicio, new Caminho());
-		gerarCaminho();
 	}
 
 	private void montarPontosMedios() {

@@ -19,17 +19,6 @@ public class Cenarios {
 		return novaMatriz;
 	}
 
-	public static void main(String[] args) {
-		try {
-			imprimirCenario(getCenarioB());
-
-			System.out.println(new Wavefront(getCenarioA()).gerarCaminho().toString());
-
-		} catch (Exception ex) {
-			System.out.println("Erro:\r\n" + ex.getMessage());
-		}
-	}
-
 	public static int[][] getCenarioA() {
 		int[][] mapa = new int[][]
 		/*  */{ { V, X, V, V, V, V }, //
