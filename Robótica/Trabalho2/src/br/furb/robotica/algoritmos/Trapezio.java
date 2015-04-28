@@ -44,10 +44,10 @@ public class Trapezio implements GeradorCaminho {
 		//O peso é a aproximidade com o nó atual e a Aproximidade com o nó Destino
 		for (int i = 0; i < linhasDestinos.size(); i++) {
 			pesos[i] = Math.abs(linhaAtual - linhasDestinos.get(i)[1]);
-			//pesos[i] += Math.abs(linhasDestinos.get(i)[1] - fim[1]);
+			pesos[i] += Math.abs(linhasDestinos.get(i)[1] - fim[1]);
 		}
 
-		//Ordena pelo peso desc
+		//Ordena pelo peso crescente
 		for (int i = 0; i < pesos.length; i++) {
 			for (int j = i; j < pesos.length; j++) {
 				if (pesos[i] > pesos[j]) {
