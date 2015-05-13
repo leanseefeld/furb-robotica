@@ -19,4 +19,8 @@ public enum Lado {
 					+ toString());
 		}
 	}
+
+	public static Lado valueOf(int i) {
+	    return Lado.values()[i];
+	}
 }
