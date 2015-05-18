@@ -20,7 +20,7 @@ public class BehaviorMover implements Behavior {
     public void action() {
 	Motor.A.forward();
 	Motor.B.forward();
-	this.robo.moverParaPosicaoNaoVisitadao();
+	this.robo.moverParaPosicaoNaoVisitada();
     }
 
     @Override

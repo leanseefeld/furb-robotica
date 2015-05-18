@@ -73,8 +73,10 @@ public class RoboMapeador {
 	return this.mapa.getInfoPosicao(this.coordenadaAtual);
     }
 
-    public void moverParaPosicaoNaoVisitadao() {
+    public void moverParaPosicaoNaoVisitada() {
 	int[] coordenadaVisinho = this.mapa.getVisinhoNaoVisitado(this.coordenadaAtual);
+	
+	//TODO: Fazer isso usando busca em profundidade... deve ficar mais facil
 	if(coordenadaVisinho == null)
 	{
 	    List<int[]> coordenadas = this.mapa.getCoordenadasNaoVisitadas();
