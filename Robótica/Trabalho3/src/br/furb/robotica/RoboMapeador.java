@@ -1,5 +1,6 @@
 package br.furb.robotica;
 
+import java.util.List;
 import lejos.nxt.Button;
 import lejos.nxt.Motor;
 import lejos.nxt.SensorPort;
@@ -11,6 +12,7 @@ public class RoboMapeador {
 
     private static final int VELOCIDADE = 600;
     private static final int DISTANCIA_OBSTACULO = 50;
+    private static final int NOVENTAGRAUS = 90;
 
     public static void main(String[] args) {
 	System.out.println("Pressione ENTER");
@@ -51,20 +53,20 @@ public class RoboMapeador {
 
 	InfoPosicao infoPosicao = mapa.criarPosicao(coordenadaAtual, ladoAtual);
 
-	Motor.C.rotate(-90); //ESQUERDA DO ROBO
+	Motor.C.rotate(-NOVENTAGRAUS); //ESQUERDA DO ROBO
 	Lado ladoSensor = Lado.valueOf((this.ladoAtual.ordinal() - 1) % 4);
 	infoPosicao.setLadoLivre(ladoSensor, sensor.getDistance() < DISTANCIA_OBSTACULO);
 
-	Motor.C.rotate(+90); //FRENTE DO ROBO
+	Motor.C.rotate(+NOVENTAGRAUS); //FRENTE DO ROBO
 	ladoSensor = Lado.valueOf(this.ladoAtual.ordinal());
 	infoPosicao.setLadoLivre(ladoSensor, sensor.getDistance() < DISTANCIA_OBSTACULO);
 
-	Motor.C.rotate(+90); //ESQUERDA DO ROBO
+	Motor.C.rotate(+NOVENTAGRAUS); //ESQUERDA DO ROBO
 	ladoSensor = Lado.valueOf((this.ladoAtual.ordinal() + 1) % 4);
 	infoPosicao.setLadoLivre(ladoSensor, sensor.getDistance() < DISTANCIA_OBSTACULO);
 
 	//Aponta o sensor para frente novamente
-	Motor.C.rotate(90, true);
+	Motor.C.rotate(-NOVENTAGRAUS, true);
     }
 
     public InfoPosicao getPosicaoAtual() {
@@ -72,10 +74,19 @@ public class RoboMapeador {
     }
 
     public void moverParaPosicaoNaoVisitadao() {
-	//TODO: Implementar
-	//Analisar visinho não visitado
-	//Se todos os visinhos foram visitados, verificar se existe alguma posição não visitada e ir até la
-	//Se não tiver posição não visitada, fazer nada pois esse metodo não será executado
+	int[] coordenadaVisinho = this.mapa.getVisinhoNaoVisitado(this.coordenadaAtual);
+	if(coordenadaVisinho == null)
+	{
+	    List<int[]> coordenadas = this.mapa.getCoordenadasNaoVisitadas();
+	    Caminho caminho = null;
+	    for (int[] coord : coordenadas) {
+		caminho = this.mapa.montarCaminho(this.coordenadaAtual, coord);
+		if(caminho != null)
+		    break;
+	    }
+	    if(caminho == null)
+		System.out.println("O mapa está completo");
+	}
     }
 
     public boolean mapeamentoEstaCompleto() {

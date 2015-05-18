@@ -1,5 +1,7 @@
 package br.furb.robotica;
 
+import java.util.List;
+
 public class MapaLabirinto {
 
     public static final int LINHA = 0; // i | "for" de fora
@@ -43,4 +45,55 @@ public class MapaLabirinto {
 	return false;
     }
 
+    public boolean coordenadaEhValida(int[] coord) {
+	if (coord[LINHA] >= posicoes.length) {
+	    return false;
+	}
+	if (coord[COLUNA] >= posicoes[coord[LINHA]].length) {
+	    return false;
+	}
+	return true;
+    }
+
+    public int[] getVisinhoNaoVisitado(int[] coordenadaAtual) {
+	InfoPosicao infoPosicaoAtual = getInfoPosicao(coordenadaAtual);
+	int[] coord = new int[2];
+
+	if (infoPosicaoAtual.isLadoLivre(Lado.DIREITA)) {
+	    coord[MapaLabirinto.COLUNA] = coordenadaAtual[MapaLabirinto.COLUNA]++;
+	    coord[MapaLabirinto.LINHA] = coordenadaAtual[MapaLabirinto.LINHA];
+	    if (coordenadaEhValida(coord) && getInfoPosicao(coord) != null) {
+		return coord;
+	    }
+	} else if (infoPosicaoAtual.isLadoLivre(Lado.ESQUERDA)) {
+	    coord[MapaLabirinto.COLUNA] = coordenadaAtual[MapaLabirinto.COLUNA]--;
+	    coord[MapaLabirinto.LINHA] = coordenadaAtual[MapaLabirinto.LINHA];
+	    if (coordenadaEhValida(coord) && getInfoPosicao(coord) != null) {
+		return coord;
+	    }
+	} else if (infoPosicaoAtual.isLadoLivre(Lado.FRENTE)) {
+	    coord[MapaLabirinto.COLUNA] = coordenadaAtual[MapaLabirinto.COLUNA];
+	    coord[MapaLabirinto.LINHA] = coordenadaAtual[MapaLabirinto.LINHA]++;
+	    if (coordenadaEhValida(coord) && getInfoPosicao(coord) != null) {
+		return coord;
+	    }
+	} else {
+	    coord[MapaLabirinto.COLUNA] = coordenadaAtual[MapaLabirinto.COLUNA];
+	    coord[MapaLabirinto.LINHA] = coordenadaAtual[MapaLabirinto.LINHA]--;
+	    if (coordenadaEhValida(coord) && getInfoPosicao(coord) != null) {
+		return coord;
+	    }
+	}
+	return null;
+    }
+
+    public List<int[]> getCoordenadasNaoVisitadas() {
+	// TODO Auto-generated method stub
+	return null;
+    }
+
+    public Caminho montarCaminho(int[] origem, int[] destino) {
+	// TODO Auto-generated method stub
+	return null;
+    }
 }
