@@ -3,24 +3,22 @@ package br.furb.robotica;
 import lejos.nxt.Motor;
 import lejos.robotics.subsumption.Behavior;
 
-public class BehaviorMover implements Behavior {
+public class BehaviorSeguirTrajeto implements Behavior {
 
     private RoboMapeador robo;
 
-    public BehaviorMover(RoboMapeador robo) {
+    public BehaviorSeguirTrajeto(RoboMapeador robo) {
 	this.robo = robo;
     }
 
     @Override
     public boolean takeControl() {
-	return robo.getPosicaoAtual() != null;
+	return robo.getCaminho() != null && !robo.getCaminho().isAfterLast();
     }
 
     @Override
     public void action() {
-	Motor.A.forward();
-	Motor.B.forward();
-	this.robo.moverParaPosicaoNaoVisitada();
+	this.robo.moverProximaPosicao();
     }
 
     @Override

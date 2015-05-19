@@ -93,7 +93,7 @@ public class MapaLabirinto {
     }
 
     public Caminho montarCaminho(int[] origem, int[] destino) {
-	// TODO Auto-generated method stub
+	// TODO Que tal utilizar o WevaFront aqui?
 	return null;
     }
 }

@@ -11,14 +11,13 @@ import lejos.robotics.subsumption.Behavior;
 public class RoboMapeador {
 
     private static final int VELOCIDADE = 600;
+    private static final int PASSO = 600;
     private static final int DISTANCIA_OBSTACULO = 50;
-    private static final int NOVENTAGRAUS = 90;
+    private static final int _90GRAUS = 90;
 
     public static void main(String[] args) {
 	System.out.println("Pressione ENTER");
 	Button.ENTER.waitForPressAndRelease();
-	Motor.A.setSpeed(VELOCIDADE);
-	Motor.B.setSpeed(VELOCIDADE);
 
 	MapaLabirinto mapa = new MapaLabirinto();
 	mapa.setCoordenadaDestino(0, 0);
@@ -26,10 +25,11 @@ public class RoboMapeador {
 	RoboMapeador robo = new RoboMapeador(mapa, Lado.FRENTE);
 
 	Behavior analizarPosicao = new BehaviorAnalizarPosicao(robo);
-	Behavior mover = new BehaviorMover(robo);
+	Behavior montarTrajeto = new BehaviorMontarTrajeto(robo);
+	Behavior seguirTrajeto = new BehaviorSeguirTrajeto(robo);
 	Behavior mapeamentoCompleto = new BehaviorMapeamentoCompleto(robo);
 
-	Behavior[] comportamentos = { analizarPosicao, mover, mapeamentoCompleto };
+	Behavior[] comportamentos = { analizarPosicao, montarTrajeto, seguirTrajeto, mapeamentoCompleto };
 	Arbitrator arb = new Arbitrator(comportamentos);
 	arb.start();
     }
@@ -38,13 +38,35 @@ public class RoboMapeador {
     private Lado ladoAtual;
     private MapaLabirinto mapa;
     private UltrasonicSensor sensor;
+    private Caminho caminho;
+    private boolean mapaCompleto;
 
     public RoboMapeador(MapaLabirinto mapa, Lado ladoAtual) {
+	Motor.A.setSpeed(VELOCIDADE);
+	Motor.B.setSpeed(VELOCIDADE);
+
 	this.mapa = mapa;
 	this.ladoAtual = ladoAtual;
 	sensor = new UltrasonicSensor(SensorPort.S4);
     }
 
+    /**
+     * @return Retorna o caminho que o robo deve seguir
+     */
+    public Caminho getCaminho() {
+	return this.caminho;
+    }
+
+    /**
+     * @return Retorna a posição atual do robo no mapa
+     */
+    public InfoPosicao getPosicaoAtual() {
+	return this.mapa.getInfoPosicao(this.coordenadaAtual);
+    }
+
+    /**
+     * Pega informações da posição atual do robo
+     */
     public void analisarPosicao() {
 	if (mapa.getInfoPosicao(coordenadaAtual) != null) {
 	    //TODO: Apenas para testes... depois remover isso
@@ -53,47 +75,60 @@ public class RoboMapeador {
 
 	InfoPosicao infoPosicao = mapa.criarPosicao(coordenadaAtual, ladoAtual);
 
-	Motor.C.rotate(-NOVENTAGRAUS); //ESQUERDA DO ROBO
+	Motor.C.rotate(-_90GRAUS); //ESQUERDA DO ROBO
 	Lado ladoSensor = Lado.valueOf((this.ladoAtual.ordinal() - 1) % 4);
 	infoPosicao.setLadoLivre(ladoSensor, sensor.getDistance() < DISTANCIA_OBSTACULO);
 
-	Motor.C.rotate(+NOVENTAGRAUS); //FRENTE DO ROBO
+	Motor.C.rotate(+_90GRAUS); //FRENTE DO ROBO
 	ladoSensor = Lado.valueOf(this.ladoAtual.ordinal());
 	infoPosicao.setLadoLivre(ladoSensor, sensor.getDistance() < DISTANCIA_OBSTACULO);
 
-	Motor.C.rotate(+NOVENTAGRAUS); //ESQUERDA DO ROBO
+	Motor.C.rotate(+_90GRAUS); //ESQUERDA DO ROBO
 	ladoSensor = Lado.valueOf((this.ladoAtual.ordinal() + 1) % 4);
 	infoPosicao.setLadoLivre(ladoSensor, sensor.getDistance() < DISTANCIA_OBSTACULO);
 
 	//Aponta o sensor para frente novamente
-	Motor.C.rotate(-NOVENTAGRAUS, true);
+	Motor.C.rotate(-_90GRAUS, true);
     }
 
-    public InfoPosicao getPosicaoAtual() {
-	return this.mapa.getInfoPosicao(this.coordenadaAtual);
-    }
-
-    public void moverParaPosicaoNaoVisitada() {
+    /**
+     * Monta um caminho para uma posição desejada para que o robo siga
+     */
+    public void montarCaminhoAteProximaPosicao() {
+	// TODO Auto-generated method stub
 	int[] coordenadaVisinho = this.mapa.getVisinhoNaoVisitado(this.coordenadaAtual);
-	
+
 	//TODO: Fazer isso usando busca em profundidade... deve ficar mais facil
-	if(coordenadaVisinho == null)
-	{
+	if (coordenadaVisinho != null) {
+	    this.caminho = new Caminho();
+	    this.caminho.addPasso(coordenadaVisinho);
+	} else {
 	    List<int[]> coordenadas = this.mapa.getCoordenadasNaoVisitadas();
 	    Caminho caminho = null;
 	    for (int[] coord : coordenadas) {
 		caminho = this.mapa.montarCaminho(this.coordenadaAtual, coord);
-		if(caminho != null)
+		if (caminho != null)
 		    break;
 	    }
-	    if(caminho == null)
-		System.out.println("O mapa está completo");
+	    if (caminho == null)
+		mapaCompleto = true;
 	}
     }
 
-    public boolean mapeamentoEstaCompleto() {
-	//Da pra deixar assim, mas pode ocorre de existir uma posição inacessível
-	return !mapa.existePosicaoNaoVisitada();
+    /**
+     * Move para a proxima posição do caminho
+     */
+    public void moverProximaPosicao() {
+	//TODO Implementar
+	//Da pra utilizar a mesma lógica no trabalho 2
     }
 
+    /**
+     * Verifica se todo o mapa ja foi mapeado
+     * 
+     * @return
+     */
+    public boolean mapeamentoEstaCompleto() {
+	return mapaCompleto;
+    }
 }
