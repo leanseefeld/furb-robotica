@@ -21,6 +21,7 @@ public class Wavefront {
 	this.coordenadaInicial = coordenadaInicial;
 	this.coordenadaFinal = coordenadaFinal;
 	mapaValorado = new int[mapa.getPosicoes().length][mapa.getPosicoes()[0].length];
+	mapaValorado[this.coordenadaInicial[Matriz.LINHA]][this.coordenadaInicial[Matriz.COLUNA]] = -1;
     }
 
     public Caminho gerarCaminho() {
@@ -82,10 +83,10 @@ public class Wavefront {
 
 	if (this.mapaOriginal.isIndicesValidos(celula) && this.mapaOriginal.getInfoPosicao(celula) != null) {
 	    List<int[]> possiveisVizinhos = criarLista( //
-		    new int[] { celula[Matriz.COLUNA] + 1, celula[Matriz.LINHA] }, // 
-		    new int[] { celula[Matriz.COLUNA] - 1, celula[Matriz.LINHA] }, //
-		    new int[] { celula[Matriz.COLUNA], celula[Matriz.LINHA] + 1 }, //
-		    new int[] { celula[Matriz.COLUNA], celula[Matriz.LINHA] - 1 });
+		    new int[] { celula[Matriz.LINHA] + 1, celula[Matriz.COLUNA] }, // 
+		    new int[] { celula[Matriz.LINHA] - 1, celula[Matriz.COLUNA] }, //
+		    new int[] { celula[Matriz.LINHA], celula[Matriz.COLUNA] + 1 }, //
+		    new int[] { celula[Matriz.LINHA], celula[Matriz.COLUNA] - 1 });
 
 	    for (int[] vizinho : possiveisVizinhos) {
 		if (this.mapaOriginal.isIndicesValidos(vizinho) && mapaOriginal.existePassagem(celula, vizinho)) {
@@ -120,7 +121,9 @@ public class Wavefront {
      */
     private void escorrerValores() {
 	int[] celula = this.coordenadaInicial;
+	this.mapaValorado[celula[Matriz.LINHA]][celula[Matriz.COLUNA]] = 1;
 	for (int[] v : acharVizinhosConexos(celula)) {
+	    this.mapaValorado[v[Matriz.LINHA]][v[Matriz.COLUNA]] = 2;
 	    vizinhosPendentes.add(v);
 	}
 
@@ -139,7 +142,7 @@ public class Wavefront {
 
 	// atribuir o valor do menor vizinho + 1
 	int[] menorVizinho = getMenorVizinhoValorado(vizinhos);
-	mapaValorado[celula[Matriz.COLUNA]][celula[Matriz.LINHA]] = valorCelula(menorVizinho) + 1;
+	mapaValorado[celula[Matriz.LINHA]][celula[Matriz.COLUNA]] = valorCelula(menorVizinho) + 1;
 
 	// após atribuir o valor, ir para os próximos vizinhos vazios
 	for (int[] vizinho : vizinhos) {

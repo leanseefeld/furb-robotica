@@ -140,7 +140,8 @@ public class MapaLabirinto {
      */
     public boolean existePassagem(int[] origem, int[] destino) {
 	Lado lado = this.getLado(origem, destino);
-	return this.getInfoPosicao(origem).isLadoLivre(lado);
+	boolean existe = this.getInfoPosicao(origem).isLadoLivre(lado);
+	return existe;
     }
 
     /**
