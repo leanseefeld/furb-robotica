@@ -47,7 +47,7 @@ public class RoboMapeador {
 
 	this.mapa = mapa;
 	this.ladoAtual = ladoAtual;
-	sensor = new UltrasonicSensor(SensorPort.S4);
+	this.sensor = new UltrasonicSensor(SensorPort.S4);
     }
 
     /**
@@ -69,7 +69,7 @@ public class RoboMapeador {
      */
     public void analisarPosicao() {
 	if (mapa.getInfoPosicao(coordenadaAtual) != null) {
-	    //TODO: Apenas para testes... depois remover isso
+	    //Apenas para testes... depois remover isso
 	    throw new UnsupportedOperationException("analisarPosicao não deveria ter sido chamado");
 	}
 
@@ -95,12 +95,12 @@ public class RoboMapeador {
      * Monta um caminho para uma posição desejada para que o robo siga
      */
     public void montarCaminhoAteProximaPosicao() {
-	// TODO Auto-generated method stub
 	int[] coordenadaVisinho = this.mapa.getVisinhoNaoVisitado(this.coordenadaAtual);
 
 	//TODO: Fazer isso usando busca em profundidade... deve ficar mais facil
 	if (coordenadaVisinho != null) {
 	    this.caminho = new Caminho();
+	    this.caminho.addPasso(this.coordenadaAtual);
 	    this.caminho.addPasso(coordenadaVisinho);
 	} else {
 	    List<int[]> coordenadas = this.mapa.getCoordenadasNaoVisitadas();
@@ -113,14 +113,25 @@ public class RoboMapeador {
 	    if (caminho == null)
 		mapaCompleto = true;
 	}
+	caminho.toFirst();
+	//Move um para ignorar a posição atual
+	caminho.nextElement();
     }
 
     /**
      * Move para a proxima posição do caminho
      */
     public void moverProximaPosicao() {
-	//TODO Implementar
-	//Da pra utilizar a mesma lógica no trabalho 2
+	int[] proximaPosicao = null;
+	printPosicaoAtual();
+
+	proximaPosicao = caminho.nextElement();
+	Lado novoSentido =  mapa.getLado(this.coordenadaAtual, proximaPosicao);
+	girar(novoSentido);
+	moverEmFrente();
+	this.ladoAtual = novoSentido;
+	this.coordenadaAtual = proximaPosicao;
+	printPosicaoAtual();
     }
 
     /**
@@ -130,5 +141,52 @@ public class RoboMapeador {
      */
     public boolean mapeamentoEstaCompleto() {
 	return mapaCompleto;
+    }
+
+    /**
+     * Move o robo uma posição para frente
+     */
+    private void moverEmFrente() {
+	System.out.println("Moveu para frente");
+	Motor.A.rotate(PASSO, true);
+	Motor.B.rotate(PASSO);
+    }
+
+    /**
+     * Gira o robo no para o lado desejado
+     * 
+     * @param ladoDestino
+     */
+    private void girar(Lado ladoDestino) {
+	int quantidadeGirar = ladoDestino.ordinal() - this.ladoAtual.ordinal();
+
+	// Se for 3, muda para 1 e muda a direção da rotação
+	// se for 4, fica parado
+	if (quantidadeGirar > 2) {
+	    quantidadeGirar = -(quantidadeGirar % 2);
+	}
+
+	// Obs: Se quantidadeGirar for positiva, irá girar para direita
+	// se for negativa, irá ser para a esquerda
+	Motor.A.rotate((quantidadeGirar * _90GRAUS), true);
+	Motor.B.rotate(-(quantidadeGirar * _90GRAUS));
+
+	if (this.ladoAtual != ladoDestino) {
+	    System.out.print("Novo sentido " + ladoDestino.name());
+	    if (quantidadeGirar > 0) {
+		System.out.println(" - GIROU " + (quantidadeGirar * 90) + "º à direita");
+	    } else {
+		System.out.println(" - GIROU " + (quantidadeGirar * 90 * -1) + "º à esquerda");
+	    }
+	    this.ladoAtual = ladoDestino;
+	}
+    }
+
+    /**
+     * Exibe a posição e o lado atual do robo
+     */
+    public void printPosicaoAtual() {
+	System.out.println("Posicao Atual: Coluna:" + this.coordenadaAtual[0] + " Linha:" + this.coordenadaAtual[1]);
+	System.out.println("Lado Atual: " + this.ladoAtual.name());
     }
 }

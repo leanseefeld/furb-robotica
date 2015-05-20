@@ -17,7 +17,10 @@ public class Caminho implements Enumeration<int[]> {
     }
 
     public void addPasso(int coluna, int linha) {
-	addPasso(new int[] { coluna, linha });
+	int[] coordenada = new int[2];
+	coordenada[Matriz.COLUNA] = coluna;
+	coordenada[Matriz.LINHA] = linha;
+	addPasso(coordenada);
     }
 
     public void addPasso(int[] posicao) {
@@ -32,7 +35,7 @@ public class Caminho implements Enumeration<int[]> {
     public String toString() {
 	StringBuilder saida = new StringBuilder();
 	for (int[] is : this.caminho) {
-	    saida.append("C:").append(is[0]).append("L:").append(is[1]).append(' ');
+	    saida.append("C:").append(is[Matriz.COLUNA]).append("L:").append(is[Matriz.LINHA]).append(' ');
 	}
 	return saida.substring(0, saida.length() - 1);
     }
