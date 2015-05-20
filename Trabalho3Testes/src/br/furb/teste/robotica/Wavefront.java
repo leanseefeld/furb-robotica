@@ -5,6 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Queue;
 import br.furb.robotica.Caminho;
+import br.furb.robotica.InfoPosicao;
 import br.furb.robotica.Matriz;
 
 public class Wavefront {
@@ -15,18 +16,18 @@ public class Wavefront {
     private int[][] mapaValorado;
     private Queue<int[]> vizinhosPendentes = new LinkedList<int[]>();
 
-    private final int[] coordenadaInicial;
-    private final int[] coordenadaFinal;
+    private final int[] coordenadaAtual;
+    private final int[] coordenadaObjetivo;
 
-    public Wavefront(MapaLabirinto mapa, int[] coordenadaInicial, int[] coordenadaFinal) {
+    public Wavefront(MapaLabirinto mapa, int[] coordenadaAtual, int[] coordenadaObjetivo) {
 	this.mapaOriginal = mapa;
-	this.coordenadaInicial = coordenadaInicial;
-	this.coordenadaFinal = coordenadaFinal;
+	this.coordenadaAtual = coordenadaAtual;
+	this.coordenadaObjetivo = coordenadaObjetivo;
 	mapaValorado = new int[mapa.getPosicoes().length][mapa.getPosicoes()[0].length];
     }
 
     public Caminho gerarCaminho() {
-	return gerarCaminho(coordenadaInicial);
+	return gerarCaminho(coordenadaAtual);
     }
 
     /**
@@ -39,23 +40,25 @@ public class Wavefront {
     public Caminho gerarCaminho(int[] origem) {
 	valorarMapa();
 
+	this.imprimirCenario(this.mapaValorado);
+
 	Caminho caminho = new Caminho();
 
 	int[] passo = origem.clone();
 	caminho.addPasso(passo);
 	do {
-	    int[][] vizinhos = acharVizinhosConexos(passo);
+	    int[][] vizinhos = acharVizinhosExplorados(passo, true);
 	    passo = getMenorVizinhoValorado(vizinhos);
 	    caminho.addPasso(passo);
-	} while (!isCelulaDestino(passo));
+	} while (!isCelulaAtual(passo));
 
 	caminho.imprimeCaminho();
 	return caminho;
     }
 
-    private boolean isCelulaDestino(int[] passo) {
-	return passo[Matriz.COLUNA] == this.coordenadaFinal[Matriz.COLUNA]
-		&& passo[Matriz.LINHA] == this.coordenadaFinal[Matriz.LINHA];
+    private boolean isCelulaAtual(int[] passo) {
+	return passo[Matriz.COLUNA] == this.coordenadaAtual[Matriz.COLUNA]
+		&& passo[Matriz.LINHA] == this.coordenadaAtual[Matriz.LINHA];
     }
 
     private int[] getMenorVizinhoValorado(int[][] vizinhos) {
@@ -73,25 +76,35 @@ public class Wavefront {
     }
 
     /**
-     * Retorna todos os vizinhos que não sejam obstáculos.
+     * Retorna todos os vizinhos que esta célula tenha ligação. <br>
      * 
      * @param celula
      *            celula cujo os vizinhos se deseja saber.
-     * @return vizinhos que não sejam obstáculos.
+     * @param apenasConexos
+     *            Se true, busca apenas as células conexas(que possuem passagem entre si) <br>
+     *            <span style="color:red">Não funciona se esta celula não foi explorada</span>
+     * @return vizinhos conexos
      */
-    private int[][] acharVizinhosConexos(int[] celula) {
+    private int[][] acharVizinhosExplorados(int[] celula, boolean apenasConexos) {
 	List<int[]> vizinhos = new ArrayList<>(4);
 
-	if (this.mapaOriginal.isIndicesValidos(celula) && this.mapaOriginal.getInfoPosicao(celula) != null) {
-	    List<int[]> possiveisVizinhos = criarLista( //
-		    new int[] { celula[Matriz.LINHA] + 1, celula[Matriz.COLUNA] }, // 
-		    new int[] { celula[Matriz.LINHA] - 1, celula[Matriz.COLUNA] }, //
-		    new int[] { celula[Matriz.LINHA], celula[Matriz.COLUNA] + 1 }, //
-		    new int[] { celula[Matriz.LINHA], celula[Matriz.COLUNA] - 1 });
+	if (!this.mapaOriginal.isIndicesValidos(celula)
+		|| (apenasConexos && this.mapaOriginal.getInfoPosicao(celula) == null)) {
+	    return new int[0][2];
+	}
 
-	    for (int[] vizinho : possiveisVizinhos) {
-		if (this.mapaOriginal.isIndicesValidos(vizinho) && mapaOriginal.existePassagem(celula, vizinho)) {
-		    vizinhos.add(vizinho);
+	List<int[]> possiveisVizinhos = criarLista( //
+		new int[] { celula[Matriz.LINHA] + 1, celula[Matriz.COLUNA] }, // 
+		new int[] { celula[Matriz.LINHA] - 1, celula[Matriz.COLUNA] }, //
+		new int[] { celula[Matriz.LINHA], celula[Matriz.COLUNA] + 1 }, //
+		new int[] { celula[Matriz.LINHA], celula[Matriz.COLUNA] - 1 });
+
+	for (int[] vizinho : possiveisVizinhos) {
+	    if (this.mapaOriginal.isIndicesValidos(vizinho)) {
+		if (mapaOriginal.getInfoPosicao(vizinho) != null) {
+		    if (!apenasConexos || mapaOriginal.existePassagem(celula, vizinho)) {
+			vizinhos.add(vizinho);
+		    }
 		}
 	    }
 	}
@@ -103,7 +116,7 @@ public class Wavefront {
     }
 
     protected void valorarMapa() {
-	int[] objetivo = this.coordenadaFinal;
+	int[] objetivo = this.coordenadaObjetivo;
 	if (objetivo == null) {
 	    throw new IllegalStateException("objetivo não está no mapa");
 	}
@@ -121,22 +134,30 @@ public class Wavefront {
      * Faz com que os valores do mapa valorado "escorram" pras células ainda não valoradas.
      */
     private void escorrerValores() {
-	int[] celula = this.coordenadaInicial;
-	this.mapaValorado[celula[Matriz.LINHA]][celula[Matriz.COLUNA]] = 1;
-	for (int[] v : acharVizinhosConexos(celula)) {
-	    this.mapaValorado[v[Matriz.LINHA]][v[Matriz.COLUNA]] = 2;
-	    vizinhosPendentes.add(v);
+	int[] celulaObjetivo = this.coordenadaObjetivo;
+	System.out.println("C: " + celulaObjetivo[Matriz.LINHA] + "  L:" + celulaObjetivo[Matriz.COLUNA]
+		+ " - Objetivo");
+	this.mapaValorado[celulaObjetivo[Matriz.LINHA]][celulaObjetivo[Matriz.COLUNA]] = 1;
+	int[][] visinhosExplorados = acharVizinhosExplorados(celulaObjetivo, false);
+	for (int[] v : visinhosExplorados) {
+	    if (this.mapaOriginal.existePassagem(v, celulaObjetivo)) {
+		this.mapaValorado[v[Matriz.LINHA]][v[Matriz.COLUNA]] = 2;
+		vizinhosPendentes.add(v);
+	    }
 	}
 
 	while (!vizinhosPendentes.isEmpty()) {
 	    int[] vizinho = (int[]) vizinhosPendentes.poll();
+	    this.imprimirCenario(this.mapaValorado);
+	    System.out.println("C: " + vizinho[Matriz.LINHA] + "  L:" + vizinho[Matriz.COLUNA]);
 	    escorrerValores(vizinho);
 	}
+	this.imprimirCenario(this.mapaValorado);
     }
 
     private void escorrerValores(int[] celula) {
 	// se não tem vizinhos, ignora
-	int[][] vizinhos = acharVizinhosConexos(celula);
+	int[][] vizinhos = acharVizinhosExplorados(celula, true);
 	if (vizinhos.length == 0) {
 	    return;
 	}
@@ -159,5 +180,25 @@ public class Wavefront {
 	    ret.add(cell);
 	}
 	return ret;
+    }
+
+    public void imprimirCenario(int[][] mapa) {
+	for (int lin = 0; lin < mapa.length; lin++) {
+	    for (int col = 0; col < mapa[lin].length; col++) {
+		System.out.print(celulaToString(mapa[lin][col],
+			this.mapaOriginal.getInfoPosicao(new int[] { lin, col })));
+	    }
+	    System.out.println();
+	}
+    }
+
+    private String celulaToString(int valor, InfoPosicao posicao) {
+	String saida = "  -  ";
+	if (posicao == null) {
+	    saida = "  ?" + valor + " ";
+	} else {
+	    saida = "  " + valor + "  ";
+	}
+	return saida;
     }
 }

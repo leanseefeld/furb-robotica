@@ -13,30 +13,30 @@ public class Main {
 
     public static void main(String[] args) {
 	caminhosNaoVisitados = new LinkedList<int[]>();
-	System.out.println("Trabalho3Testes iniciou");
+	System.out.println("INICIO - Trabalho3Testes");
 	MapaLabirinto mapa = new MapaLabirinto();
 	mapa.setCoordenadaDestino(0, 0);
 	mapa.setCoordenadaOrigem(3, 3);
 
 	InfoPosicao[][] posicoes = mapa.getPosicoes();
-	posicoes[0][0] = new InfoPosicao(Lado.ATRAS); //Destino
-	posicoes[1][0] = new InfoPosicao(Lado.ATRAS, Lado.FRENTE);
-	posicoes[2][0] = new InfoPosicao(Lado.ATRAS, Lado.FRENTE);
-	posicoes[3][0] = new InfoPosicao(Lado.FRENTE, Lado.DIREITA);
-	caminhosNaoVisitados.add(new int[] { 3, 2 });
-	posicoes[3][1] = new InfoPosicao(Lado.ESQUERDA, Lado.FRENTE, Lado.ESQUERDA);
-	posicoes[2][1] = new InfoPosicao(Lado.FRENTE, Lado.ATRAS);
-	caminhosNaoVisitados.add(new int[] { 0, 1 });
-	posicoes[1][1] = new InfoPosicao(Lado.FRENTE, Lado.ATRAS, Lado.DIREITA);
-	caminhosNaoVisitados.add(new int[] { 2, 2 });
-	posicoes[1][2] = new InfoPosicao(Lado.FRENTE, Lado.ATRAS, Lado.ESQUERDA);
-	posicoes[0][2] = new InfoPosicao(Lado.ATRAS, Lado.DIREITA);
-	posicoes[0][3] = new InfoPosicao(Lado.ESQUERDA, Lado.ATRAS);
-	posicoes[1][3] = new InfoPosicao(Lado.FRENTE, Lado.ATRAS);
-	posicoes[2][3] = new InfoPosicao(Lado.FRENTE, Lado.ATRAS);
 	posicoes[3][3] = new InfoPosicao(Lado.FRENTE, Lado.ATRAS); //Origem
-
-	int[] coordenadaAtualDoRobo = new int[] { 0, 0 }; //Destino
+	posicoes[2][3] = new InfoPosicao(Lado.FRENTE, Lado.ATRAS);
+	posicoes[1][3] = new InfoPosicao(Lado.FRENTE, Lado.ATRAS);
+	posicoes[0][3] = new InfoPosicao(Lado.ESQUERDA, Lado.ATRAS);
+	posicoes[0][2] = new InfoPosicao(Lado.ATRAS, Lado.DIREITA);
+	posicoes[1][2] = new InfoPosicao(Lado.FRENTE, Lado.ATRAS, Lado.ESQUERDA);
+	caminhosNaoVisitados.add(new int[] { 2, 2 });
+	posicoes[1][1] = new InfoPosicao(Lado.FRENTE, Lado.ATRAS, Lado.DIREITA);
+	caminhosNaoVisitados.add(new int[] { 0, 1 });
+	posicoes[2][1] = new InfoPosicao(Lado.FRENTE, Lado.ATRAS);
+	posicoes[3][1] = new InfoPosicao(Lado.ESQUERDA, Lado.FRENTE, Lado.ESQUERDA);
+	caminhosNaoVisitados.add(new int[] { 3, 2 });
+	posicoes[3][0] = new InfoPosicao(Lado.FRENTE, Lado.DIREITA);
+	posicoes[2][0] = new InfoPosicao(Lado.ATRAS, Lado.FRENTE);
+	posicoes[1][0] = new InfoPosicao(Lado.ATRAS, Lado.FRENTE);
+	posicoes[0][0] = new InfoPosicao(Lado.ATRAS);
+	
+	int[] coordenadaAtualDoRobo = new int[] { 0, 0 }; //Coordenada do robo
 	mapa.getCoordenadasNaoVisitadas();
 	Caminho caminho = montarCaminhoAteProximaPosicao(mapa, coordenadaAtualDoRobo);
 	System.out.println(caminho.toString());
@@ -56,11 +56,16 @@ public class Main {
 		caminhosNaoVisitados.add(coordenadaVisinho.get(i));
 	    }
 	} else {
-	    if (!caminhosNaoVisitados.isEmpty()) {
-		int[] coord = caminhosNaoVisitados.peek();
-		caminho = mapa.montarCaminho(coordenadaAtual, coord);
-	    } else {
-		System.out.println("Mapa ja foi totalmente explorado");
+	    int[] coord = null;
+	    while ((coord = caminhosNaoVisitados.poll()) != null) {
+		if (mapa.getInfoPosicao(coord) == null) {
+		    caminho = mapa.montarCaminho(coordenadaAtual, coord);
+		    break;
+		}
+	    }
+
+	    if (caminho == null) {
+		System.out.println("Nenhum caminho foi encontrado pois todos os locais do mapa ja foram explorados");
 		return null;
 	    }
 	}

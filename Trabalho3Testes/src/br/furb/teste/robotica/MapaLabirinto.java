@@ -61,7 +61,7 @@ public class MapaLabirinto {
     public List<int[]> getVisinhosNaoVisitado(int[] coordenadaAtual) {
 	InfoPosicao infoPosicaoAtual = getInfoPosicao(coordenadaAtual);
 	List<int[]> coords = new ArrayList<int[]>();
-	
+
 	if (infoPosicaoAtual.isLadoLivre(Lado.DIREITA)) {
 	    int[] coord = coordenadaAtual.clone();
 	    coord[Matriz.COLUNA]++;
