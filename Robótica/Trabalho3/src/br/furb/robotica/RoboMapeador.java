@@ -1,6 +1,7 @@
 package br.furb.robotica;
 
 import java.util.List;
+import java.util.Queue;
 import lejos.nxt.Button;
 import lejos.nxt.Motor;
 import lejos.nxt.SensorPort;
@@ -40,6 +41,7 @@ public class RoboMapeador {
     private UltrasonicSensor sensor;
     private Caminho caminho;
     private boolean mapaCompleto;
+    private Queue<int[]> caminhosNaoVisitados;
 
     public RoboMapeador(MapaLabirinto mapa, Lado ladoAtual) {
 	Motor.A.setSpeed(VELOCIDADE);
@@ -47,6 +49,7 @@ public class RoboMapeador {
 
 	this.mapa = mapa;
 	this.ladoAtual = ladoAtual;
+	this.caminhosNaoVisitados = new Queue<int[]>();
 	this.sensor = new UltrasonicSensor(SensorPort.S4);
     }
 
@@ -95,23 +98,22 @@ public class RoboMapeador {
      * Monta um caminho para uma posição desejada para que o robo siga
      */
     public void montarCaminhoAteProximaPosicao() {
-	int[] coordenadaVisinho = this.mapa.getVisinhoNaoVisitado(this.coordenadaAtual);
+	List<int[]> coordenadaVisinho = this.mapa.getVisinhosNaoVisitado(this.coordenadaAtual);
 
-	//TODO: Fazer isso usando busca em profundidade... deve ficar mais facil
-	if (coordenadaVisinho != null) {
-	    this.caminho = new Caminho();
-	    this.caminho.addPasso(this.coordenadaAtual);
-	    this.caminho.addPasso(coordenadaVisinho);
-	} else {
-	    List<int[]> coordenadas = this.mapa.getCoordenadasNaoVisitadas();
-	    Caminho caminho = null;
-	    for (int[] coord : coordenadas) {
-		caminho = this.mapa.montarCaminho(this.coordenadaAtual, coord);
-		if (caminho != null)
-		    break;
+	if (!coordenadaVisinho.isEmpty()) {
+	    caminho = new Caminho();
+	    caminho.addPasso(coordenadaAtual);
+	    caminho.addPasso(coordenadaVisinho.get(0));
+	    for (int i = 1; i < coordenadaVisinho.size(); i++) {
+		caminhosNaoVisitados.push(coordenadaVisinho.get(0));
 	    }
-	    if (caminho == null)
-		mapaCompleto = true;
+	} else {
+	    if (!caminhosNaoVisitados.isEmpty()) {
+		int[] coord = (int[]) caminhosNaoVisitados.pop();
+		caminho = mapa.montarCaminho(coordenadaAtual, coord);
+	    } else {
+		this.mapaCompleto = true;
+	    }
 	}
 	caminho.toFirst();
 	//Move um para ignorar a posição atual
@@ -126,7 +128,7 @@ public class RoboMapeador {
 	printPosicaoAtual();
 
 	proximaPosicao = caminho.nextElement();
-	Lado novoSentido =  mapa.getLado(this.coordenadaAtual, proximaPosicao);
+	Lado novoSentido = mapa.getLado(this.coordenadaAtual, proximaPosicao);
 	girar(novoSentido);
 	moverEmFrente();
 	this.ladoAtual = novoSentido;

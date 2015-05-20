@@ -21,7 +21,6 @@ public class Wavefront {
 	this.coordenadaInicial = coordenadaInicial;
 	this.coordenadaFinal = coordenadaFinal;
 	mapaValorado = new int[mapa.getPosicoes().length][mapa.getPosicoes()[0].length];
-	mapaValorado[this.coordenadaInicial[Matriz.LINHA]][this.coordenadaInicial[Matriz.COLUNA]] = -1;
     }
 
     public Caminho gerarCaminho() {
@@ -98,7 +97,7 @@ public class Wavefront {
     }
 
     private int valorCelula(int... celula) {
-	return mapaValorado[celula[Matriz.COLUNA]][celula[Matriz.LINHA]];
+	return mapaValorado[celula[Matriz.LINHA]][celula[Matriz.COLUNA]];
     }
 
     protected void valorarMapa() {
