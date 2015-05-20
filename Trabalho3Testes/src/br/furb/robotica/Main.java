@@ -30,6 +30,7 @@ public class Main {
 	Caminho caminho = montarCaminhoAteProximaPosicao(mapa, coordenadaAtualDoRobo);
 	System.out.println(caminho.toString());
 	
+	System.out.println("FIM");
     }
 
     public static Caminho montarCaminhoAteProximaPosicao(MapaLabirinto mapa, int[] coordenadaAtual) {

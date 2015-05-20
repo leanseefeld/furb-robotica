@@ -20,6 +20,7 @@ public class Wavefront {
 	this.mapaOriginal = mapa;
 	this.coordenadaInicial = coordenadaInicial;
 	this.coordenadaFinal = coordenadaFinal;
+	mapaValorado = new int[mapa.getPosicoes().length][mapa.getPosicoes()[0].length];
     }
 
     public Caminho gerarCaminho() {
@@ -142,7 +143,9 @@ public class Wavefront {
 
 	// após atribuir o valor, ir para os próximos vizinhos vazios
 	for (int[] vizinho : vizinhos) {
-	    vizinhosPendentes.add(vizinho);
+	    if (valorCelula(vizinho) == 0) {
+		vizinhosPendentes.add(vizinho);
+	    }
 	}
     }
 
