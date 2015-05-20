@@ -19,6 +19,7 @@ public class Wavefront {
 	this.mapaOriginal = mapa;
 	this.coordenadaInicial = coordenadaInicial;
 	this.coordenadaFinal = coordenadaFinal;
+	mapaValorado = new int[mapa.getPosicoes().length][mapa.getPosicoes()[0].length];
     }
 
     public Caminho gerarCaminho() {
@@ -50,7 +51,8 @@ public class Wavefront {
     }
 
     private boolean isCelulaDestino(int[] passo) {
-	return passo[Matriz.COLUNA] == this.coordenadaFinal[Matriz.COLUNA] && passo[Matriz.LINHA] == this.coordenadaFinal[Matriz.LINHA];
+	return passo[Matriz.COLUNA] == this.coordenadaFinal[Matriz.COLUNA]
+		&& passo[Matriz.LINHA] == this.coordenadaFinal[Matriz.LINHA];
     }
 
     private int[] getMenorVizinhoValorado(int[][] vizinhos) {
@@ -76,23 +78,25 @@ public class Wavefront {
      */
     private int[][] acharVizinhosConexos(int[] celula) {
 	List<int[]> vizinhos = new ArrayList<>(4);
-	List<int[]> possiveisVizinhos = criarLista( //
-		new int[] { celula[Matriz.COLUNA] + 1, celula[Matriz.LINHA] }, // 
-		new int[] { celula[Matriz.COLUNA] - 1, celula[Matriz.LINHA] }, //
-		new int[] { celula[Matriz.COLUNA], celula[Matriz.LINHA] + 1 }, //
-		new int[] { celula[Matriz.COLUNA], celula[Matriz.LINHA] - 1 });
 
-	for (int[] vizinho : possiveisVizinhos) {
-	    if (this.mapaOriginal.isIndicesValidos(vizinho) && mapaOriginal.existePassagem(celula, vizinho)) {
-		vizinhos.add(vizinho);
+	if (this.mapaOriginal.isIndicesValidos(celula) && this.mapaOriginal.getInfoPosicao(celula) != null) {
+	    List<int[]> possiveisVizinhos = criarLista( //
+		    new int[] { celula[Matriz.LINHA] + 1, celula[Matriz.COLUNA] }, // 
+		    new int[] { celula[Matriz.LINHA] - 1, celula[Matriz.COLUNA] }, //
+		    new int[] { celula[Matriz.LINHA], celula[Matriz.COLUNA] + 1 }, //
+		    new int[] { celula[Matriz.LINHA], celula[Matriz.COLUNA] - 1 });
+
+	    for (int[] vizinho : possiveisVizinhos) {
+		if (this.mapaOriginal.isIndicesValidos(vizinho) && mapaOriginal.existePassagem(celula, vizinho)) {
+		    vizinhos.add(vizinho);
+		}
 	    }
 	}
-
 	return vizinhos.toArray(new int[vizinhos.size()][2]);
     }
 
     private int valorCelula(int... celula) {
-	return mapaValorado[celula[Matriz.COLUNA]][celula[Matriz.LINHA]];
+	return mapaValorado[celula[Matriz.LINHA]][celula[Matriz.COLUNA]];
     }
 
     protected void valorarMapa() {
@@ -115,7 +119,9 @@ public class Wavefront {
      */
     private void escorrerValores() {
 	int[] celula = this.coordenadaInicial;
+	this.mapaValorado[celula[Matriz.LINHA]][celula[Matriz.COLUNA]] = 1;
 	for (int[] v : acharVizinhosConexos(celula)) {
+	    this.mapaValorado[v[Matriz.LINHA]][v[Matriz.COLUNA]] = 2;
 	    vizinhosPendentes.push(v);
 	}
 
@@ -134,11 +140,13 @@ public class Wavefront {
 
 	// atribuir o valor do menor vizinho + 1
 	int[] menorVizinho = getMenorVizinhoValorado(vizinhos);
-	mapaValorado[celula[Matriz.COLUNA]][celula[Matriz.LINHA]] = valorCelula(menorVizinho) + 1;
+	mapaValorado[celula[Matriz.LINHA]][celula[Matriz.COLUNA]] = valorCelula(menorVizinho) + 1;
 
 	// após atribuir o valor, ir para os próximos vizinhos vazios
 	for (int[] vizinho : vizinhos) {
-	    vizinhosPendentes.push(vizinho);
+	    if (valorCelula(vizinho) == 0) {
+		vizinhosPendentes.push(vizinho);
+	    }
 	}
     }
 

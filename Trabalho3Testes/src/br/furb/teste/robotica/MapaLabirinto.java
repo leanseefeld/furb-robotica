@@ -1,7 +1,11 @@
-package br.furb.robotica;
+package br.furb.teste.robotica;
 
 import java.util.ArrayList;
 import java.util.List;
+import br.furb.robotica.Caminho;
+import br.furb.robotica.InfoPosicao;
+import br.furb.robotica.Lado;
+import br.furb.robotica.Matriz;
 
 public class MapaLabirinto {
 

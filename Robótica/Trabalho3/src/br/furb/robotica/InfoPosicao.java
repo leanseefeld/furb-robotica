@@ -8,11 +8,6 @@ public class InfoPosicao {
 	lados = new EstadoLado[4];
     }
 
-    public InfoPosicao(Lado origem) {
-	this();
-	setLadoLivre(origem.getOposto(), true);
-    }
-
     public InfoPosicao(Lado... ladosLivres) {
 	this();
 	for (int i = 0; i < ladosLivres.length; i++) {

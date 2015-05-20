@@ -45,55 +45,56 @@ public class MapaLabirinto {
     }
 
     public boolean coordenadaEhValida(int[] coord) {
-	if (coord[Matriz.LINHA] >= posicoes.length) {
+	if (coord[Matriz.LINHA] < 0 || coord[Matriz.COLUNA] < 0)
 	    return false;
-	}
-	if (coord[Matriz.COLUNA] >= posicoes[coord[Matriz.LINHA]].length) {
+	if (coord[Matriz.LINHA] >= posicoes.length)
 	    return false;
-	}
+	if (coord[Matriz.COLUNA] >= posicoes[coord[Matriz.LINHA]].length)
+	    return false;
 	return true;
     }
 
     public List<int[]> getVisinhosNaoVisitado(int[] coordenadaAtual) {
- 	InfoPosicao infoPosicaoAtual = getInfoPosicao(coordenadaAtual);
- 	List<int[]> coords = new ArrayList<int[]>();
- 	
- 	if (infoPosicaoAtual.isLadoLivre(Lado.DIREITA)) {
- 	    int[] coord = coordenadaAtual.clone();
- 	    coord[Matriz.COLUNA]++;
- 	    if (coordenadaEhValida(coord) && getInfoPosicao(coord) == null) {
- 		coords.add(coord);
- 	    }
- 	} else if (infoPosicaoAtual.isLadoLivre(Lado.ESQUERDA)) {
- 	    int[] coord = coordenadaAtual.clone();
- 	    coord[Matriz.COLUNA]--;
- 	    if (coordenadaEhValida(coord) && getInfoPosicao(coord) == null) {
- 		coords.add(coord);
- 	    }
- 	} else if (infoPosicaoAtual.isLadoLivre(Lado.FRENTE)) {
- 	    int[] coord = coordenadaAtual.clone();
- 	    coord[Matriz.LINHA]--;
- 	    if (coordenadaEhValida(coord) && getInfoPosicao(coord) == null) {
- 		coords.add(coord);
- 	    }
- 	} else if (infoPosicaoAtual.isLadoLivre(Lado.ATRAS)) {
- 	    int[] coord = coordenadaAtual.clone();
- 	    coord[Matriz.LINHA]++;
- 	    if (coordenadaEhValida(coord) && getInfoPosicao(coord) == null) {
- 		coords.add(coord);
- 	    }
- 	}
- 	return coords;
-     }
+	InfoPosicao infoPosicaoAtual = getInfoPosicao(coordenadaAtual);
+	List<int[]> coords = new ArrayList<int[]>();
+	
+	if (infoPosicaoAtual.isLadoLivre(Lado.DIREITA)) {
+	    int[] coord = coordenadaAtual.clone();
+	    coord[Matriz.COLUNA]++;
+	    if (coordenadaEhValida(coord) && getInfoPosicao(coord) == null) {
+		coords.add(coord);
+	    }
+	} else if (infoPosicaoAtual.isLadoLivre(Lado.ESQUERDA)) {
+	    int[] coord = coordenadaAtual.clone();
+	    coord[Matriz.COLUNA]--;
+	    if (coordenadaEhValida(coord) && getInfoPosicao(coord) == null) {
+		coords.add(coord);
+	    }
+	} else if (infoPosicaoAtual.isLadoLivre(Lado.FRENTE)) {
+	    int[] coord = coordenadaAtual.clone();
+	    coord[Matriz.LINHA]--;
+	    if (coordenadaEhValida(coord) && getInfoPosicao(coord) == null) {
+		coords.add(coord);
+	    }
+	} else if (infoPosicaoAtual.isLadoLivre(Lado.ATRAS)) {
+	    int[] coord = coordenadaAtual.clone();
+	    coord[Matriz.LINHA]++;
+	    if (coordenadaEhValida(coord) && getInfoPosicao(coord) == null) {
+		coords.add(coord);
+	    }
+	}
+	return coords;
+    }
 
     public List<int[]> getCoordenadasNaoVisitadas() {
 	List<int[]> naoVisitadas = new ArrayList<int[]>();
 	for (int lin = 0; lin < this.posicoes.length; lin++) {
 	    for (int col = 0; col < this.posicoes[lin].length; col++) {
-		if (this.posicoes == null) {
+		if (this.posicoes[lin][col] == null) {
 		    int[] coordenada = new int[2];
 		    coordenada[Matriz.LINHA] = lin;
 		    coordenada[Matriz.COLUNA] = col;
+		    naoVisitadas.add(coordenada);
 		}
 	    }
 	}
@@ -140,16 +141,22 @@ public class MapaLabirinto {
      */
     public boolean existePassagem(int[] origem, int[] destino) {
 	Lado lado = this.getLado(origem, destino);
-	return this.getInfoPosicao(origem).isLadoLivre(lado);
+	boolean existe = this.getInfoPosicao(origem).isLadoLivre(lado);
+	return existe;
     }
 
     /**
      * Verifica se a coordenada destá dentro da matriz
+     * 
      * @param coordenada
      * @return
      */
     public boolean isIndicesValidos(int[] coordenada) {
 	return coordenada[Matriz.COLUNA] < this.posicoes.length && coordenada[Matriz.LINHA] < this.posicoes[0].length // 
 		&& coordenada[Matriz.COLUNA] >= 0 && coordenada[Matriz.LINHA] >= 0;
+    }
+
+    public InfoPosicao[][] getPosicoes() {
+	return this.posicoes;
     }
 }
