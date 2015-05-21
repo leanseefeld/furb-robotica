@@ -43,22 +43,49 @@ public class Wavefront {
 	this.imprimirCenario(this.mapaValorado);
 
 	Caminho caminho = new Caminho();
-
+	boolean fim = false;
 	int[] passo = origem.clone();
 	caminho.addPasso(passo);
+	print(passo);
 	do {
-	    int[][] vizinhos = acharVizinhosExplorados(passo, true);
-	    passo = getMenorVizinhoValorado(vizinhos);
-	    caminho.addPasso(passo);
-	} while (!isCelulaAtual(passo));
+	    int[] objetivo = getProcuraObjetivoVisinho(passo);
+	    if (objetivo != null) {
+		fim = true;
+		caminho.addPasso(objetivo);
+		print(objetivo);
+	    } else {
+		int[][] vizinhos = acharVizinhosExplorados(passo, true);
+		passo = getMenorVizinhoValorado(vizinhos);
+		caminho.addPasso(passo);
+		print(passo);
+	    }
+	} while (!fim);
 
 	caminho.imprimeCaminho();
 	return caminho;
     }
 
-    private boolean isCelulaAtual(int[] passo) {
-	return passo[Matriz.COLUNA] == this.coordenadaAtual[Matriz.COLUNA]
-		&& passo[Matriz.LINHA] == this.coordenadaAtual[Matriz.LINHA];
+    public void print(int[] objetivo) {
+	System.out.println(objetivo[Matriz.COLUNA] + "  " + objetivo[Matriz.LINHA]);
+    }
+
+    /**
+     * Procura se algum dos visinhos é o objetivo e se encontrar retorna o mesmo
+     * 
+     * @param celula
+     * @return Coordenadad objetivo
+     */
+    private int[] getProcuraObjetivoVisinho(int[] celula) {
+	for (int[] is : getTodosVizinhos(celula)) {
+	    if (this.mapaOriginal.isIndicesValidos(is)) {
+		if (this.mapaOriginal.comparaCooredenadas(is, this.coordenadaObjetivo)) {
+		    if (this.mapaOriginal.existePassagem(celula, is)) {
+			return is;
+		    }
+		}
+	    }
+	}
+	return null;
     }
 
     private int[] getMenorVizinhoValorado(int[][] vizinhos) {
@@ -67,7 +94,7 @@ public class Wavefront {
 	for (int i = 1; i < vizinhos.length; i++) {
 	    int[] vizinho = vizinhos[i];
 	    int valor = valorCelula(vizinho);
-	    if (menorValor < 2 || valor >= 2 && valor < menorValor) {
+	    if (menorValor < 1 || valor >= 1 && valor < menorValor) {
 		menor = vizinho;
 		menorValor = valorCelula(vizinho);
 	    }
@@ -93,11 +120,7 @@ public class Wavefront {
 	    return new int[0][2];
 	}
 
-	List<int[]> possiveisVizinhos = criarLista( //
-		new int[] { celula[Matriz.LINHA] + 1, celula[Matriz.COLUNA] }, // 
-		new int[] { celula[Matriz.LINHA] - 1, celula[Matriz.COLUNA] }, //
-		new int[] { celula[Matriz.LINHA], celula[Matriz.COLUNA] + 1 }, //
-		new int[] { celula[Matriz.LINHA], celula[Matriz.COLUNA] - 1 });
+	List<int[]> possiveisVizinhos = getTodosVizinhos(celula);
 
 	for (int[] vizinho : possiveisVizinhos) {
 	    if (this.mapaOriginal.isIndicesValidos(vizinho)) {
@@ -109,6 +132,15 @@ public class Wavefront {
 	    }
 	}
 	return vizinhos.toArray(new int[vizinhos.size()][2]);
+    }
+
+    public List<int[]> getTodosVizinhos(int[] celula) {
+	List<int[]> possiveisVizinhos = criarLista( //
+		new int[] { celula[Matriz.LINHA] + 1, celula[Matriz.COLUNA] }, // 
+		new int[] { celula[Matriz.LINHA] - 1, celula[Matriz.COLUNA] }, //
+		new int[] { celula[Matriz.LINHA], celula[Matriz.COLUNA] + 1 }, //
+		new int[] { celula[Matriz.LINHA], celula[Matriz.COLUNA] - 1 });
+	return possiveisVizinhos;
     }
 
     private int valorCelula(int... celula) {

@@ -2,6 +2,10 @@ package br.furb.robotica;
 
 import java.util.ArrayList;
 import java.util.List;
+import br.furb.robotica.Caminho;
+import br.furb.robotica.InfoPosicao;
+import br.furb.robotica.Lado;
+import br.furb.robotica.Matriz;
 
 public class MapaLabirinto {
 
@@ -57,7 +61,7 @@ public class MapaLabirinto {
     public List<int[]> getVisinhosNaoVisitado(int[] coordenadaAtual) {
 	InfoPosicao infoPosicaoAtual = getInfoPosicao(coordenadaAtual);
 	List<int[]> coords = new ArrayList<int[]>();
-	
+
 	if (infoPosicaoAtual.isLadoLivre(Lado.DIREITA)) {
 	    int[] coord = coordenadaAtual.clone();
 	    coord[Matriz.COLUNA]++;
@@ -158,5 +162,9 @@ public class MapaLabirinto {
 
     public InfoPosicao[][] getPosicoes() {
 	return this.posicoes;
+    }
+    
+    public boolean comparaCooredenadas(int[] a, int[] b) {
+	return a[Matriz.COLUNA] == b[Matriz.COLUNA] && a[Matriz.LINHA] == b[Matriz.LINHA];
     }
 }

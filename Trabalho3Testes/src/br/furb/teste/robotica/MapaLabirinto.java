@@ -163,4 +163,8 @@ public class MapaLabirinto {
     public InfoPosicao[][] getPosicoes() {
 	return this.posicoes;
     }
+    
+    public boolean comparaCooredenadas(int[] a, int[] b) {
+	return a[Matriz.COLUNA] == b[Matriz.COLUNA] && a[Matriz.LINHA] == b[Matriz.LINHA];
+    }
 }
