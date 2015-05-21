@@ -6,6 +6,8 @@ import java.util.Queue;
 import br.furb.robotica.Caminho;
 import br.furb.robotica.InfoPosicao;
 import br.furb.robotica.Lado;
+import br.furb.robotica.MapaLabirinto;
+import br.furb.robotica.MinhaQueue;
 
 public class Main {
 
@@ -59,7 +61,7 @@ public class Main {
 	    int[] coord = null;
 	    while ((coord = caminhosNaoVisitados.poll()) != null) {
 		if (mapa.getInfoPosicao(coord) == null) {
-		    caminho = mapa.montarCaminho(coordenadaAtual, coord);
+		    caminho = mapa.montarCaminho(coordenadaAtual, coord, new MinhaLinkedList<int[]>());
 		    break;
 		}
 	    }

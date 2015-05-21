@@ -110,7 +110,7 @@ public class RoboMapeador {
 	} else {
 	    if (!caminhosNaoVisitados.isEmpty()) {
 		int[] coord = (int[]) caminhosNaoVisitados.pop();
-		caminho = mapa.montarCaminho(coordenadaAtual, coord);
+		caminho = mapa.montarCaminho(coordenadaAtual, coord, new MinhaQueue<int[]>());
 	    } else {
 		this.mapaCompleto = true;
 	    }

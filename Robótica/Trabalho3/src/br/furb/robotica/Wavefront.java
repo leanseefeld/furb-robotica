@@ -11,12 +11,20 @@ public class Wavefront {
 
     private MapaLabirinto mapaOriginal;
     private int[][] mapaValorado;
-    private Queue<int[]> vizinhosPendentes = new Queue<int[]>();
+    private MinhaPilha<int[]> vizinhosPendentes;
 
     private final int[] coordenadaAtual;
     private final int[] coordenadaObjetivo;
 
-    public Wavefront(MapaLabirinto mapa, int[] coordenadaAtual, int[] coordenadaObjetivo) {
+    /**
+     * @param mapa
+     * @param coordenadaAtual
+     * @param coordenadaObjetivo
+     * @param tipoDePila
+     *            Criada para poder ser utilizada para teste em um projeto sem a biblioteca do Lejos
+     */
+    public Wavefront(MapaLabirinto mapa, int[] coordenadaAtual, int[] coordenadaObjetivo, MinhaPilha<int[]> tipoDePila) {
+	vizinhosPendentes = tipoDePila;
 	this.mapaOriginal = mapa;
 	this.coordenadaAtual = coordenadaAtual;
 	this.coordenadaObjetivo = coordenadaObjetivo;
@@ -171,12 +179,12 @@ public class Wavefront {
 	for (int[] v : visinhosExplorados) {
 	    if (this.mapaOriginal.existePassagem(v, celulaObjetivo)) {
 		this.mapaValorado[v[Matriz.LINHA]][v[Matriz.COLUNA]] = 2;
-		vizinhosPendentes.push(v);
+		vizinhosPendentes.colocar(v);
 	    }
 	}
 
-	while (!vizinhosPendentes.isEmpty()) {
-	    int[] vizinho = (int[]) vizinhosPendentes.pop();
+	while (!vizinhosPendentes.estaVazia()) {
+	    int[] vizinho = (int[]) vizinhosPendentes.pegar();
 	    this.imprimirCenario(this.mapaValorado);
 	    System.out.println("C: " + vizinho[Matriz.LINHA] + "  L:" + vizinho[Matriz.COLUNA]);
 	    escorrerValores(vizinho);
@@ -198,7 +206,7 @@ public class Wavefront {
 	// após atribuir o valor, ir para os próximos vizinhos vazios
 	for (int[] vizinho : vizinhos) {
 	    if (valorCelula(vizinho) == 0) {
-		vizinhosPendentes.push(vizinho);
+		vizinhosPendentes.colocar(vizinho);
 	    }
 	}
     }

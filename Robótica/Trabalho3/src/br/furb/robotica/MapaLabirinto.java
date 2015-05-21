@@ -105,8 +105,8 @@ public class MapaLabirinto {
 	return naoVisitadas;
     }
 
-    public Caminho montarCaminho(int[] origem, int[] destino) {
-	Wavefront wave = new Wavefront(this, origem, destino);
+    public Caminho montarCaminho(int[] origem, int[] destino, MinhaPilha<int[]> minhaPilha) {
+	Wavefront wave = new Wavefront(this, origem, destino, minhaPilha);
 	return wave.gerarCaminho();
     }
 
