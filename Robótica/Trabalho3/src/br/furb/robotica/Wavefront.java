@@ -1,9 +1,5 @@
 package br.furb.robotica;
 
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
 
 public class Wavefront {
 
@@ -59,7 +55,7 @@ public class Wavefront {
 		caminho.addPasso(objetivo);
 		print(objetivo);
 	    } else {
-		int[][] vizinhos = acharVizinhosExplorados(passo, true);
+		int[][] vizinhos = this.mapaOriginal.acharVizinhosExplorados(passo, true);
 		passo = getMenorVizinhoValorado(vizinhos);
 		caminho.addPasso(passo);
 		print(passo);
@@ -81,7 +77,7 @@ public class Wavefront {
      * @return Coordenadad objetivo
      */
     private int[] getProcuraObjetivoVisinho(int[] celula) {
-	for (int[] is : getTodosVizinhos(celula)) {
+	for (int[] is : this.mapaOriginal.getTodosVizinhos(celula)) {
 	    if (this.mapaOriginal.isIndicesValidos(is)) {
 		if (this.mapaOriginal.comparaCooredenadas(is, this.coordenadaObjetivo)) {
 		    if (this.mapaOriginal.existePassagem(celula, is)) {
@@ -105,47 +101,6 @@ public class Wavefront {
 	    }
 	}
 	return menor;
-    }
-
-    /**
-     * Retorna todos os vizinhos que esta célula tenha ligação. <br>
-     * 
-     * @param celula
-     *            celula cujo os vizinhos se deseja saber.
-     * @param apenasConexos
-     *            Se true, busca apenas as células conexas(que possuem passagem entre si) <br>
-     *            <span style="color:red">Não funciona se esta celula não foi explorada</span>
-     * @return vizinhos conexos
-     */
-    private int[][] acharVizinhosExplorados(int[] celula, boolean apenasConexos) {
-	List<int[]> vizinhos = new ArrayList<>(4);
-
-	if (!this.mapaOriginal.isIndicesValidos(celula)
-		|| (apenasConexos && this.mapaOriginal.getInfoPosicao(celula) == null)) {
-	    return new int[0][2];
-	}
-
-	List<int[]> possiveisVizinhos = getTodosVizinhos(celula);
-
-	for (int[] vizinho : possiveisVizinhos) {
-	    if (this.mapaOriginal.isIndicesValidos(vizinho)) {
-		if (mapaOriginal.getInfoPosicao(vizinho) != null) {
-		    if (!apenasConexos || mapaOriginal.existePassagem(celula, vizinho)) {
-			vizinhos.add(vizinho);
-		    }
-		}
-	    }
-	}
-	return vizinhos.toArray(new int[vizinhos.size()][2]);
-    }
-
-    public List<int[]> getTodosVizinhos(int[] celula) {
-	List<int[]> possiveisVizinhos = criarLista( //
-		new int[] { celula[Matriz.LINHA] + 1, celula[Matriz.COLUNA] }, // 
-		new int[] { celula[Matriz.LINHA] - 1, celula[Matriz.COLUNA] }, //
-		new int[] { celula[Matriz.LINHA], celula[Matriz.COLUNA] + 1 }, //
-		new int[] { celula[Matriz.LINHA], celula[Matriz.COLUNA] - 1 });
-	return possiveisVizinhos;
     }
 
     private int valorCelula(int... celula) {
@@ -175,7 +130,7 @@ public class Wavefront {
 	System.out.println("C: " + celulaObjetivo[Matriz.LINHA] + "  L:" + celulaObjetivo[Matriz.COLUNA]
 		+ " - Objetivo");
 	this.mapaValorado[celulaObjetivo[Matriz.LINHA]][celulaObjetivo[Matriz.COLUNA]] = 1;
-	int[][] visinhosExplorados = acharVizinhosExplorados(celulaObjetivo, false);
+	int[][] visinhosExplorados = this.mapaOriginal.acharVizinhosExplorados(celulaObjetivo, false);
 	for (int[] v : visinhosExplorados) {
 	    if (this.mapaOriginal.existePassagem(v, celulaObjetivo)) {
 		this.mapaValorado[v[Matriz.LINHA]][v[Matriz.COLUNA]] = 2;
@@ -194,7 +149,7 @@ public class Wavefront {
 
     private void escorrerValores(int[] celula) {
 	// se não tem vizinhos, ignora
-	int[][] vizinhos = acharVizinhosExplorados(celula, true);
+	int[][] vizinhos = this.mapaOriginal.acharVizinhosExplorados(celula, true);
 	if (vizinhos.length == 0) {
 	    return;
 	}
@@ -209,14 +164,6 @@ public class Wavefront {
 		vizinhosPendentes.colocar(vizinho);
 	    }
 	}
-    }
-
-    public static final List<int[]> criarLista(int[]... cells) {
-	List<int[]> ret = new ArrayList<>();
-	for (int[] cell : cells) {
-	    ret.add(cell);
-	}
-	return ret;
     }
 
     public void imprimirCenario(int[][] mapa) {

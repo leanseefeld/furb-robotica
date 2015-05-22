@@ -163,8 +163,91 @@ public class MapaLabirinto {
     public InfoPosicao[][] getPosicoes() {
 	return this.posicoes;
     }
-    
+
     public boolean comparaCooredenadas(int[] a, int[] b) {
 	return a[Matriz.COLUNA] == b[Matriz.COLUNA] && a[Matriz.LINHA] == b[Matriz.LINHA];
+    }
+
+    /**
+     * Retorna todos os vizinhos que esta célula tenha ligação. <br>
+     * 
+     * @param celula
+     *            celula cujo os vizinhos se deseja saber.
+     * @param apenasConexos
+     *            Se true, busca apenas as células conexas(que possuem passagem entre si) <br>
+     *            <span style="color:red">Não funciona se esta celula não foi explorada</span>
+     * @return vizinhos conexos
+     */
+    public int[][] acharVizinhosExplorados(int[] celula, boolean apenasConexos) {
+	List<int[]> vizinhos = new ArrayList<>(4);
+
+	if (!this.isIndicesValidos(celula) || (apenasConexos && this.getInfoPosicao(celula) == null)) {
+	    return new int[0][2];
+	}
+
+	List<int[]> possiveisVizinhos = getTodosVizinhos(celula);
+
+	for (int[] vizinho : possiveisVizinhos) {
+	    if (this.isIndicesValidos(vizinho)) {
+		if (getInfoPosicao(vizinho) != null) {
+		    if (!apenasConexos || existePassagem(celula, vizinho)) {
+			vizinhos.add(vizinho);
+		    }
+		}
+	    }
+	}
+	return vizinhos.toArray(new int[vizinhos.size()][2]);
+    }
+
+    public List<int[]> getTodosVizinhos(int[] celula) {
+	List<int[]> possiveisVizinhos = criarLista( //
+		new int[] { celula[Matriz.LINHA] + 1, celula[Matriz.COLUNA] }, // 
+		new int[] { celula[Matriz.LINHA] - 1, celula[Matriz.COLUNA] }, //
+		new int[] { celula[Matriz.LINHA], celula[Matriz.COLUNA] + 1 }, //
+		new int[] { celula[Matriz.LINHA], celula[Matriz.COLUNA] - 1 });
+	return possiveisVizinhos;
+    }
+
+    public int[][] converterParaGrafo() {
+	int[][] grafo = new int[this.posicoes.length * this.posicoes[0].length][];
+
+	for (int lin = 0; lin <= this.posicoes.length; lin++) {
+	    for (int col = 0; col <= this.posicoes[lin].length; col++) {
+		int[] coordenada = new int[] { lin, col };
+		int[][] vizinhos = this.acharVizinhosExplorados(coordenada, true);
+
+		int u = converteIndexGrafo(lin, col);
+		grafo[u] = new int[vizinhos.length];
+
+		for (int[] vizinho : vizinhos) {
+		    int v = converteIndexGrafo(vizinho);
+		    grafo[u][v] = 1;
+		}
+	    }
+	}
+	return grafo;
+    }
+
+    private int converteIndexGrafo(int linha, int coluna) {
+	return linha * coluna;
+    }
+
+    private int converteIndexGrafo(int[] coordenada) {
+	return converteIndexGrafo(coordenada[Matriz.LINHA], coordenada[Matriz.COLUNA]);
+    }
+
+    public int[] converteCoordenada(int indexGrafo) {
+	int[] coordenada = new int[2];
+	coordenada[Matriz.LINHA] = indexGrafo % this.posicoes.length;
+	coordenada[Matriz.COLUNA] = indexGrafo / this.posicoes.length;
+	return coordenada;
+    }
+
+    public static final List<int[]> criarLista(int[]... cells) {
+	List<int[]> ret = new ArrayList<>();
+	for (int[] cell : cells) {
+	    ret.add(cell);
+	}
+	return ret;
     }
 }
