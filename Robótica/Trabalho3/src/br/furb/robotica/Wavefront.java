@@ -1,6 +1,5 @@
 package br.furb.robotica;
 
-
 public class Wavefront {
 
     static boolean log = true;
@@ -55,7 +54,7 @@ public class Wavefront {
 		caminho.addPasso(objetivo);
 		print(objetivo);
 	    } else {
-		int[][] vizinhos = this.mapaOriginal.acharVizinhosExplorados(passo, true);
+		int[][] vizinhos = this.mapaOriginal.getVizinhos(passo, true, true);
 		passo = getMenorVizinhoValorado(vizinhos);
 		caminho.addPasso(passo);
 		print(passo);
@@ -130,11 +129,11 @@ public class Wavefront {
 	System.out.println("C: " + celulaObjetivo[Matriz.LINHA] + "  L:" + celulaObjetivo[Matriz.COLUNA]
 		+ " - Objetivo");
 	this.mapaValorado[celulaObjetivo[Matriz.LINHA]][celulaObjetivo[Matriz.COLUNA]] = 1;
-	int[][] visinhosExplorados = this.mapaOriginal.acharVizinhosExplorados(celulaObjetivo, false);
+	int[][] visinhosExplorados = this.mapaOriginal.getVizinhos(celulaObjetivo, false, true);
 	for (int[] v : visinhosExplorados) {
 	    if (this.mapaOriginal.existePassagem(v, celulaObjetivo)) {
 		this.mapaValorado[v[Matriz.LINHA]][v[Matriz.COLUNA]] = 2;
-		vizinhosPendentes.colocar(v);
+		vizinhosPendentes.empilhar(v);
 	    }
 	}
 
@@ -149,7 +148,7 @@ public class Wavefront {
 
     private void escorrerValores(int[] celula) {
 	// se não tem vizinhos, ignora
-	int[][] vizinhos = this.mapaOriginal.acharVizinhosExplorados(celula, true);
+	int[][] vizinhos = this.mapaOriginal.getVizinhos(celula, true, true);
 	if (vizinhos.length == 0) {
 	    return;
 	}
@@ -161,7 +160,7 @@ public class Wavefront {
 	// após atribuir o valor, ir para os próximos vizinhos vazios
 	for (int[] vizinho : vizinhos) {
 	    if (valorCelula(vizinho) == 0) {
-		vizinhosPendentes.colocar(vizinho);
+		vizinhosPendentes.empilhar(vizinho);
 	    }
 	}
     }

@@ -5,7 +5,7 @@ import java.util.Queue;
 public class MinhaQueue<T> extends Queue<T> implements MinhaPilha<T> {
 
     @Override
-    public void colocar(T objeto) {
+    public void empilhar(T objeto) {
 	this.push(objeto);
     }
 

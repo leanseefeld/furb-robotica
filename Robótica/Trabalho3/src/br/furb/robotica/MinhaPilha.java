@@ -7,7 +7,7 @@ package br.furb.robotica;
  * @param <T>
  */
 public interface MinhaPilha<T> {
-    public void colocar(T objeto);
+    public void empilhar(T objeto);
     public T pegar();
     public boolean estaVazia();
 }

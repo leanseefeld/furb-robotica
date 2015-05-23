@@ -20,7 +20,7 @@ public class BehaviorMontarTrajeto implements Behavior {
 
     @Override
     public void action() {
-	robo.montarCaminhoAteProximaPosicao();
+	robo.setCaminho(robo.montarCaminhoAteProximaPosicao());
     }
 
     @Override

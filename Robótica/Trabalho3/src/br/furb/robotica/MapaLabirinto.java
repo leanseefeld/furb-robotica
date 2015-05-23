@@ -105,9 +105,40 @@ public class MapaLabirinto {
 	return naoVisitadas;
     }
 
-    public Caminho montarCaminho(int[] origem, int[] destino, MinhaPilha<int[]> minhaPilha) {
+    /**
+     * Busca o menor caminho até uma posição utilizando o wave front
+     * 
+     * @param origem
+     * @param destino
+     * @param minhaPilha
+     * @return
+     */
+    public Caminho montarCaminhoWaveFront(int[] origem, int[] destino, MinhaPilha<int[]> minhaPilha) {
 	Wavefront wave = new Wavefront(this, origem, destino, minhaPilha);
 	return wave.gerarCaminho();
+    }
+
+    /**
+     * Busca o menor caminho até uma posição utilizando o algoritmo de Dijkstra
+     * 
+     * @param origem
+     * @param destino
+     * @return
+     */
+    public Caminho montarCaminhoDijkstra(int[] origem, int[] destino) {
+	int[][] grafo = this.converterParaGrafo();
+	int origemGrafo = this.converterIndexGrafo(origem);
+	int origemDestino = this.converterIndexGrafo(destino);
+	Dijkstra dijkstra = new Dijkstra(grafo, origemGrafo, origemDestino);
+	dijkstra.doSearch();
+	int[] menorCaminhoGrafo = dijkstra.getMinPathRoute();
+
+	Caminho caminho = new Caminho();
+	for (int indexGrafo : menorCaminhoGrafo) {
+	    int[] coordenada = this.converteCoordenada(indexGrafo);
+	    caminho.addPasso(coordenada);
+	}
+	return caminho;
     }
 
     /**
@@ -169,16 +200,18 @@ public class MapaLabirinto {
     }
 
     /**
-     * Retorna todos os vizinhos que esta célula tenha ligação. <br>
+     * Retorna todos as coordenadas vizinhas conexas (que possuem passagem entre si) <br>
      * 
      * @param celula
-     *            celula cujo os vizinhos se deseja saber.
+     *            Coordenada cujo os vizinhos se deseja saber.
      * @param apenasConexos
-     *            Se true, busca apenas as células conexas(que possuem passagem entre si) <br>
+     *            Se true, busca apenas as coordenadas conexas <br>
      *            <span style="color:red">Não funciona se esta celula não foi explorada</span>
+     * @param apenasExplorados
+     *            Se true, busca apenas as coordenadas que já foram exploradas
      * @return vizinhos conexos
      */
-    public int[][] acharVizinhosExplorados(int[] celula, boolean apenasConexos) {
+    public int[][] getVizinhos(int[] celula, boolean apenasConexos, boolean apenasExplorados) {
 	List<int[]> vizinhos = new ArrayList<>(4);
 
 	if (!this.isIndicesValidos(celula) || (apenasConexos && this.getInfoPosicao(celula) == null)) {
@@ -189,7 +222,7 @@ public class MapaLabirinto {
 
 	for (int[] vizinho : possiveisVizinhos) {
 	    if (this.isIndicesValidos(vizinho)) {
-		if (getInfoPosicao(vizinho) != null) {
+		if (!apenasExplorados || getInfoPosicao(vizinho) != null) {
 		    if (!apenasConexos || existePassagem(celula, vizinho)) {
 			vizinhos.add(vizinho);
 		    }
@@ -209,18 +242,18 @@ public class MapaLabirinto {
     }
 
     public int[][] converterParaGrafo() {
-	int[][] grafo = new int[this.posicoes.length * this.posicoes[0].length][];
+	int[][] grafo = new int[this.posicoes.length * this.posicoes[0].length][this.posicoes.length
+		* this.posicoes[0].length];
 
-	for (int lin = 0; lin <= this.posicoes.length; lin++) {
-	    for (int col = 0; col <= this.posicoes[lin].length; col++) {
+	for (int lin = 0; lin < this.posicoes.length; lin++) {
+	    for (int col = 0; col < this.posicoes[lin].length; col++) {
 		int[] coordenada = new int[] { lin, col };
-		int[][] vizinhos = this.acharVizinhosExplorados(coordenada, true);
+		int[][] vizinhos = this.getVizinhos(coordenada, true, false);
 
 		int u = converteIndexGrafo(lin, col);
-		grafo[u] = new int[vizinhos.length];
 
 		for (int[] vizinho : vizinhos) {
-		    int v = converteIndexGrafo(vizinho);
+		    int v = converterIndexGrafo(vizinho);
 		    grafo[u][v] = 1;
 		}
 	    }
@@ -229,17 +262,17 @@ public class MapaLabirinto {
     }
 
     private int converteIndexGrafo(int linha, int coluna) {
-	return linha * coluna;
+	return this.posicoes.length * linha + coluna;
     }
 
-    private int converteIndexGrafo(int[] coordenada) {
+    private int converterIndexGrafo(int[] coordenada) {
 	return converteIndexGrafo(coordenada[Matriz.LINHA], coordenada[Matriz.COLUNA]);
     }
 
     public int[] converteCoordenada(int indexGrafo) {
 	int[] coordenada = new int[2];
-	coordenada[Matriz.LINHA] = indexGrafo % this.posicoes.length;
-	coordenada[Matriz.COLUNA] = indexGrafo / this.posicoes.length;
+	coordenada[Matriz.LINHA] = indexGrafo / this.posicoes.length;
+	coordenada[Matriz.COLUNA] = indexGrafo % this.posicoes.length;
 	return coordenada;
     }
 

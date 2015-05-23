@@ -1,7 +1,6 @@
 package br.furb.robotica;
 
 import java.util.List;
-import java.util.Queue;
 import lejos.nxt.Button;
 import lejos.nxt.Motor;
 import lejos.nxt.SensorPort;
@@ -41,7 +40,7 @@ public class RoboMapeador {
     private UltrasonicSensor sensor;
     private Caminho caminho;
     private boolean mapaCompleto;
-    private Queue<int[]> caminhosNaoVisitados;
+    private MinhaPilha<int[]> caminhosNaoVisitados;
 
     public RoboMapeador(MapaLabirinto mapa, Lado ladoAtual) {
 	Motor.A.setSpeed(VELOCIDADE);
@@ -49,7 +48,7 @@ public class RoboMapeador {
 
 	this.mapa = mapa;
 	this.ladoAtual = ladoAtual;
-	this.caminhosNaoVisitados = new Queue<int[]>();
+	this.caminhosNaoVisitados = new MinhaQueue<int[]>();
 	this.sensor = new UltrasonicSensor(SensorPort.S4);
     }
 
@@ -60,6 +59,14 @@ public class RoboMapeador {
 	return this.caminho;
     }
 
+    /**
+     * Insere um caminho para o robo seguir
+     * @param caminho
+     */
+    public void setCaminho(Caminho caminho) {
+	this.caminho = caminho;
+    }
+    
     /**
      * @return Retorna a posição atual do robo no mapa
      */
@@ -97,27 +104,34 @@ public class RoboMapeador {
     /**
      * Monta um caminho para uma posição desejada para que o robo siga
      */
-    public void montarCaminhoAteProximaPosicao() {
-	List<int[]> coordenadaVisinho = this.mapa.getVisinhosNaoVisitado(this.coordenadaAtual);
+    public Caminho montarCaminhoAteProximaPosicao() {
+	Caminho caminho = null;
+	List<int[]> coordenadaVisinho = mapa.getVisinhosNaoVisitado(coordenadaAtual);
 
 	if (!coordenadaVisinho.isEmpty()) {
 	    caminho = new Caminho();
 	    caminho.addPasso(coordenadaAtual);
 	    caminho.addPasso(coordenadaVisinho.get(0));
 	    for (int i = 1; i < coordenadaVisinho.size(); i++) {
-		caminhosNaoVisitados.push(coordenadaVisinho.get(0));
+		caminhosNaoVisitados.empilhar(coordenadaVisinho.get(i));
 	    }
 	} else {
-	    if (!caminhosNaoVisitados.isEmpty()) {
-		int[] coord = (int[]) caminhosNaoVisitados.pop();
-		caminho = mapa.montarCaminho(coordenadaAtual, coord, new MinhaQueue<int[]>());
-	    } else {
+	    int[] coord = null;
+	    while ((coord = caminhosNaoVisitados.pegar()) != null) {
+		if (mapa.getInfoPosicao(coord) == null) {
+		    caminho = mapa.montarCaminhoDijkstra(coordenadaAtual, coord);
+		    //caminho = mapa.montarCaminhoWaveFront(coordenadaAtual, coord, new MinhaLinkedList<int[]>());
+		    break;
+		}
+	    }
+
+	    if (caminho == null) {
 		this.mapaCompleto = true;
 	    }
 	}
 	caminho.toFirst();
-	//Move um para ignorar a posição atual
 	caminho.nextElement();
+	return caminho;
     }
 
     /**
@@ -191,4 +205,6 @@ public class RoboMapeador {
 	System.out.println("Posicao Atual: Coluna:" + this.coordenadaAtual[0] + " Linha:" + this.coordenadaAtual[1]);
 	System.out.println("Lado Atual: " + this.ladoAtual.name());
     }
+
+  
 }

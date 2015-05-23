@@ -6,8 +6,8 @@ import br.furb.robotica.MinhaPilha;
 public class MinhaLinkedList<T> extends LinkedList<T> implements MinhaPilha<T> {
 
     @Override
-    public void colocar(T objeto) {
-	this.add(objeto);
+    public void empilhar(T objeto) {
+	this.push(objeto);
     }
 
     @Override
