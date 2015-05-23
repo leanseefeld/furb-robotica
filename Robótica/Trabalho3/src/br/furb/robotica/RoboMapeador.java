@@ -89,7 +89,7 @@ public class RoboMapeador {
 	InfoPosicao infoPosicao = mapa.criarPosicao(coordenadaAtual);
 
 	Motor.C.rotate(-_90GRAUS); //ESQUERDA DO ROBO
-	Lado ladoSensor = Lado.valueOf((this.ladoAtual.ordinal() - 1) % 4);
+	Lado ladoSensor = Lado.valueOf(Math.abs((this.ladoAtual.ordinal() - 1)) % 4);
 	infoPosicao.setLadoLivre(ladoSensor, sensor.getDistance() < DISTANCIA_OBSTACULO);
 
 	Motor.C.rotate(+_90GRAUS); //FRENTE DO ROBO
