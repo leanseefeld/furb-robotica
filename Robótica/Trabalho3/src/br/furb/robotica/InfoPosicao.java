@@ -10,9 +10,7 @@ public class InfoPosicao {
 
     public InfoPosicao(Lado... ladosLivres) {
 	this();
-	for (int i = 0; i < ladosLivres.length; i++) {
-	    setLadoLivre(ladosLivres[i], true);
-	}
+	this.setLadoLivre(ladosLivres);
     }
 
     private EstadoLado getEstadoLado(Lado lado) {
@@ -27,4 +25,12 @@ public class InfoPosicao {
 	lados[lado.ordinal()] = EstadoLado.valueOf(livre);
     }
 
+    public void setLadoLivre(Lado... ladosLivres) {
+	System.out.print("Lado livre:");
+	for (int i = 0; i < ladosLivres.length; i++) {
+	    System.out.print(ladosLivres[i].name() +"  ");
+	    setLadoLivre(ladosLivres[i], true);
+	}
+	System.out.println();
+    }
 }

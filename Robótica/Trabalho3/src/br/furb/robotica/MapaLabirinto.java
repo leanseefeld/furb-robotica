@@ -2,26 +2,16 @@ package br.furb.robotica;
 
 import java.util.ArrayList;
 import java.util.List;
-import br.furb.robotica.Caminho;
-import br.furb.robotica.InfoPosicao;
-import br.furb.robotica.Lado;
-import br.furb.robotica.Matriz;
+import br.furb.robotica.estruturas.MinhaPilha;
 
 public class MapaLabirinto {
 
     private final InfoPosicao[][] posicoes;
 
-    private int[] coordenadaOrigem;
     private int[] coordenadaDestino;
 
     public MapaLabirinto() {
 	posicoes = new InfoPosicao[4][4];
-    }
-
-    public void setCoordenadaOrigem(int linha, int col) {
-	coordenadaOrigem = new int[2];
-	coordenadaOrigem[Matriz.LINHA] = linha;
-	coordenadaOrigem[Matriz.COLUNA] = col;
     }
 
     public void setCoordenadaDestino(int linha, int col) {
@@ -34,8 +24,8 @@ public class MapaLabirinto {
 	return posicoes[coordenada[Matriz.LINHA]][coordenada[Matriz.COLUNA]];
     }
 
-    public InfoPosicao criarPosicao(int[] coordenada, Lado ladoOrigem) {
-	return posicoes[coordenada[Matriz.LINHA]][coordenada[Matriz.COLUNA]] = new InfoPosicao(ladoOrigem);
+    public InfoPosicao criarPosicao(int[] coordenada) {
+	return posicoes[coordenada[Matriz.LINHA]][coordenada[Matriz.COLUNA]] = new InfoPosicao();
     }
 
     public boolean existePosicaoNaoVisitada() {
@@ -58,39 +48,12 @@ public class MapaLabirinto {
 	return true;
     }
 
-    public List<int[]> getVisinhosNaoVisitado(int[] coordenadaAtual) {
-	InfoPosicao infoPosicaoAtual = getInfoPosicao(coordenadaAtual);
-	List<int[]> coords = new ArrayList<int[]>();
-
-	if (infoPosicaoAtual.isLadoLivre(Lado.DIREITA)) {
-	    int[] coord = coordenadaAtual.clone();
-	    coord[Matriz.COLUNA]++;
-	    if (coordenadaEhValida(coord) && getInfoPosicao(coord) == null) {
-		coords.add(coord);
-	    }
-	} else if (infoPosicaoAtual.isLadoLivre(Lado.ESQUERDA)) {
-	    int[] coord = coordenadaAtual.clone();
-	    coord[Matriz.COLUNA]--;
-	    if (coordenadaEhValida(coord) && getInfoPosicao(coord) == null) {
-		coords.add(coord);
-	    }
-	} else if (infoPosicaoAtual.isLadoLivre(Lado.FRENTE)) {
-	    int[] coord = coordenadaAtual.clone();
-	    coord[Matriz.LINHA]--;
-	    if (coordenadaEhValida(coord) && getInfoPosicao(coord) == null) {
-		coords.add(coord);
-	    }
-	} else if (infoPosicaoAtual.isLadoLivre(Lado.ATRAS)) {
-	    int[] coord = coordenadaAtual.clone();
-	    coord[Matriz.LINHA]++;
-	    if (coordenadaEhValida(coord) && getInfoPosicao(coord) == null) {
-		coords.add(coord);
-	    }
-	}
-	return coords;
-    }
-
-    public List<int[]> getCoordenadasNaoVisitadas() {
+    /**
+     * Retorna todas as coordenadas que não foram exploradas
+     * 
+     * @return
+     */
+    public List<int[]> getCoordenadasNaoExploradas() {
 	List<int[]> naoVisitadas = new ArrayList<int[]>();
 	for (int lin = 0; lin < this.posicoes.length; lin++) {
 	    for (int col = 0; col < this.posicoes[lin].length; col++) {
@@ -202,7 +165,7 @@ public class MapaLabirinto {
     /**
      * Retorna todos as coordenadas vizinhas conexas (que possuem passagem entre si) <br>
      * 
-     * @param celula
+     * @param coordenada
      *            Coordenada cujo os vizinhos se deseja saber.
      * @param apenasConexos
      *            Se true, busca apenas as coordenadas conexas <br>
@@ -211,19 +174,47 @@ public class MapaLabirinto {
      *            Se true, busca apenas as coordenadas que já foram exploradas
      * @return vizinhos conexos
      */
-    public int[][] getVizinhos(int[] celula, boolean apenasConexos, boolean apenasExplorados) {
+    public int[][] getVizinhos(int[] coordenada, boolean apenasConexos, boolean apenasExplorados) {
 	List<int[]> vizinhos = new ArrayList<>(4);
 
-	if (!this.isIndicesValidos(celula) || (apenasConexos && this.getInfoPosicao(celula) == null)) {
+	if (!this.isIndicesValidos(coordenada) || (apenasConexos && this.getInfoPosicao(coordenada) == null)) {
 	    return new int[0][2];
 	}
 
-	List<int[]> possiveisVizinhos = getTodosVizinhos(celula);
+	List<int[]> possiveisVizinhos = getTodosVizinhos(coordenada);
 
 	for (int[] vizinho : possiveisVizinhos) {
 	    if (this.isIndicesValidos(vizinho)) {
 		if (!apenasExplorados || getInfoPosicao(vizinho) != null) {
-		    if (!apenasConexos || existePassagem(celula, vizinho)) {
+		    if (!apenasConexos || existePassagem(coordenada, vizinho)) {
+			vizinhos.add(vizinho);
+		    }
+		}
+	    }
+	}
+	return vizinhos.toArray(new int[vizinhos.size()][2]);
+    }
+
+    /**
+     * Retorna todos as coordenadas vizinhas conexas que não foram explordas
+     * 
+     * @param coordenada
+     *            coordenada base
+     * @return
+     */
+    public int[][] getVisinhosConexosNaoExplorados(int[] coordenada) {
+	List<int[]> vizinhos = new ArrayList<>(4);
+
+	if (!this.isIndicesValidos(coordenada) || this.getInfoPosicao(coordenada) == null) {
+	    return new int[0][2];
+	}
+
+	List<int[]> possiveisVizinhos = getTodosVizinhos(coordenada);
+
+	for (int[] vizinho : possiveisVizinhos) {
+	    if (this.isIndicesValidos(vizinho)) {
+		if (getInfoPosicao(vizinho) == null) {
+		    if (existePassagem(coordenada, vizinho)) {
 			vizinhos.add(vizinho);
 		    }
 		}

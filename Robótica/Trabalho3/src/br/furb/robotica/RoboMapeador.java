@@ -1,12 +1,14 @@
 package br.furb.robotica;
 
-import java.util.List;
 import lejos.nxt.Button;
 import lejos.nxt.Motor;
 import lejos.nxt.SensorPort;
 import lejos.nxt.UltrasonicSensor;
 import lejos.robotics.subsumption.Arbitrator;
 import lejos.robotics.subsumption.Behavior;
+import br.furb.robotica.common.Coordenada;
+import br.furb.robotica.estruturas.MinhaPilha;
+import br.furb.robotica.estruturas.MinhaQueue;
 
 public class RoboMapeador {
 
@@ -21,8 +23,7 @@ public class RoboMapeador {
 
 	MapaLabirinto mapa = new MapaLabirinto();
 	mapa.setCoordenadaDestino(0, 0);
-	mapa.setCoordenadaOrigem(3, 3);
-	RoboMapeador robo = new RoboMapeador(mapa, Lado.FRENTE);
+	RoboMapeador robo = new RoboMapeador(mapa, Lado.FRENTE, Coordenada.criar(3, 3));
 
 	Behavior analizarPosicao = new BehaviorAnalizarPosicao(robo);
 	Behavior montarTrajeto = new BehaviorMontarTrajeto(robo);
@@ -40,15 +41,16 @@ public class RoboMapeador {
     private UltrasonicSensor sensor;
     private Caminho caminho;
     private boolean mapaCompleto;
-    private MinhaPilha<int[]> caminhosNaoVisitados;
+    private MinhaPilha<int[]> coordenadasNaoVisitados;
 
-    public RoboMapeador(MapaLabirinto mapa, Lado ladoAtual) {
+    public RoboMapeador(MapaLabirinto mapa, Lado ladoAtual, int[] coordenadaAtual) {
 	Motor.A.setSpeed(VELOCIDADE);
 	Motor.B.setSpeed(VELOCIDADE);
 
+	this.coordenadaAtual = coordenadaAtual;
 	this.mapa = mapa;
 	this.ladoAtual = ladoAtual;
-	this.caminhosNaoVisitados = new MinhaQueue<int[]>();
+	this.coordenadasNaoVisitados = new MinhaQueue<int[]>();
 	this.sensor = new UltrasonicSensor(SensorPort.S4);
     }
 
@@ -61,12 +63,13 @@ public class RoboMapeador {
 
     /**
      * Insere um caminho para o robo seguir
+     * 
      * @param caminho
      */
     public void setCaminho(Caminho caminho) {
 	this.caminho = caminho;
     }
-    
+
     /**
      * @return Retorna a posição atual do robo no mapa
      */
@@ -83,7 +86,7 @@ public class RoboMapeador {
 	    throw new UnsupportedOperationException("analisarPosicao não deveria ter sido chamado");
 	}
 
-	InfoPosicao infoPosicao = mapa.criarPosicao(coordenadaAtual, ladoAtual);
+	InfoPosicao infoPosicao = mapa.criarPosicao(coordenadaAtual);
 
 	Motor.C.rotate(-_90GRAUS); //ESQUERDA DO ROBO
 	Lado ladoSensor = Lado.valueOf((this.ladoAtual.ordinal() - 1) % 4);
@@ -106,18 +109,17 @@ public class RoboMapeador {
      */
     public Caminho montarCaminhoAteProximaPosicao() {
 	Caminho caminho = null;
-	List<int[]> coordenadaVisinho = mapa.getVisinhosNaoVisitado(coordenadaAtual);
+	int[][] coordenadasVisinhas = mapa.getVisinhosConexosNaoExplorados(coordenadaAtual);
 
-	if (!coordenadaVisinho.isEmpty()) {
+	if (coordenadasVisinhas.length != 0) {
 	    caminho = new Caminho();
-	    caminho.addPasso(coordenadaAtual);
-	    caminho.addPasso(coordenadaVisinho.get(0));
-	    for (int i = 1; i < coordenadaVisinho.size(); i++) {
-		caminhosNaoVisitados.empilhar(coordenadaVisinho.get(i));
+	    caminho.addPasso(coordenadasVisinhas[0]);
+	    for (int i = 1; i < coordenadasVisinhas.length; i++) {
+		coordenadasNaoVisitados.empilhar(coordenadasVisinhas[i]);
 	    }
 	} else {
 	    int[] coord = null;
-	    while ((coord = caminhosNaoVisitados.pegar()) != null) {
+	    while ((coord = coordenadasNaoVisitados.pegar()) != null) {
 		if (mapa.getInfoPosicao(coord) == null) {
 		    caminho = mapa.montarCaminhoDijkstra(coordenadaAtual, coord);
 		    //caminho = mapa.montarCaminhoWaveFront(coordenadaAtual, coord, new MinhaLinkedList<int[]>());
@@ -127,10 +129,12 @@ public class RoboMapeador {
 
 	    if (caminho == null) {
 		this.mapaCompleto = true;
+		return null;
+	    } else {
+		caminho.toFirst();
+		caminho.nextElement();
 	    }
 	}
-	caminho.toFirst();
-	caminho.nextElement();
 	return caminho;
     }
 
@@ -202,9 +206,8 @@ public class RoboMapeador {
      * Exibe a posição e o lado atual do robo
      */
     public void printPosicaoAtual() {
-	System.out.println("Posicao Atual: Coluna:" + this.coordenadaAtual[0] + " Linha:" + this.coordenadaAtual[1]);
+	System.out.println("Posicao Atual: Coluna:" + this.coordenadaAtual[Matriz.COLUNA] + " Linha:"
+		+ this.coordenadaAtual[Matriz.LINHA]);
 	System.out.println("Lado Atual: " + this.ladoAtual.name());
     }
-
-  
 }

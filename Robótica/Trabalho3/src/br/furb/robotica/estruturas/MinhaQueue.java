@@ -1,4 +1,4 @@
-package br.furb.robotica;
+package br.furb.robotica.estruturas;
 
 import java.util.Queue;
 

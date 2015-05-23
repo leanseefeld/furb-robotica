@@ -1,5 +1,7 @@
 package br.furb.robotica;
 
+import br.furb.robotica.estruturas.MinhaPilha;
+
 public class Wavefront {
 
     static boolean log = true;

@@ -1,4 +1,4 @@
-package br.furb.robotica;
+package br.furb.robotica.estruturas;
 
 /**
  * Criada com o objetivo de poder testar os algorítmos sem vinculo com a biblioteca do Lejos

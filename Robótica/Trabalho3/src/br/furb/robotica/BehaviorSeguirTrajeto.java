@@ -23,8 +23,6 @@ public class BehaviorSeguirTrajeto implements Behavior {
 
     @Override
     public void suppress() {
-	Motor.A.flt();
-	Motor.B.flt();
     }
 
 }
