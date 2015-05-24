@@ -74,7 +74,8 @@ public class Algoritmo2 {
 					girar(DIRECAO); // atualiza velocidades
 					fimCiclo = currentTimeMillis() + DURACAO_CICLO;
 				}
-			} else if (estadoAnterior != estado) {
+			}
+			if (estadoAnterior != estado) {
 				velRotacao = VEL_NORMAL;
 				velRotacaoPivo = velRotacao / PROPORCAO_PIVO;
 
