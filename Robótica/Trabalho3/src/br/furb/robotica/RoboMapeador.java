@@ -1,9 +1,11 @@
 package br.furb.robotica;
 
 import lejos.nxt.Button;
+import lejos.nxt.ColorSensor;
 import lejos.nxt.Motor;
 import lejos.nxt.SensorPort;
 import lejos.nxt.UltrasonicSensor;
+import lejos.robotics.Color;
 import lejos.robotics.subsumption.Arbitrator;
 import lejos.robotics.subsumption.Behavior;
 import br.furb.robotica.common.Coordenada;
@@ -16,21 +18,24 @@ public class RoboMapeador {
     private static final int PASSO = 600;
     private static final int DISTANCIA_OBSTACULO = 50;
     private static final int _90GRAUS = 90;
+    private static final int QTD_VERDE_DESTINO = 150;
 
     public static void main(String[] args) {
 	System.out.println("Pressione ENTER");
 	Button.ENTER.waitForPressAndRelease();
 
 	MapaLabirinto mapa = new MapaLabirinto();
-	mapa.setCoordenadaDestino(0, 0);
 	RoboMapeador robo = new RoboMapeador(mapa, Lado.FRENTE, Coordenada.criar(3, 3));
 
 	Behavior analizarPosicao = new BehaviorAnalizarPosicao(robo);
-	Behavior montarTrajeto = new BehaviorMontarTrajeto(robo);
-	Behavior seguirTrajeto = new BehaviorSeguirTrajeto(robo);
+	Behavior montarTrajeto = new BehaviorMontarCaminhoExploracao(robo);
+	Behavior seguirTrajeto = new BehaviorSeguirCaminho(robo);
 	Behavior mapeamentoCompleto = new BehaviorMapeamentoCompleto(robo);
+	Behavior seguirMenorCaminho = new BehaviorSeguirMenorCaminho(robo);
+	Behavior concluirObjetivo = new BehaviorConcluiuObjetivo(robo);
 
-	Behavior[] comportamentos = { analizarPosicao, montarTrajeto, seguirTrajeto, mapeamentoCompleto };
+	Behavior[] comportamentos = { analizarPosicao, montarTrajeto, seguirTrajeto, mapeamentoCompleto,
+		seguirMenorCaminho };
 	Arbitrator arb = new Arbitrator(comportamentos);
 	arb.start();
     }
@@ -42,16 +47,26 @@ public class RoboMapeador {
     private Caminho caminho;
     private boolean mapaCompleto;
     private MinhaPilha<int[]> coordenadasNaoVisitados;
+    private Estado estado;
+    private ColorSensor colorSensor;
+
+    private final int[] coordenadaInicial;
+    private final Lado ladoInicial;
 
     public RoboMapeador(MapaLabirinto mapa, Lado ladoAtual, int[] coordenadaAtual) {
 	Motor.A.setSpeed(VELOCIDADE);
 	Motor.B.setSpeed(VELOCIDADE);
 
 	this.coordenadaAtual = coordenadaAtual;
-	this.mapa = mapa;
+	this.coordenadaInicial = coordenadaAtual;
 	this.ladoAtual = ladoAtual;
+	this.ladoInicial = ladoAtual;
+	this.mapa = mapa;
 	this.coordenadasNaoVisitados = new MinhaQueue<int[]>();
 	this.sensor = new UltrasonicSensor(SensorPort.S4);
+	this.colorSensor = new ColorSensor(SensorPort.S3);
+	this.colorSensor.setFloodlight(true);
+	this.estado = Estado.EXPLORANDO_MAPA;
     }
 
     /**
@@ -77,6 +92,14 @@ public class RoboMapeador {
 	return this.mapa.getInfoPosicao(this.coordenadaAtual);
     }
 
+    public Estado getEstado() {
+	return estado;
+    }
+
+    public void setEstado(Estado estado) {
+	this.estado = estado;
+    }
+
     /**
      * Pega informações da posição atual do robo
      */
@@ -87,6 +110,13 @@ public class RoboMapeador {
 	}
 
 	InfoPosicao infoPosicao = mapa.criarPosicao(coordenadaAtual);
+
+	if (colorSensor.isFloodlightOn()) {
+	    if (colorSensor.getColor().getGreen() > QTD_VERDE_DESTINO) {
+		this.mapa.setCoordenadaDestino(coordenadaAtual);
+		colorSensor.setFloodlight(false);
+	    }
+	}
 
 	Motor.C.rotate(-_90GRAUS); //ESQUERDA DO ROBO
 	Lado ladoSensor = Lado.valueOf(Math.abs((this.ladoAtual.ordinal() - 1)) % 4);
@@ -135,6 +165,17 @@ public class RoboMapeador {
 		caminho.nextElement();
 	    }
 	}
+	return caminho;
+    }
+
+    /**
+     * Monta o menor caminho da posição atual até o destino
+     * 
+     * @return
+     */
+    public Caminho montarMenorCaminho() {
+	Caminho caminho = mapa.montarCaminhoDijkstra(this.coordenadaAtual, this.mapa.getCoordenadaDestino());
+	caminho.nextElement();
 	return caminho;
     }
 
@@ -209,5 +250,22 @@ public class RoboMapeador {
 	System.out.println("Posicao Atual: Coluna:" + this.coordenadaAtual[Matriz.COLUNA] + " Linha:"
 		+ this.coordenadaAtual[Matriz.LINHA]);
 	System.out.println("Lado Atual: " + this.ladoAtual.name());
+    }
+
+    /**
+     * Atualiza as coordenadas do robo para a posição inicial
+     */
+    public void moveRoboParaPontoInicial() {
+	this.coordenadaAtual = this.coordenadaInicial;
+	this.ladoAtual = this.ladoInicial;
+    }
+
+    /**
+     * Verifica se o robo está sobre a coordenada objetivo
+     * 
+     * @return
+     */
+    public boolean estaSobreOjetivo() {
+	return Coordenada.comparar(this.coordenadaAtual, this.mapa.getCoordenadaDestino());
     }
 }

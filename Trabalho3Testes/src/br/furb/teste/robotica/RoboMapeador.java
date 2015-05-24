@@ -1,10 +1,10 @@
 package br.furb.teste.robotica;
 
 import br.furb.robotica.Caminho;
+import br.furb.robotica.Estado;
 import br.furb.robotica.InfoPosicao;
 import br.furb.robotica.Lado;
 import br.furb.robotica.MapaLabirinto;
-import br.furb.robotica.Matriz;
 import br.furb.robotica.common.Coordenada;
 import br.furb.robotica.estruturas.MinhaPilha;
 
@@ -22,20 +22,29 @@ public class RoboMapeador {
     private Caminho caminho;
     private boolean mapaCompleto;
     private MinhaPilha<int[]> coordenadasNaoVisitados;
-
-    public void addCoordenadaNaoExplorada(int[] coordenada) {
-	this.coordenadasNaoVisitados.empilhar(coordenada);
-    }
+    private Estado estado;
+    private final int[] coordenadaInicial;
+    private final Lado ladoInicial;
 
     public RoboMapeador(MapaLabirinto mapa, Lado ladoAtual, int[] coordenadaAtual) {
 	//	Motor.A.setSpeed(VELOCIDADE);
 	//	Motor.B.setSpeed(VELOCIDADE);
 
+	this.coordenadaInicial = coordenadaAtual;
 	this.coordenadaAtual = coordenadaAtual;
-	this.mapa = mapa;
 	this.ladoAtual = ladoAtual;
+	this.ladoInicial = ladoAtual;
+	this.mapa = mapa;
 	this.coordenadasNaoVisitados = new MinhaLinkedList<int[]>();
 	//	this.sensor = new UltrasonicSensor(SensorPort.S4);
+    }
+
+    public Estado getEstado() {
+	return estado;
+    }
+
+    public void setEstado(Estado estado) {
+	this.estado = estado;
     }
 
     /**
@@ -65,6 +74,10 @@ public class RoboMapeador {
 	return this.mapa.getInfoPosicao(this.coordenadaAtual);
     }
 
+    public void addCoordenadaNaoExplorada(int[] coordenada) {
+	this.coordenadasNaoVisitados.empilhar(coordenada);
+    }
+
     /**
      * Pega informações da posição atual do robo
      */
@@ -76,91 +89,28 @@ public class RoboMapeador {
 
 	InfoPosicao infoPosicao = mapa.criarPosicao(coordenadaAtual);
 
-	//Simula o mapa
-	switch (coordenadaAtual[Matriz.COLUNA]) {
-	    case 0:
-		switch (coordenadaAtual[Matriz.LINHA]) {
-		    case 0:
-			infoPosicao.setLadoLivre(Lado.ATRAS);
-			break;
-		    case 1:
-			infoPosicao.setLadoLivre(Lado.FRENTE, Lado.ATRAS);
-			break;
-		    case 2:
-			infoPosicao.setLadoLivre(Lado.FRENTE, Lado.ATRAS);
-			break;
-		    case 3:
-			infoPosicao.setLadoLivre(Lado.FRENTE, Lado.DIREITA);
-			break;
-		}
-		break;
-	    case 1:
-		switch (coordenadaAtual[Matriz.LINHA]) {
-		    case 0:
-			infoPosicao.setLadoLivre(Lado.ATRAS);
-			break;
-		    case 1:
-			infoPosicao.setLadoLivre(Lado.FRENTE, Lado.DIREITA, Lado.ATRAS);
-			break;
-		    case 2:
-			infoPosicao.setLadoLivre(Lado.FRENTE, Lado.ATRAS);
-			break;
-		    case 3:
-			infoPosicao.setLadoLivre(Lado.ESQUERDA, Lado.FRENTE, Lado.DIREITA);
-			break;
-		}
-		break;
-	    case 2:
-		switch (coordenadaAtual[Matriz.LINHA]) {
-		    case 0:
-			infoPosicao.setLadoLivre(Lado.ATRAS, Lado.DIREITA);
-			break;
-		    case 1:
-			infoPosicao.setLadoLivre(Lado.FRENTE, Lado.ESQUERDA, Lado.ATRAS);
-			break;
-		    case 2:
-			infoPosicao.setLadoLivre(Lado.FRENTE);
-			break;
-		    case 3:
-			infoPosicao.setLadoLivre(Lado.ESQUERDA);
-			break;
-		}
-		break;
-	    case 3:
-		switch (coordenadaAtual[Matriz.LINHA]) {
-		    case 0:
-			infoPosicao.setLadoLivre(Lado.ESQUERDA, Lado.ATRAS);
-			break;
-		    case 1:
-			infoPosicao.setLadoLivre(Lado.FRENTE, Lado.ATRAS);
-			break;
-		    case 2:
-			infoPosicao.setLadoLivre(Lado.FRENTE, Lado.ATRAS);
-			break;
-		    case 3:
-			infoPosicao.setLadoLivre(Lado.FRENTE);
-			break;
-		}
-		break;
+	if (Terreno.isDestino(coordenadaAtual)) {
+	    this.mapa.setCoordenadaDestino(coordenadaAtual);
 	}
+	Terreno.verificarPosicao(coordenadaAtual, infoPosicao);
 
-	//	//	Motor.C.rotate(-_90GRAUS); //ESQUERDA DO ROBO
+	//	Motor.C.rotate(-_90GRAUS); //ESQUERDA DO ROBO
 	//	Lado ladoSensor = Lado.valueOf(Math.abs(this.ladoAtual.ordinal() - 1) % 4);
 	//	System.out.println("Olhou para o lado" + ladoSensor.name());
-	//	//	infoPosicao.setLadoLivre(ladoSensor, sensor.getDistance() < DISTANCIA_OBSTACULO);
+	//	infoPosicao.setLadoLivre(ladoSensor, sensor.getDistance() < DISTANCIA_OBSTACULO);
 	//
-	//	//	Motor.C.rotate(+_90GRAUS); //FRENTE DO ROBO
+	//	Motor.C.rotate(+_90GRAUS); //FRENTE DO ROBO
 	//	ladoSensor = Lado.valueOf(this.ladoAtual.ordinal());
 	//	System.out.println("Olhou para o lado" + ladoSensor.name());
-	//	//	infoPosicao.setLadoLivre(ladoSensor, sensor.getDistance() < DISTANCIA_OBSTACULO);
+	//	infoPosicao.setLadoLivre(ladoSensor, sensor.getDistance() < DISTANCIA_OBSTACULO);
 	//
-	//	//	Motor.C.rotate(+_90GRAUS); //ESQUERDA DO ROBO
+	//	Motor.C.rotate(+_90GRAUS); //ESQUERDA DO ROBO
 	//	ladoSensor = Lado.valueOf((this.ladoAtual.ordinal() + 1) % 4);
 	//	System.out.println("Olhou para o lado" + ladoSensor.name());
-	//	//	infoPosicao.setLadoLivre(ladoSensor, sensor.getDistance() < DISTANCIA_OBSTACULO);
+	//	infoPosicao.setLadoLivre(ladoSensor, sensor.getDistance() < DISTANCIA_OBSTACULO);
 	//
 	//	//Aponta o sensor para frente novamente
-	//	//	Motor.C.rotate(-_90GRAUS, true);
+	//	Motor.C.rotate(-_90GRAUS, true);
     }
 
     /**
@@ -194,6 +144,12 @@ public class RoboMapeador {
 		caminho.nextElement();
 	    }
 	}
+	return caminho;
+    }
+    
+    public Caminho montarMenorCaminho() {
+	Caminho caminho = mapa.montarCaminhoDijkstra(this.coordenadaAtual, this.mapa.getCoordenadaDestino());
+	caminho.nextElement();
 	return caminho;
     }
 
@@ -264,7 +220,12 @@ public class RoboMapeador {
      * Exibe a posição e o lado atual do robo
      */
     public void printPosicaoAtual() {
-	System.out.println("Posicao Atual: " + Coordenada.toString(coordenadaAtual) + "   Lado Atual: " + this.ladoAtual.name());
+	System.out.println("Posicao Atual: " + Coordenada.toString(coordenadaAtual) + "   Lado Atual: "
+		+ this.ladoAtual.name());
     }
 
+    public void moveRoboParaPontoInicial() {
+	this.coordenadaAtual = this.coordenadaInicial;
+	this.ladoAtual = this.ladoInicial;
+    }
 }

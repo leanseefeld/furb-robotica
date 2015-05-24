@@ -2,6 +2,11 @@ package br.furb.robotica;
 
 import lejos.robotics.subsumption.Behavior;
 
+/**
+ * Pega informações da posição atual do robo
+ * @author Gustavo
+ *
+ */
 public class BehaviorAnalizarPosicao implements Behavior {
 
     private RoboMapeador robo;
@@ -12,7 +17,7 @@ public class BehaviorAnalizarPosicao implements Behavior {
 
     @Override
     public boolean takeControl() {
-	return false;
+	return true;
     }
 
     @Override

@@ -7,7 +7,6 @@ import br.furb.robotica.estruturas.MinhaPilha;
 public class MapaLabirinto {
 
     private final InfoPosicao[][] posicoes;
-
     private int[] coordenadaDestino;
 
     public MapaLabirinto() {
@@ -18,6 +17,14 @@ public class MapaLabirinto {
 	coordenadaDestino = new int[2];
 	coordenadaDestino[Matriz.LINHA] = linha;
 	coordenadaDestino[Matriz.COLUNA] = col;
+    }
+
+    public int[] getCoordenadaDestino() {
+	return this.coordenadaDestino;
+    }
+
+    public void setCoordenadaDestino(int[] coordenadaDestino) {
+	this.coordenadaDestino = coordenadaDestino;
     }
 
     public InfoPosicao getInfoPosicao(int[] coordenada) {

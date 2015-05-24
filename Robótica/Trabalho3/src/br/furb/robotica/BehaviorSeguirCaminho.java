@@ -1,19 +1,24 @@
 package br.furb.robotica;
 
-import lejos.nxt.Motor;
 import lejos.robotics.subsumption.Behavior;
 
-public class BehaviorSeguirTrajeto implements Behavior {
+/**
+ * Segue um caminho definido
+ * 
+ * @author Gustavo
+ */
+public class BehaviorSeguirCaminho implements Behavior {
 
     private RoboMapeador robo;
 
-    public BehaviorSeguirTrajeto(RoboMapeador robo) {
+    public BehaviorSeguirCaminho(RoboMapeador robo) {
 	this.robo = robo;
     }
 
     @Override
     public boolean takeControl() {
-	return robo.getCaminho() != null && !robo.getCaminho().isAfterLast();
+	return robo.getEstado() == Estado.EXPLORANDO_MAPA && robo.getCaminho() != null
+		&& !robo.getCaminho().isAfterLast();
     }
 
     @Override
