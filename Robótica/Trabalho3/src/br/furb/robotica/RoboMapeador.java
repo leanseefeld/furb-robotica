@@ -35,7 +35,7 @@ public class RoboMapeador {
 	Behavior concluirObjetivo = new BehaviorConcluiuObjetivo(robo);
 
 	Behavior[] comportamentos = { analizarPosicao, montarTrajeto, seguirTrajeto, mapeamentoCompleto,
-		seguirMenorCaminho };
+		seguirMenorCaminho, concluirObjetivo };
 	Arbitrator arb = new Arbitrator(comportamentos);
 	arb.start();
     }
