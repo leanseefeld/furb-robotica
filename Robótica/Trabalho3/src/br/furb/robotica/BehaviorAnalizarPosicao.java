@@ -17,7 +17,7 @@ public class BehaviorAnalizarPosicao implements Behavior {
 
     @Override
     public boolean takeControl() {
-	return true;
+	return this.robo.getPosicaoAtual() == null;
     }
 
     @Override

@@ -1,7 +1,6 @@
 package br.furb.teste.robotica;
 
 import br.furb.robotica.Caminho;
-import br.furb.robotica.Estado;
 import br.furb.robotica.InfoPosicao;
 import br.furb.robotica.Lado;
 import br.furb.robotica.MapaLabirinto;
@@ -22,7 +21,6 @@ public class RoboMapeador {
     private Caminho caminho;
     private boolean mapaCompleto;
     private MinhaPilha<int[]> coordenadasNaoVisitados;
-    private Estado estado;
     private final int[] coordenadaInicial;
     private final Lado ladoInicial;
 
@@ -37,14 +35,6 @@ public class RoboMapeador {
 	this.mapa = mapa;
 	this.coordenadasNaoVisitados = new MinhaLinkedList<int[]>();
 	//	this.sensor = new UltrasonicSensor(SensorPort.S4);
-    }
-
-    public Estado getEstado() {
-	return estado;
-    }
-
-    public void setEstado(Estado estado) {
-	this.estado = estado;
     }
 
     /**

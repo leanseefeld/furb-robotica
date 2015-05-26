@@ -17,8 +17,7 @@ public class BehaviorMontarCaminhoExploracao implements Behavior {
 
     @Override
     public boolean takeControl() {
-	return robo.getEstado() == Estado.EXPLORANDO_MAPA
-		&& (robo.getCaminho() == null || robo.getCaminho().isAfterLast());
+	return !robo.mapeamentoEstaCompleto() && (robo.getCaminho() == null || robo.getCaminho().isAfterLast());
     }
 
     @Override

@@ -18,7 +18,7 @@ public class BehaviorSeguirMenorCaminho implements Behavior {
 
     @Override
     public boolean takeControl() {
-	return robo.getEstado() == Estado.SEGUINDO_MENOR_CAMINHO && !robo.getCaminho().isAfterLast();
+	return !robo.getCaminho().isAfterLast();
     }
 
     @Override

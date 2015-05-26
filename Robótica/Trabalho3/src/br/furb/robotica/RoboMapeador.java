@@ -5,7 +5,6 @@ import lejos.nxt.ColorSensor;
 import lejos.nxt.Motor;
 import lejos.nxt.SensorPort;
 import lejos.nxt.UltrasonicSensor;
-import lejos.robotics.Color;
 import lejos.robotics.subsumption.Arbitrator;
 import lejos.robotics.subsumption.Behavior;
 import br.furb.robotica.common.Coordenada;
@@ -30,14 +29,27 @@ public class RoboMapeador {
 	Behavior analizarPosicao = new BehaviorAnalizarPosicao(robo);
 	Behavior montarTrajeto = new BehaviorMontarCaminhoExploracao(robo);
 	Behavior seguirTrajeto = new BehaviorSeguirCaminho(robo);
-	Behavior mapeamentoCompleto = new BehaviorMapeamentoCompleto(robo);
-	Behavior seguirMenorCaminho = new BehaviorSeguirMenorCaminho(robo);
-	Behavior concluirObjetivo = new BehaviorConcluiuObjetivo(robo);
 
-	Behavior[] comportamentos = { analizarPosicao, montarTrajeto, seguirTrajeto, mapeamentoCompleto,
-		seguirMenorCaminho, concluirObjetivo };
+	Behavior[] comportamentos = { analizarPosicao, montarTrajeto, seguirTrajeto };
 	Arbitrator arb = new Arbitrator(comportamentos);
 	arb.start();
+
+	System.out.println("O mapeamento está completo");
+	System.out.println("Pressione enter para seguir o menor caminho");
+	Button.ENTER.waitForPressAndRelease();
+
+	robo.moveRoboParaPontoInicial();
+
+	Behavior mapeamentoMontaMenorCaminho = new BehaviorMontaMenorCaminho(robo);
+	Behavior seguirMenorCaminho = new BehaviorSeguirMenorCaminho(robo);
+
+	comportamentos = new Behavior[] { mapeamentoMontaMenorCaminho, seguirMenorCaminho };
+	arb = new Arbitrator(comportamentos);
+	arb.start();
+
+	System.out.println("Objetivo alcançado");
+	Button.ENTER.waitForPressAndRelease();
+	System.out.println("FIM");
     }
 
     private int[] coordenadaAtual;
@@ -47,7 +59,6 @@ public class RoboMapeador {
     private Caminho caminho;
     private boolean mapaCompleto;
     private MinhaPilha<int[]> coordenadasNaoVisitados;
-    private Estado estado;
     private ColorSensor colorSensor;
 
     private final int[] coordenadaInicial;
@@ -66,7 +77,6 @@ public class RoboMapeador {
 	this.sensor = new UltrasonicSensor(SensorPort.S4);
 	this.colorSensor = new ColorSensor(SensorPort.S3);
 	this.colorSensor.setFloodlight(true);
-	this.estado = Estado.EXPLORANDO_MAPA;
     }
 
     /**
@@ -90,14 +100,6 @@ public class RoboMapeador {
      */
     public InfoPosicao getPosicaoAtual() {
 	return this.mapa.getInfoPosicao(this.coordenadaAtual);
-    }
-
-    public Estado getEstado() {
-	return estado;
-    }
-
-    public void setEstado(Estado estado) {
-	this.estado = estado;
     }
 
     /**
