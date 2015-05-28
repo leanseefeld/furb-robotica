@@ -10,27 +10,26 @@ import lejos.robotics.subsumption.Behavior;
  */
 public class BehaviorMontaMenorCaminho implements Behavior {
 
-    private RoboMapeador robo;
+	private RoboMapeador robo;
 
-    public BehaviorMontaMenorCaminho(RoboMapeador robo) {
-	super();
-	this.robo = robo;
-    }
+	public BehaviorMontaMenorCaminho(RoboMapeador robo) {
+		this.robo = robo;
+	}
 
-    @Override
-    public boolean takeControl() {
-	return robo.getCaminho() == null || robo.estaSobreOjetivo();
-    }
+	@Override
+	public boolean takeControl() {
+		return robo.getCaminho() == null || robo.estaSobreOjetivo();
+	}
 
-    @Override
-    public void action() {
-	Caminho menorCaminho = this.robo.montarMenorCaminho();
-	this.robo.setCaminho(menorCaminho);
-    }
+	@Override
+	public void action() {
+		Caminho menorCaminho = this.robo.montarMenorCaminho();
+		this.robo.setCaminho(menorCaminho);
+	}
 
-    @Override
-    public void suppress() {
+	@Override
+	public void suppress() {
 
-    }
+	}
 
 }

@@ -9,25 +9,28 @@ import lejos.robotics.subsumption.Behavior;
  */
 public class BehaviorSeguirCaminho implements Behavior {
 
-    private RoboMapeador robo;
+	private RoboMapeador robo;
 
-    public BehaviorSeguirCaminho(RoboMapeador robo) {
-	this.robo = robo;
-    }
+	public BehaviorSeguirCaminho(RoboMapeador robo) {
+		this.robo = robo;
+	}
 
-    @Override
-    public boolean takeControl() {
-	return !robo.mapeamentoEstaCompleto() && robo.getCaminho() != null
-		&& !robo.getCaminho().isAfterLast();
-    }
+	@Override
+	public boolean takeControl() {
+		Debug.println("S.takeControl");
+		Debug.step("Com. " + robo.mapeamentoEstaCompleto());
+		return !robo.mapeamentoEstaCompleto() && robo.getCaminho() != null
+				&& !robo.getCaminho().isAfterLast();
+	}
 
-    @Override
-    public void action() {
-	this.robo.moverProximaPosicao();
-    }
+	@Override
+	public void action() {
+		Debug.step("S.action");
+		this.robo.moverProximaPosicao();
+	}
 
-    @Override
-    public void suppress() {
-    }
+	@Override
+	public void suppress() {
+	}
 
 }

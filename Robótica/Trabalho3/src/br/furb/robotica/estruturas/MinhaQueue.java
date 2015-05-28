@@ -4,19 +4,22 @@ import java.util.Queue;
 
 public class MinhaQueue<T> extends Queue<T> implements MinhaPilha<T> {
 
-    @Override
-    public void empilhar(T objeto) {
-	this.push(objeto);
-    }
+	@Override
+	public void empilhar(T objeto) {
+		this.push(objeto);
+	}
 
-    @Override
-    public T pegar() {
-	return (T) this.pop();
-    }
+	@Override
+	public T pegar() {
+		if (isEmpty()) {
+			return null;
+		}
+		return (T) this.pop();
+	}
 
-    @Override
-    public boolean estaVazia() {
-	return this.isEmpty();
-    }
+	@Override
+	public boolean estaVazia() {
+		return this.isEmpty();
+	}
 
 }
