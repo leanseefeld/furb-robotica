@@ -1,7 +1,7 @@
-package br.furb.robotica;
+package util;
 
-import br.furb.robotica.common.GraphSearcher;
-import br.furb.robotica.estruturas.lista.Lista;
+import java.util.LinkedList;
+import java.util.List;
 
 public class Dijkstra extends GraphSearcher {
 
@@ -47,15 +47,15 @@ public class Dijkstra extends GraphSearcher {
 	}
 
 	public int[] getMinPathRoute() {
-		Lista route = new Lista();
+		List<Integer> route = new LinkedList<>();
 		int parent = destiny;
 		while (parent != NIL) {
-			route.insere(parent);
+			route.add(parent);
 			parent = vars[parent][V_PARENT];
 		}
-		int[] intRoute = new int[route.comprimento()];
+		int[] intRoute = new int[route.size()];
 		for (int i = 0; i < intRoute.length; i++) {
-			intRoute[i] = route.buscarIndice(i).getInfo();
+			intRoute[i] = route.get(i);
 		}
 		return intRoute;
 	}

@@ -1,6 +1,5 @@
-package br.furb.robotica.common;
+package br.furb.robotica;
 
-import br.furb.robotica.Matriz;
 
 public class Coordenada {
 

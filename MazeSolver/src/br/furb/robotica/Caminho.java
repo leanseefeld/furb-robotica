@@ -5,8 +5,8 @@ import java.util.Enumeration;
 import java.util.List;
 
 /**
- * Objeto que armazena a sequência de passos para que o robô se desloque de
- * uma posição até outra.
+ * Objeto que armazena a sequência de passos para que o robô se desloque de uma
+ * posição até outra.
  */
 public class Caminho implements Enumeration<int[]> {
 
@@ -34,7 +34,7 @@ public class Caminho implements Enumeration<int[]> {
 	}
 
 	public void imprimeCaminho() {
-		Debug.println(toString());
+		System.out.println(toString());
 	}
 
 	public boolean isAfterLast() {

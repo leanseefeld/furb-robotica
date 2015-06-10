@@ -3,6 +3,8 @@ package br.furb.robotica;
 import java.util.ArrayList;
 import java.util.List;
 
+import util.Dijkstra;
+
 public class MapaLabirinto {
 
 	public static final List<int[]> criarLista(int[]... cells) {
@@ -17,8 +19,8 @@ public class MapaLabirinto {
 
 	private int[] coordenadaDestino;
 
-	public MapaLabirinto() {
-		posicoes = new InfoPosicao[4][4];
+	public MapaLabirinto(int tamanho) {
+		posicoes = new InfoPosicao[tamanho][tamanho];
 	}
 
 	public boolean comparaCooredenadas(int[] a, int[] b) {

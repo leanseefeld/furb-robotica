@@ -1,6 +1,7 @@
-package br.furb.robotica.common;
+package util;
 
-import br.furb.robotica.estruturas.lista.Lista;
+import java.util.LinkedList;
+import java.util.List;
 
 public abstract class GraphSearcher {
 
@@ -27,15 +28,15 @@ public abstract class GraphSearcher {
 	}
 
 	protected int[] getAdjs(int v) {
-		Lista lista = new Lista();
+		List<Integer> lista = new LinkedList<>();
 		for (int i = 0; i < graph.length; i++) {
 			if (graph[v][i] != 0 && graph[v][i] != INFINITE) {
-				lista.insere(i);
+				lista.add(i);
 			}
 		}
-		int[] adjs = new int[lista.comprimento()];
+		int[] adjs = new int[lista.size()];
 		for (int i = 0; i < adjs.length; i++) {
-			adjs[i] = lista.buscarIndice(i).getInfo();
+			adjs[i] = lista.get(i);
 		}
 		return adjs;
 	}

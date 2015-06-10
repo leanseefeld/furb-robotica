@@ -1,5 +1,7 @@
-package br.furb.robotica;
+package br.furb.robotica.behavior;
 
+import br.furb.robotica.Debug;
+import br.furb.robotica.Robo;
 import lejos.robotics.subsumption.Behavior;
 
 /**

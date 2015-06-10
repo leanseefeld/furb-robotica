@@ -1,5 +1,12 @@
 package br.furb.robotica;
 
+import java.util.Stack;
+
+import br.furb.robotica.behavior.BehaviorAnalizarPosicao;
+import br.furb.robotica.behavior.BehaviorMontaMenorCaminho;
+import br.furb.robotica.behavior.BehaviorMontarCaminhoExploracao;
+import br.furb.robotica.behavior.BehaviorSeguirCaminho;
+import br.furb.robotica.behavior.BehaviorSeguirMenorCaminho;
 import lejos.nxt.Button;
 import lejos.nxt.ColorSensor;
 import lejos.nxt.Motor;
@@ -8,12 +15,9 @@ import lejos.nxt.UltrasonicSensor;
 import lejos.robotics.Color;
 import lejos.robotics.subsumption.Arbitrator;
 import lejos.robotics.subsumption.Behavior;
-import br.furb.robotica.common.Coordenada;
-import br.furb.robotica.estruturas.MinhaPilha;
-import br.furb.robotica.estruturas.MinhaQueue;
 
 /**
- * Classe de inicialização do robô.
+ * Classe de inicializaÃ§Ã£o do robÃ´.
  */
 public class Robo {
 
@@ -22,14 +26,16 @@ public class Robo {
 	private static final int DISTANCIA_OBSTACULO = 20;
 	private static final int _90GRAUS = 90;
 	private static final int _90GRAUS_RODAS = 400;
+	private static final int TAMANHO_MATRIZ = 100;
 
 	public static void main(String[] args) {
 		System.out.println("ENTER    -> Executa");
 		System.out.println("[outro]  -> Depura");
 		Debug.debug = Button.waitForAnyPress() != Button.ENTER.getId();
 
-		MapaLabirinto mapa = new MapaLabirinto();
-		Robo robo = new Robo(mapa, Lado.FRENTE, Coordenada.criar(3, 3));
+		MapaLabirinto mapa = new MapaLabirinto(TAMANHO_MATRIZ);
+		final int indiceInicial = TAMANHO_MATRIZ / 2;
+		Robo robo = new Robo(mapa, Lado.FRENTE, Coordenada.criar(indiceInicial, indiceInicial));
 
 		Behavior seguirTrajeto = new BehaviorSeguirCaminho(robo);
 		Behavior montarTrajeto = new BehaviorMontarCaminhoExploracao(robo);
@@ -71,7 +77,7 @@ public class Robo {
 	private UltrasonicSensor sensor;
 	private Caminho caminho;
 	private boolean mapaCompleto;
-	private MinhaPilha<int[]> coordenadasNaoVisitados;
+	private Stack<int[]> coordenadasNaoVisitados;
 	private ColorSensor colorSensor;
 
 	private final int[] coordenadaInicial;
@@ -86,7 +92,7 @@ public class Robo {
 		this.ladoAtual = ladoAtual;
 		this.ladoInicial = ladoAtual;
 		this.mapa = mapa;
-		this.coordenadasNaoVisitados = new MinhaQueue<int[]>();
+		this.coordenadasNaoVisitados = new Stack<>();
 		this.sensor = new UltrasonicSensor(SensorPort.S4);
 		this.colorSensor = new ColorSensor(SensorPort.S3);
 		this.colorSensor.setFloodlight(true);
@@ -191,11 +197,11 @@ public class Robo {
 			caminho = new Caminho();
 			caminho.addPasso(coordenadasVisinhas[0]);
 			for (int i = 1; i < coordenadasVisinhas.length; i++) {
-				coordenadasNaoVisitados.empilhar(coordenadasVisinhas[i]);
+				coordenadasNaoVisitados.push(coordenadasVisinhas[i]);
 			}
 		} else {
 			int[] coord = null;
-			while ((coord = coordenadasNaoVisitados.pegar()) != null) {
+			while ((coord = coordenadasNaoVisitados.pop()) != null) {
 				Debug.print(Coordenada.toString(coord));
 				if (mapa.getInfoPosicao(coord) == null) {
 					Debug.print("Escolhida!");
