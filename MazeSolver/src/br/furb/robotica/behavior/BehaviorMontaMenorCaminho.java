@@ -1,8 +1,8 @@
 package br.furb.robotica.behavior;
 
+import lejos.robotics.subsumption.Behavior;
 import br.furb.robotica.Caminho;
 import br.furb.robotica.Robo;
-import lejos.robotics.subsumption.Behavior;
 
 /**
  * Verifica se o mapa ja foi totalmente explorado. <br>
@@ -12,26 +12,26 @@ import lejos.robotics.subsumption.Behavior;
  */
 public class BehaviorMontaMenorCaminho implements Behavior {
 
-	private Robo robo;
+    private Robo robo;
 
-	public BehaviorMontaMenorCaminho(Robo robo) {
-		this.robo = robo;
-	}
+    public BehaviorMontaMenorCaminho(Robo robo) {
+	this.robo = robo;
+    }
 
-	@Override
-	public void action() {
-		Caminho menorCaminho = this.robo.montarMenorCaminho();
-		this.robo.setCaminho(menorCaminho);
-	}
+    @Override
+    public void action() {
+	Caminho menorCaminho = this.robo.montarMenorCaminho();
+	this.robo.setCaminho(menorCaminho);
+    }
 
-	@Override
-	public void suppress() {
+    @Override
+    public void suppress() {
 
-	}
+    }
 
-	@Override
-	public boolean takeControl() {
-		return robo.getCaminho() == null || robo.estaSobreOjetivo();
-	}
+    @Override
+    public boolean takeControl() {
+	return robo.getCaminho() == null || robo.estaSobreOjetivo();
+    }
 
 }

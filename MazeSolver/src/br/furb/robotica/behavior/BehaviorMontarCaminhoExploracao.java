@@ -1,9 +1,9 @@
 package br.furb.robotica.behavior;
 
+import lejos.robotics.subsumption.Behavior;
 import br.furb.robotica.Caminho;
 import br.furb.robotica.Debug;
 import br.furb.robotica.Robo;
-import lejos.robotics.subsumption.Behavior;
 
 /**
  * Monta um caminho para explorar algum local ainda não explorado
@@ -12,30 +12,28 @@ import lejos.robotics.subsumption.Behavior;
  */
 public class BehaviorMontarCaminhoExploracao implements Behavior {
 
-	private Robo robo;
+    private Robo robo;
 
-	public BehaviorMontarCaminhoExploracao(Robo robo) {
-		this.robo = robo;
-	}
+    public BehaviorMontarCaminhoExploracao(Robo robo) {
+	this.robo = robo;
+    }
 
-	@Override
-	public void action() {
-		Caminho caminho = robo.montarCaminhoAteProximaPosicao();
-		Debug.step("M.action: caminhoNull? " + (caminho == null));
-		robo.setCaminho(caminho);
-	}
+    @Override
+    public void action() {
+	Caminho caminho = robo.montarCaminhoAteProximaPosicao();
+	Debug.step("M.action: caminhoNull? " + (caminho == null));
+	robo.setCaminho(caminho);
+    }
 
-	@Override
-	public void suppress() {
+    @Override
+    public void suppress() {
 
-	}
+    }
 
-	@Override
-	public boolean takeControl() {
-		Debug.step("M.takeControl");
-		return !robo.mapeamentoEstaCompleto()
-				&& (robo.getCaminho() == null || robo.getCaminho()
-						.isAfterLast());
-	}
+    @Override
+    public boolean takeControl() {
+	Debug.step("M.takeControl");
+	return !robo.mapeamentoEstaCompleto() && (robo.getCaminho() == null || robo.getCaminho().isAfterLast());
+    }
 
 }
