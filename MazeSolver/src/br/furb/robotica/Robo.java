@@ -26,6 +26,7 @@ public class Robo {
     private static final int _90GRAUS = 90;
     private static final int _90GRAUS_RODAS = 400;
     private static final int TAMANHO_MATRIZ = 100;
+    private static final int COR_OBJETIVO = Color.GREEN;
 
     public static void main(String[] args) {
 	System.out.println("ENTER    -> Executa");
@@ -98,16 +99,11 @@ public class Robo {
      * Pega informações da posição atual do robo
      */
     public void analisarPosicao() {
-	if (mapa.getInfoPosicao(coordenadaAtual) != null) {
-	    //Apenas para testes... depois remover isso
-	    throw new UnsupportedOperationException("Analisando posição repetida");
-	}
-
 	InfoPosicao infoPosicao = mapa.criarPosicao(coordenadaAtual);
 
 	if (colorSensor.isFloodlightOn()) {
 	    int colorId = colorSensor.getColorID();
-	    if (colorId == Color.GREEN) {
+	    if (colorId == COR_OBJETIVO) {
 		this.mapa.setCoordenadaDestino(coordenadaAtual);
 		colorSensor.setFloodlight(false);
 		Debug.println("Green: " + colorId);
