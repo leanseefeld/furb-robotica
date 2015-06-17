@@ -30,7 +30,7 @@ public class BehaviorAnalizarPosicao implements Behavior {
     @Override
     public boolean takeControl() {
 	Debug.step("A.takeControl");
-	return this.robo.getPosicaoAtual() == null;
+	return robo.estaSobreInterseccao();
     }
 
 }

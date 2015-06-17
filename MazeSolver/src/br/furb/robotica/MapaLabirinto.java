@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import util.Dijkstra;
 
+@Deprecated
 public class MapaLabirinto {
 
     public static final List<int[]> criarLista(int[]... cells) {

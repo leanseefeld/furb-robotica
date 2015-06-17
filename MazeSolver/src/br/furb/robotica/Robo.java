@@ -1,17 +1,18 @@
 package br.furb.robotica;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Stack;
 import lejos.nxt.Button;
 import lejos.nxt.ColorSensor;
 import lejos.nxt.Motor;
 import lejos.nxt.SensorPort;
-import lejos.nxt.UltrasonicSensor;
 import lejos.robotics.Color;
 import lejos.robotics.subsumption.Arbitrator;
 import lejos.robotics.subsumption.Behavior;
 import br.furb.robotica.behavior.BehaviorAnalizarPosicao;
 import br.furb.robotica.behavior.BehaviorMontaMenorCaminho;
-import br.furb.robotica.behavior.BehaviorMontarCaminhoExploracao;
+import br.furb.robotica.behavior.BehaviorMontarTrajeto;
 import br.furb.robotica.behavior.BehaviorSeguirCaminho;
 import br.furb.robotica.behavior.BehaviorSeguirMenorCaminho;
 
@@ -21,24 +22,21 @@ import br.furb.robotica.behavior.BehaviorSeguirMenorCaminho;
 public class Robo {
 
     private static final int VELOCIDADE = 500;
-    private static final int PASSO = 800;
-    private static final int DISTANCIA_OBSTACULO = 20;
-    private static final int _90GRAUS = 90;
     private static final int _90GRAUS_RODAS = 400;
-    private static final int TAMANHO_MATRIZ = 100;
-    private static final int COR_OBJETIVO = Color.GREEN;
+
+    private static final int COR_INTERSECCAO = Color.WHITE;
+    private static final int COR_LINHA = Color.BLACK;
+    private static final int DISTANCIA_INSPECAO = 100;
 
     public static void main(String[] args) {
 	System.out.println("ENTER    -> Executa");
 	System.out.println("[outro]  -> Depura");
 	Debug.debug = Button.waitForAnyPress() != Button.ENTER.getId();
 
-	MapaLabirinto mapa = new MapaLabirinto(TAMANHO_MATRIZ);
-	final int indiceInicial = TAMANHO_MATRIZ / 2;
-	Robo robo = new Robo(mapa, Lado.FRENTE, Coordenada.criar(indiceInicial, indiceInicial));
+	Robo robo = new Robo();
 
 	Behavior seguirTrajeto = new BehaviorSeguirCaminho(robo);
-	Behavior montarTrajeto = new BehaviorMontarCaminhoExploracao(robo);
+	Behavior montarTrajeto = new BehaviorMontarTrajeto(robo);
 	Behavior analizarPosicao = new BehaviorAnalizarPosicao(robo);
 
 	Behavior[] comportamentos = { seguirTrajeto, montarTrajeto, analizarPosicao };
@@ -68,72 +66,55 @@ public class Robo {
 	System.out.println("FIM");
     }
 
-    private int[] coordenadaAtual;
     private Lado ladoAtual;
-    private MapaLabirinto mapa;
-    private UltrasonicSensor sensor;
+    private final GerenciadorNos gerenciadorNos;
     private Caminho caminho;
     private boolean mapaCompleto;
-    private Stack<int[]> coordenadasNaoVisitados;
+    private Stack<No> nosNaoVizitados;
     private ColorSensor colorSensor;
 
-    private final int[] coordenadaInicial;
-    private final Lado ladoInicial;
+    private No noAtual;
 
-    public Robo(MapaLabirinto mapa, Lado ladoAtual, int[] coordenadaAtual) {
+    public Robo() {
 	Motor.A.setSpeed(VELOCIDADE);
 	Motor.B.setSpeed(VELOCIDADE);
 
-	this.coordenadaAtual = coordenadaAtual;
-	this.coordenadaInicial = coordenadaAtual;
-	this.ladoAtual = ladoAtual;
-	this.ladoInicial = ladoAtual;
-	this.mapa = mapa;
-	this.coordenadasNaoVisitados = new Stack<>();
-	this.sensor = new UltrasonicSensor(SensorPort.S4);
+	this.nosNaoVizitados = new Stack<>();
 	this.colorSensor = new ColorSensor(SensorPort.S3);
 	this.colorSensor.setFloodlight(true);
+
+	this.gerenciadorNos = new GerenciadorNos();
+	this.noAtual = new No(0, 0);
+	this.gerenciadorNos.salvarNo(this.noAtual);
     }
 
     /**
      * Pega informações da posição atual do robo
      */
     public void analisarPosicao() {
-	InfoPosicao infoPosicao = mapa.criarPosicao(coordenadaAtual);
-
-	if (colorSensor.isFloodlightOn()) {
-	    int colorId = colorSensor.getColorID();
-	    if (colorId == COR_OBJETIVO) {
-		this.mapa.setCoordenadaDestino(coordenadaAtual);
-		colorSensor.setFloodlight(false);
-		Debug.println("Green: " + colorId);
+	if (noAtual.isVisitado()) {
+	    return;
+	}
+	List<Lado> ladosAExplorar = new ArrayList<>(4);
+	for (Lado lado : Lado.values()) {
+	    No vizinho = noAtual.getVizinho(lado);
+	    if (vizinho == null) {
+		No vizinhoNaoConexo = gerenciadorNos.getVizinho(noAtual, lado, false);
+		if (vizinhoNaoConexo == null || !vizinhoNaoConexo.isVisitado()) {
+		    ladosAExplorar.add(lado);
+		}
 	    }
 	}
-
-	Motor.C.rotate(-_90GRAUS); //ESQUERDA DO ROBO
-	int ordinalLado = this.ladoAtual.ordinal() - 1;
-	ordinalLado = ordinalLado == -1 ? 3 : ordinalLado;
-	Lado ladoSensor = Lado.valueOf(ordinalLado);
-	infoPosicao.setLadoLivre(ladoSensor, sensor.getDistance() > DISTANCIA_OBSTACULO);
-
-	Debug.println(ladoSensor.name() + " - " + sensor.getDistance());
-
-	Motor.C.rotate(+_90GRAUS); //FRENTE DO ROBO
-	ladoSensor = Lado.valueOf(this.ladoAtual.ordinal());
-	infoPosicao.setLadoLivre(ladoSensor, sensor.getDistance() > DISTANCIA_OBSTACULO);
-
-	Debug.println(ladoSensor.name() + " - " + sensor.getDistance());
-
-	Motor.C.rotate(+_90GRAUS); //DIREITA DO ROBO
-	ladoSensor = Lado.valueOf((this.ladoAtual.ordinal() + 1) % 4);
-	infoPosicao.setLadoLivre(ladoSensor, sensor.getDistance() > DISTANCIA_OBSTACULO);
-	Debug.println(ladoSensor.name() + " - " + sensor.getDistance());
-
-	//Aponta o sensor para frente novamente
-	Motor.C.rotate(-_90GRAUS, true);
-	if (!Coordenada.equals(coordenadaInicial, coordenadaAtual)) {
-	    infoPosicao.setLadoLivre(ladoAtual.getOposto());
+	for (Lado lado : ladosAExplorar) {
+	    virarPara(lado);
+	    avancar(DISTANCIA_INSPECAO);
+	    if (estaSobreLinha()) {
+		No vizinho = gerenciadorNos.getVizinho(noAtual, lado, true);
+		nosNaoVizitados.push(vizinho);
+	    }
+	    retroceder(DISTANCIA_INSPECAO);
 	}
+	noAtual.setVisitado(true);
     }
 
     public boolean analisouPosicao() {
@@ -183,11 +164,11 @@ public class Robo {
 	    caminho = new Caminho();
 	    caminho.addPasso(coordenadasVisinhas[0]);
 	    for (int i = 1; i < coordenadasVisinhas.length; i++) {
-		coordenadasNaoVisitados.push(coordenadasVisinhas[i]);
+		nosNaoVizitados.push(coordenadasVisinhas[i]);
 	    }
 	} else {
 	    int[] coord = null;
-	    while ((coord = coordenadasNaoVisitados.pop()) != null) {
+	    while ((coord = nosNaoVizitados.pop()) != null) {
 		Debug.print(Coordenada.toString(coord));
 		if (mapa.getInfoPosicao(coord) == null) {
 		    Debug.print("Escolhida!");
@@ -236,7 +217,7 @@ public class Robo {
 
 	proximaPosicao = caminho.nextElement();
 	Lado novoSentido = mapa.getLado(this.coordenadaAtual, proximaPosicao);
-	girar(novoSentido);
+	virarPara(novoSentido);
 	moverEmFrente();
 	this.ladoAtual = novoSentido;
 	this.coordenadaAtual = proximaPosicao;
@@ -265,13 +246,17 @@ public class Robo {
      * Gira o robo no para o lado desejado
      * 
      * @param ladoDestino
+     *            lado para o qual virar
      */
-    private void girar(Lado ladoDestino) {
+    private void virarPara(Lado ladoDestino) {
 	int quantidadeGirar = ladoDestino.ordinal() - this.ladoAtual.ordinal();
+	if (quantidadeGirar == 0) {
+	    return;
+	}
 
 	// Se for 3, muda para 1 e muda a direção da rotação
 	// se for 4, fica parado
-	if (quantidadeGirar > 2) {
+	if (Math.abs(quantidadeGirar) > 2) {
 	    quantidadeGirar = -(quantidadeGirar % 2);
 	}
 
@@ -292,12 +277,45 @@ public class Robo {
     }
 
     /**
-     * Move o robo uma posição para frente
+     * Move o robo um passo para frente
+     * 
+     * @param passo
+     *            distancia a mover
      */
-    private void moverEmFrente() {
-	Debug.println("Moveu para frente");
-	Motor.A.rotate(PASSO, true);
-	Motor.B.rotate(PASSO);
+    public void avancar(int passo) {
+	Debug.println("Moveu: " + passo);
+	Motor.A.rotate(passo, true);
+	Motor.B.rotate(passo);
+    }
+
+    /**
+     * O mesmo que {@code avancar(-passo)}.
+     * 
+     * @param passo
+     *            distancia a mover
+     * @see #avancar(int)
+     */
+    public void retroceder(int passo) {
+	avancar(-passo);
+    }
+
+    public boolean estaSobreInterseccao() {
+	return colorSensor.getColor().getColor() == COR_INTERSECCAO;
+    }
+
+    public boolean estaSobreLinha() {
+	if (colorSensor.getColorID() == COR_LINHA) {
+	    return true;
+	}
+	Motor.A.rotate(DISTANCIA_INSPECAO);
+	boolean estaSobreLinha = colorSensor.getColorID() == COR_LINHA;
+	Motor.A.rotate(-DISTANCIA_INSPECAO);
+	if (!estaSobreLinha) {
+	    Motor.B.rotate(DISTANCIA_INSPECAO);
+	    estaSobreLinha = colorSensor.getColorID() == COR_LINHA;
+	    Motor.B.rotate(-DISTANCIA_INSPECAO);
+	}
+	return estaSobreLinha;
     }
 
 }
