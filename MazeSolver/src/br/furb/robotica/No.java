@@ -1,5 +1,8 @@
 package br.furb.robotica;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class No {
 
     private No frente, atras, esquerda, direita;
@@ -75,35 +78,50 @@ public class No {
 	this.y = y;
     }
 
-    public void setVizinho(Lado lado, No vizinho) {
+    public void setVizinho(Sentido lado, No vizinho) {
 	switch (lado) {
-	    case ATRAS:
+	    case SUL:
 		setAtras(vizinho);
 		break;
-	    case FRENTE:
+	    case NORTE:
 		setFrente(vizinho);
 		break;
-	    case DIREITA:
+	    case LESTE:
 		setDireita(vizinho);
 		break;
-	    case ESQUERDA:
+	    case OESTE:
 		setEsquerda(vizinho);
 		break;
 	}
     }
 
-    public No getVizinho(Lado lado) {
+    public No getVizinho(Sentido lado) {
 	switch (lado) {
-	    case ATRAS:
+	    case SUL:
 		return getAtras();
-	    case FRENTE:
+	    case NORTE:
 		return getFrente();
-	    case DIREITA:
+	    case LESTE:
 		return getDireita();
-	    case ESQUERDA:
+	    case OESTE:
 		return getEsquerda();
 	}
 	return null;
     }
 
+    @Override
+    public String toString() {
+	return "X:" + getX() + " Y:" + getY();
+    }
+
+    public List<No> getVizinhosConexos(boolean somenteNaoVisitados) {
+	List<No> vizinhos = new ArrayList<>(4);
+	for (Sentido sentido : Sentido.values()) {
+	    No possivelVizinho = getVizinho(sentido);
+	    if (isVisitado() || !somenteNaoVisitados) {
+		vizinhos.add(possivelVizinho);
+	    }
+	}
+	return vizinhos;
+    }
 }

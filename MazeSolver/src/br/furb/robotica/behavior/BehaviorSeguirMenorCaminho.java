@@ -28,7 +28,7 @@ public class BehaviorSeguirMenorCaminho implements Behavior {
 
     @Override
     public boolean takeControl() {
-	return !robo.getCaminho().isAfterLast();
+	return !robo.getCaminho().hasMoreElements();
     }
 
 }

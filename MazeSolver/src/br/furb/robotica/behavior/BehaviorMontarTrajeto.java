@@ -1,7 +1,6 @@
 package br.furb.robotica.behavior;
 
 import lejos.robotics.subsumption.Behavior;
-import br.furb.robotica.Caminho;
 import br.furb.robotica.Debug;
 import br.furb.robotica.Robo;
 
@@ -20,9 +19,8 @@ public class BehaviorMontarTrajeto implements Behavior {
 
     @Override
     public void action() {
-	Caminho caminho = robo.montarCaminhoAteProximaPosicao();
-	Debug.step("M.action: caminhoNull? " + (caminho == null));
-	robo.setCaminho(caminho);
+	robo.montarCaminhoAteProximaPosicao();
+	//	Debug.step("M.action: caminhoNull? " + (caminho == null));
     }
 
     @Override
@@ -33,7 +31,7 @@ public class BehaviorMontarTrajeto implements Behavior {
     @Override
     public boolean takeControl() {
 	Debug.step("M.takeControl");
-	return !robo.mapeamentoEstaCompleto() && (robo.getCaminho() == null || robo.getCaminho().isAfterLast());
+	return !(robo.mapeamentoEstaCompleto() || robo.estaSeguindoCaminho());
     }
 
 }

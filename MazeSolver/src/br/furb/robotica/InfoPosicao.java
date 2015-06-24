@@ -8,16 +8,16 @@ public class InfoPosicao {
 	lados = new EstadoLado[4];
     }
 
-    public InfoPosicao(Lado... ladosLivres) {
+    public InfoPosicao(Sentido... ladosLivres) {
 	this();
 	this.setLadoLivre(ladosLivres);
     }
 
-    public boolean isLadoLivre(Lado lado) {
+    public boolean isLadoLivre(Sentido lado) {
 	return getEstadoLado(lado) == EstadoLado.LIVRE;
     }
 
-    public void setLadoLivre(Lado... ladosLivres) {
+    public void setLadoLivre(Sentido... ladosLivres) {
 	Debug.print("Lado livre:");
 	for (int i = 0; i < ladosLivres.length; i++) {
 	    Debug.print(ladosLivres[i].name() + "  ");
@@ -26,11 +26,11 @@ public class InfoPosicao {
 	Debug.println();
     }
 
-    public void setLadoLivre(Lado lado, boolean livre) {
+    public void setLadoLivre(Sentido lado, boolean livre) {
 	lados[lado.ordinal()] = EstadoLado.valueOf(livre);
     }
 
-    private EstadoLado getEstadoLado(Lado lado) {
+    private EstadoLado getEstadoLado(Sentido lado) {
 	return lados[lado.ordinal()];
     }
 }

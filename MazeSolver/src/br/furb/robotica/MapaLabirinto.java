@@ -76,7 +76,7 @@ public class MapaLabirinto {
      * @return
      */
     public boolean existePassagem(int[] origem, int[] destino) {
-	Lado lado = this.getLado(origem, destino);
+	Sentido lado = this.getLado(origem, destino);
 	boolean existe = this.getInfoPosicao(origem).isLadoLivre(lado);
 	return existe;
     }
@@ -128,18 +128,18 @@ public class MapaLabirinto {
      *            coordenada visinha de destino
      * @return Direção da coordenada de destino em relação a coordenada de origem
      */
-    public Lado getLado(int[] origem, int[] destino) {
-	Lado novoLado = null;
+    public Sentido getLado(int[] origem, int[] destino) {
+	Sentido novoLado = null;
 	if (origem[Matriz.COLUNA] - destino[Matriz.COLUNA] < 0) {
-	    novoLado = Lado.DIREITA;
+	    novoLado = Sentido.LESTE;
 	} else if (origem[Matriz.COLUNA] - destino[Matriz.COLUNA] > 0) {
-	    novoLado = Lado.ESQUERDA;
+	    novoLado = Sentido.OESTE;
 	}
 
 	if (origem[Matriz.LINHA] - destino[Matriz.LINHA] < 0) {
-	    novoLado = Lado.ATRAS;
+	    novoLado = Sentido.SUL;
 	} else if (origem[Matriz.LINHA] - destino[Matriz.LINHA] > 0) {
-	    novoLado = Lado.FRENTE;
+	    novoLado = Sentido.NORTE;
 	}
 
 	return novoLado;

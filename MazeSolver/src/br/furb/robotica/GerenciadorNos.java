@@ -11,7 +11,7 @@ public class GerenciadorNos {
     public GerenciadorNos() {
 	nos = new HashMap<>();
     }
-    
+
     private Map<Integer, No> getLinhas(int x) {
 	Map<Integer, No> linha = nos.get(x);
 	if (linha == null) {
@@ -20,27 +20,27 @@ public class GerenciadorNos {
 	}
 	return linha;
     }
-    
+
     public void salvarNo(No no) {
 	Map<Integer, No> linhas = getLinhas(no.getX());
 	linhas.put(no.getY(), no);
     }
 
-    public No getVizinho(No noOrigem, Lado lado, boolean criar) {
+    public No getVizinho(No noOrigem, Sentido lado, boolean criar) {
 	int x = noOrigem.getX();
 	int y = noOrigem.getY();
 
 	switch (lado) {
-	    case ATRAS:
+	    case SUL:
 		y--;
 		break;
-	    case FRENTE:
+	    case NORTE:
 		y++;
 		break;
-	    case DIREITA:
+	    case LESTE:
 		x++;
 		break;
-	    case ESQUERDA:
+	    case OESTE:
 		x--;
 		break;
 	}
