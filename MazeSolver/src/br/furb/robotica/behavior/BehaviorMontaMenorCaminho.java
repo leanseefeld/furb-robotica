@@ -1,7 +1,6 @@
 package br.furb.robotica.behavior;
 
 import lejos.robotics.subsumption.Behavior;
-import br.furb.robotica.Caminho;
 import br.furb.robotica.Robo;
 
 /**
@@ -20,8 +19,7 @@ public class BehaviorMontaMenorCaminho implements Behavior {
 
     @Override
     public void action() {
-	Caminho menorCaminho = this.robo.montarMenorCaminho();
-	this.robo.setCaminho(menorCaminho);
+	this.robo.montarCaminhoAteProximaPosicao();
     }
 
     @Override
@@ -31,7 +29,7 @@ public class BehaviorMontaMenorCaminho implements Behavior {
 
     @Override
     public boolean takeControl() {
-	return robo.getCaminho() == null || robo.estaSobreOjetivo();
+	return robo.getCaminho() == null || robo.getCaminho().estaVazia();
     }
 
 }

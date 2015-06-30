@@ -32,7 +32,6 @@ public class Robo {
     private Sentido sentidoAtual;
     private final GerenciadorNos gerenciadorNos;
     private Pilha<Passo> caminho;
-    private boolean mapaCompleto;
     private Stack<No> nosNaoVisitados;
     private ColorSensor colorSensor;
     private No noDestino;
@@ -141,15 +140,6 @@ public class Robo {
 	return getPosicaoAtual() != null;
     }
 
-    //    /**
-    //     * Verifica se o robo está sobre a coordenada objetivo
-    //     * 
-    //     * @return
-    //     */
-    //    public boolean estaSobreOjetivo() {
-    //	return Coordenada.equals(this.coordenadaAtual, this.mapa.getCoordenadaDestino());
-    //    }
-
     /**
      * @return Retorna o caminho que o robo deve seguir
      */
@@ -185,17 +175,6 @@ public class Robo {
 	No noNaoVisitado = nosNaoVisitados.pop();
 	this.caminho = BuscaLargura.getMenorCaminho(noAtual, noNaoVisitado);
 	return this.caminho;
-    }
-
-    /**
-     * Monta o menor caminho da posição atual até o destino
-     * 
-     * @return
-     */
-    public Caminho montarMenorCaminho() {
-	Caminho caminho = mapa.montarCaminhoDijkstra(this.coordenadaAtual, this.mapa.getCoordenadaDestino());
-	caminho.nextElement();
-	return caminho;
     }
 
     /**
