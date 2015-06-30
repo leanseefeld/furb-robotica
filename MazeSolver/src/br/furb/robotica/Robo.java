@@ -6,6 +6,7 @@ import java.util.Stack;
 import lejos.nxt.Button;
 import lejos.nxt.ColorSensor;
 import lejos.nxt.Motor;
+import lejos.nxt.NXTRegulatedMotor;
 import lejos.nxt.SensorPort;
 import lejos.robotics.Color;
 import lejos.robotics.subsumption.Arbitrator;
@@ -33,7 +34,10 @@ public class Robo {
     private final GerenciadorNos gerenciadorNos;
     private Pilha<Passo> caminho;
     private Stack<No> nosNaoVisitados;
-    private ColorSensor colorSensor;
+    private final ColorSensor colorSensorDireito = new ColorSensor(SensorPort.S3);
+    private final ColorSensor colorSensorEsquerdo = new ColorSensor(SensorPort.S4);
+    private final NXTRegulatedMotor motorDirieto = Motor.B;
+    private final NXTRegulatedMotor motorEsquerdo = Motor.A;
     private No noDestino;
     private No noAtual;
     private final No noInicial;
@@ -87,8 +91,8 @@ public class Robo {
 	Motor.B.setSpeed(VELOCIDADE);
 
 	this.nosNaoVisitados = new Stack<>();
-	this.colorSensor = new ColorSensor(SensorPort.S3);
-	this.colorSensor.setFloodlight(true);
+	this.colorSensorDireito.setFloodlight(true);
+	this.colorSensorEsquerdo.setFloodlight(true);
 
 	this.gerenciadorNos = new GerenciadorNos();
 	this.noAtual = new No(0, 0);
@@ -112,28 +116,105 @@ public class Robo {
 	for (Sentido lado : Sentido.values()) {
 	    No vizinho = noAtual.getVizinho(lado);
 	    if (vizinho == null) {
-		// No vizinhoNaoConexo = gerenciadorNos.getVizinho(noAtual, lado, false);
-		// if (vizinhoNaoConexo == null || !vizinhoNaoConexo.isVisitado()) {
-		ladosAExplorar.add(lado);
-		// }
+		No vizinhoNaoConexo = gerenciadorNos.getVizinho(noAtual, lado, false);
+		if (vizinhoNaoConexo == null || !vizinhoNaoConexo.isVisitado()) {
+		    ladosAExplorar.add(lado);
+		}
 	    }
 	}
 	boolean estahSobreObjetivo = true;
+
+	//TODO: Implementar
+	//Está parado sobre a intersecção
+	//Então volta um pouco para traz
+	//Vira para a direita
+	// - Verifica se encontrou preto em algum dos sensores
+	// Se não, gira um pouco mais para a direita.... vai procurando enquanto gira. girar apenas 45º
+
 	for (Sentido sentido : ladosAExplorar) {
 	    virarPara(sentido);
+	    this.sentidoAtual = sentido;
 	    avancar(DISTANCIA_INSPECAO);
 	    if (estaSobreLinha()) {
 		No vizinho = gerenciadorNos.getVizinho(noAtual, sentido, true);
 		nosNaoVisitados.push(vizinho);
-	    } else if (sentidoAtual != sentidoOriginal) {
-		estahSobreObjetivo &= estaSobreObjetivo();
 	    }
 	    retroceder(DISTANCIA_INSPECAO);
 	}
+
+	//	for (Sentido sentido : ladosAExplorar) {
+	//	    virarPara(sentido);
+	//	    avancar(DISTANCIA_INSPECAO);
+	//	    if (estaSobreLinha()) {
+	//		No vizinho = gerenciadorNos.getVizinho(noAtual, sentido, true);
+	//		nosNaoVisitados.push(vizinho);
+	//	    } else if (sentidoAtual != sentidoOriginal) {
+	//		estahSobreObjetivo &= estaSobreObjetivo();
+	//	    }
+	//	    retroceder(DISTANCIA_INSPECAO);
+	//	}
+
 	noAtual.setVisitado(true);
 	if (estahSobreObjetivo) {
 	    noDestino = noAtual;
 	}
+    }
+
+    /**
+     * Retorna o lado que se encontra o sentido desejado em relação ao sentido atual
+     * 
+     * @param sentidoAtual
+     * @param sentidoDesejado
+     * @return
+     */
+    private Lado getLado(Sentido sentidoAtual, Sentido sentidoDesejado) {
+	int quantidadeGirar = sentidoAtual.ordinal() - sentidoDesejado.ordinal();
+	Lado lado = null;
+
+	if (Math.abs(quantidadeGirar) > 2) {
+	    quantidadeGirar = -(quantidadeGirar % 2);
+	}
+
+	switch (quantidadeGirar) {
+	    case 0:
+		lado = Lado.FRENTE;
+		break;
+	    case -1:
+		lado = Lado.DIREITA;
+		break;
+	    case 1:
+		lado = Lado.ESQUERDA;
+		break;
+	    case 2:
+	    case -2:
+		lado = Lado.ATRAS;
+		break;
+	    default:
+		System.out.println("Erro ao girar de " + sentidoAtual.name() + " para " + sentidoDesejado.name());
+	}
+	return lado;
+    }
+
+    /**
+     * Gira para a esquerda ou direita um quantidade
+     * 
+     * @param lado
+     * @param qtd
+     */
+    private void girar(Lado lado, int qtd) {
+	if (lado == Lado.DIREITA) {
+	    motorDirieto.rotate(-qtd, true);
+	    motorEsquerdo.rotate(+qtd);
+	} else if (lado == Lado.ESQUERDA) {
+	    motorDirieto.rotate(+qtd, true);
+	    motorEsquerdo.rotate(-qtd);
+	} else {
+	    System.out.println("Não é possível girar para o lado " + lado.name());
+	}
+    }
+
+    private boolean existeSensorSobreLinha() {
+	return colorSensorDireito.getColorID() == COR_LINHA || colorSensorEsquerdo.getColorID() == COR_LINHA;
     }
 
     public boolean analisouPosicao() {
@@ -199,8 +280,9 @@ public class Robo {
     }
 
     private void seguirLinha() {
+	//TODO: Implementar
 	while (!estaSobreInterseccao()) {
-	    // segue a linha preta
+
 	}
     }
 
@@ -219,31 +301,46 @@ public class Robo {
      *            lado para o qual virar
      */
     private void virarPara(Sentido ladoDestino) {
-	int quantidadeGirar = ladoDestino.ordinal() - this.sentidoAtual.ordinal();
-	if (quantidadeGirar == 0) {
+	Lado lado = getLado(sentidoAtual, ladoDestino);
+
+	//Se girar pra frente, não faz nada
+	if (lado == Lado.FRENTE)
 	    return;
+
+	//Se girar para traz, gira duas vezes para a direita e assim faz 180º
+	//Se não, gira para o lado desejado
+	if (lado == Lado.ATRAS) {
+	    girar(Lado.DIREITA, _90GRAUS_RODAS);
+	    girar(Lado.DIREITA, _90GRAUS_RODAS);
+	} else {
+	    girar(lado, _90GRAUS_RODAS);
 	}
 
-	// Se for 3, muda para 1 e muda a direção da rotação
-	// se for 4, fica parado
-	if (Math.abs(quantidadeGirar) > 2) {
-	    quantidadeGirar = -(quantidadeGirar % 2);
-	}
-
-	// Obs: Se quantidadeGirar for positiva, irá girar para direita
-	// se for negativa, irá ser para a esquerda
-	Motor.A.rotate(-(quantidadeGirar * _90GRAUS_RODAS));
-	Motor.B.rotate((quantidadeGirar * _90GRAUS_RODAS), true);
-
-	if (this.sentidoAtual != ladoDestino) {
-	    Debug.print("Novo sentido " + ladoDestino.name());
-	    if (quantidadeGirar > 0) {
-		Debug.println(" - GIROU " + (quantidadeGirar * 90) + "º à direita");
-	    } else {
-		Debug.println(" - GIROU " + (quantidadeGirar * 90 * -1) + "º à esquerda");
-	    }
-	    this.sentidoAtual = ladoDestino;
-	}
+	//	int quantidadeGirar = ladoDestino.ordinal() - this.sentidoAtual.ordinal();
+	//	if (quantidadeGirar == 0) {
+	//	    return;
+	//	}
+	//
+	//	// Se for 3, muda para 1 e muda a direção da rotação
+	//	// se for 4, fica parado
+	//	if (Math.abs(quantidadeGirar) > 2) {
+	//	    quantidadeGirar = -(quantidadeGirar % 2);
+	//	}
+	//
+	//	// Obs: Se quantidadeGirar for positiva, irá girar para direita
+	//	// se for negativa, irá ser para a esquerda
+	//	Motor.A.rotate(-(quantidadeGirar * _90GRAUS_RODAS));
+	//	Motor.B.rotate((quantidadeGirar * _90GRAUS_RODAS), true);
+	//
+	//	if (this.sentidoAtual != ladoDestino) {
+	//	    Debug.print("Novo sentido " + ladoDestino.name());
+	//	    if (quantidadeGirar > 0) {
+	//		Debug.println(" - GIROU " + (quantidadeGirar * 90) + "º à direita");
+	//	    } else {
+	//		Debug.println(" - GIROU " + (quantidadeGirar * 90 * -1) + "º à esquerda");
+	//	    }
+	//	    this.sentidoAtual = ladoDestino;
+	//	}
     }
 
     /**
@@ -270,22 +367,39 @@ public class Robo {
     }
 
     public boolean estaSobreInterseccao() {
-	return colorSensor.getColor().getColor() == COR_INTERSECCAO;
+	return colorSensorDireito.getColor().getColor() == COR_LINHA
+		&& colorSensorEsquerdo.getColor().getColor() == COR_LINHA;
+	//	return colorSensorDireito.getColor().getColor() == COR_INTERSECCAO
+	//		|| colorSensorEsquerdo.getColor().getColor() == COR_INTERSECCAO;
     }
 
     public boolean estaSobreLinha() {
-	if (colorSensor.getColorID() == COR_LINHA) {
-	    return true;
+	boolean encontrouLinha = false;
+	int quantidadeGirar;
+	for (quantidadeGirar = 0; quantidadeGirar < 10; quantidadeGirar++) {
+	    girar(Lado.DIREITA, 5);
+	    if (existeSensorSobreLinha()) {
+		encontrouLinha = true;
+		break;
+	    }
 	}
-	Motor.A.rotate(DISTANCIA_INSPECAO);
-	boolean estaSobreLinha = colorSensor.getColorID() == COR_LINHA;
-	Motor.A.rotate(-DISTANCIA_INSPECAO);
-	if (!estaSobreLinha) {
-	    Motor.B.rotate(DISTANCIA_INSPECAO);
-	    estaSobreLinha = colorSensor.getColorID() == COR_LINHA;
-	    Motor.B.rotate(-DISTANCIA_INSPECAO);
+	for (; quantidadeGirar >= 0; quantidadeGirar--) {
+	    girar(Lado.ESQUERDA, 5);
 	}
-	return estaSobreLinha;
+	return encontrouLinha;
+
+	//	if (colorSensor.getColorID() == COR_LINHA) {
+	//	    return true;
+	//	}
+	//	Motor.A.rotate(DISTANCIA_INSPECAO);
+	//	boolean estaSobreLinha = colorSensor.getColorID() == COR_LINHA;
+	//	Motor.A.rotate(-DISTANCIA_INSPECAO);
+	//	if (!estaSobreLinha) {
+	//	    Motor.B.rotate(DISTANCIA_INSPECAO);
+	//	    estaSobreLinha = colorSensor.getColorID() == COR_LINHA;
+	//	    Motor.B.rotate(-DISTANCIA_INSPECAO);
+	//	}
+	//	return estaSobreLinha;
     }
 
     private boolean estaSobreObjetivo() {
