@@ -13,8 +13,7 @@ import lejos.robotics.subsumption.Arbitrator;
 import lejos.robotics.subsumption.Behavior;
 import util.Pilha;
 import br.furb.robotica.behavior.BehaviorAnalizarPosicao;
-import br.furb.robotica.behavior.BehaviorMontaMenorCaminho;
-import br.furb.robotica.behavior.BehaviorMontarTrajeto;
+import br.furb.robotica.behavior.BehaviorMontarCaminho;
 import br.furb.robotica.behavior.BehaviorSeguirCaminho;
 
 /**
@@ -25,10 +24,12 @@ public class Robo {
     private static final int VELOCIDADE = 500;
     private static final int _90GRAUS_RODAS = 400;
 
-    private static final int COR_INTERSECCAO = Color.WHITE;
-    private static final int COR_LINHA = Color.BLACK;
     private static final int DISTANCIA_INSPECAO = 100;
+    private static final int DISTANCIA_AJUSTE = 10;
+    private static final int DISTANCIA_PASSO = 10;
+    // TODO: Não pode ser branca pq senão vai confundir com o fundo (fora da linha)
     private static final int COR_OBJETIVO = Color.WHITE;
+    private static final int COR_LINHA = Color.BLACK;
 
     private Sentido sentidoAtual;
     private final GerenciadorNos gerenciadorNos;
@@ -36,12 +37,16 @@ public class Robo {
     private Stack<No> nosNaoVisitados;
     private final ColorSensor colorSensorDireito = new ColorSensor(SensorPort.S3);
     private final ColorSensor colorSensorEsquerdo = new ColorSensor(SensorPort.S4);
-    private final NXTRegulatedMotor motorDirieto = Motor.B;
+    private final NXTRegulatedMotor motorDireito = Motor.B;
     private final NXTRegulatedMotor motorEsquerdo = Motor.A;
     private No noDestino;
     private No noAtual;
     private final No noInicial;
-    private final Sentido ladoInicial;
+    private final Sentido sentidoInicial;
+
+    private boolean moveu = true;
+    private int ultimaCorDireita;
+    private int ultimaCorEsquerda;
 
     public static void main(String[] args) {
 	System.out.println("ENTER    -> Executa");
@@ -51,7 +56,7 @@ public class Robo {
 	Robo robo = new Robo();
 
 	Behavior seguirCaminho = new BehaviorSeguirCaminho(robo);
-	Behavior montarCaminho = new BehaviorMontarTrajeto(robo);
+	Behavior montarCaminho = new BehaviorMontarCaminho(robo);
 	Behavior analizarPosicao = new BehaviorAnalizarPosicao(robo);
 
 	Behavior[] comportamentos = { seguirCaminho, montarCaminho, analizarPosicao };
@@ -63,18 +68,15 @@ public class Robo {
 	if (robo.getDestino() == null) {
 	    System.out.println("Destino não encontrado.");
 	} else {
+	    System.out.println("Pressione ENTER para ir a posicao original");
+	    Button.ENTER.waitForPressAndRelease();
+
+	    robo.moveParaInicio();
+
 	    System.out.println("Pressione ENTER para seguir o menor caminho");
 	    Button.ENTER.waitForPressAndRelease();
 
-	    robo.moveRoboParaPontoInicial();
-
-	    Behavior mapeamentoMontaMenorCaminho = new BehaviorMontaMenorCaminho(robo);
-	    montarCaminho = new BehaviorSeguirCaminho(robo);
-	    //	    Behavior seguirMenorCaminho = new BehaviorSeguirMenorCaminho(robo);
-
-	    comportamentos = new Behavior[] { montarCaminho, mapeamentoMontaMenorCaminho };
-	    arb = new Arbitrator(comportamentos);
-	    arb.start();
+	    robo.moverParaDestino();
 
 	    System.out.println("Objetivo alcançado");
 	}
@@ -100,17 +102,22 @@ public class Robo {
 
 	this.noInicial = noAtual;
 	this.nosNaoVisitados.push(this.noInicial);
-	this.ladoInicial = this.sentidoAtual;
+	this.sentidoInicial = this.sentidoAtual;
     }
 
     /**
-     * Pega informações da posição atual do robo
+     * Pega informações da posição atual do robô.
      */
     public void analisarPosicao() {
 	if (noAtual.isVisitado()) {
 	    return;
 	}
-	Sentido sentidoOriginal = this.sentidoAtual;
+	noAtual.setVisitado(true);
+
+	if (estaSobreObjetivo()) {
+	    this.noDestino = this.noAtual;
+	    return;
+	}
 
 	List<Sentido> ladosAExplorar = new ArrayList<>(4);
 	for (Sentido lado : Sentido.values()) {
@@ -122,14 +129,6 @@ public class Robo {
 		}
 	    }
 	}
-	boolean estahSobreObjetivo = true;
-
-	//TODO: Implementar
-	//Está parado sobre a intersecção
-	//Então volta um pouco para traz
-	//Vira para a direita
-	// - Verifica se encontrou preto em algum dos sensores
-	// Se não, gira um pouco mais para a direita.... vai procurando enquanto gira. girar apenas 45º
 
 	for (Sentido sentido : ladosAExplorar) {
 	    virarPara(sentido);
@@ -140,23 +139,6 @@ public class Robo {
 		nosNaoVisitados.push(vizinho);
 	    }
 	    retroceder(DISTANCIA_INSPECAO);
-	}
-
-	//	for (Sentido sentido : ladosAExplorar) {
-	//	    virarPara(sentido);
-	//	    avancar(DISTANCIA_INSPECAO);
-	//	    if (estaSobreLinha()) {
-	//		No vizinho = gerenciadorNos.getVizinho(noAtual, sentido, true);
-	//		nosNaoVisitados.push(vizinho);
-	//	    } else if (sentidoAtual != sentidoOriginal) {
-	//		estahSobreObjetivo &= estaSobreObjetivo();
-	//	    }
-	//	    retroceder(DISTANCIA_INSPECAO);
-	//	}
-
-	noAtual.setVisitado(true);
-	if (estahSobreObjetivo) {
-	    noDestino = noAtual;
 	}
     }
 
@@ -202,11 +184,12 @@ public class Robo {
      * @param qtd
      */
     private void girar(Lado lado, int qtd) {
+	moveu = true;
 	if (lado == Lado.DIREITA) {
-	    motorDirieto.rotate(-qtd, true);
+	    motorDireito.rotate(-qtd, true);
 	    motorEsquerdo.rotate(+qtd);
 	} else if (lado == Lado.ESQUERDA) {
-	    motorDirieto.rotate(+qtd, true);
+	    motorDireito.rotate(+qtd, true);
 	    motorEsquerdo.rotate(-qtd);
 	} else {
 	    System.out.println("Não é possível girar para o lado " + lado.name());
@@ -214,7 +197,8 @@ public class Robo {
     }
 
     private boolean existeSensorSobreLinha() {
-	return colorSensorDireito.getColorID() == COR_LINHA || colorSensorEsquerdo.getColorID() == COR_LINHA;
+	analisarCores();
+	return ultimaCorDireita == COR_LINHA || ultimaCorEsquerda == COR_LINHA;
     }
 
     public boolean analisouPosicao() {
@@ -259,11 +243,25 @@ public class Robo {
     }
 
     /**
-     * Atualiza as coordenadas do robo para a posição inicial
+     * Move o robô para a posição e sentido originais, seguindo o menor caminho.
      */
-    public void moveRoboParaPontoInicial() {
-	this.noAtual = this.noInicial;
-	this.sentidoAtual = this.ladoInicial;
+    private void moveParaInicio() {
+	moverPeloMenorCaminho(noInicial);
+    }
+
+    /**
+     * Move o robô para a posição destino, seguindo o menor caminho.
+     */
+    private void moverParaDestino() {
+	moverPeloMenorCaminho(noDestino);
+    }
+
+    private void moverPeloMenorCaminho(No objetivo) {
+	this.caminho = BuscaLargura.getMenorCaminho(noAtual, noInicial);
+	while (estaSeguindoCaminho()) {
+	    moverProximaPosicao();
+	}
+	virarPara(sentidoInicial);
     }
 
     /**
@@ -280,9 +278,13 @@ public class Robo {
     }
 
     private void seguirLinha() {
-	//TODO: Implementar
-	while (!estaSobreInterseccao()) {
-
+	while (!estaSobreInterseccao() && !estaSobreObjetivo()) {
+	    if (ultimaCorEsquerda == COR_LINHA) {
+		motorDireito.rotate(DISTANCIA_AJUSTE);
+	    } else if (ultimaCorDireita == COR_LINHA) {
+		motorEsquerdo.rotate(10);
+	    }
+	    avancar(DISTANCIA_PASSO);
 	}
     }
 
@@ -310,11 +312,11 @@ public class Robo {
 	//Se girar para traz, gira duas vezes para a direita e assim faz 180º
 	//Se não, gira para o lado desejado
 	if (lado == Lado.ATRAS) {
-	    girar(Lado.DIREITA, _90GRAUS_RODAS);
-	    girar(Lado.DIREITA, _90GRAUS_RODAS);
+	    girar(Lado.DIREITA, _90GRAUS_RODAS * 2);
 	} else {
 	    girar(lado, _90GRAUS_RODAS);
 	}
+	this.sentidoAtual = ladoDestino;
 
 	//	int quantidadeGirar = ladoDestino.ordinal() - this.sentidoAtual.ordinal();
 	//	if (quantidadeGirar == 0) {
@@ -350,9 +352,10 @@ public class Robo {
      *            distancia a mover
      */
     public void avancar(int passo) {
+	moveu = true;
 	Debug.println("Moveu: " + passo);
-	Motor.A.rotate(passo, true);
-	Motor.B.rotate(passo);
+	motorDireito.rotate(passo, true);
+	motorEsquerdo.rotate(passo);
     }
 
     /**
@@ -367,10 +370,8 @@ public class Robo {
     }
 
     public boolean estaSobreInterseccao() {
-	return colorSensorDireito.getColor().getColor() == COR_LINHA
-		&& colorSensorEsquerdo.getColor().getColor() == COR_LINHA;
-	//	return colorSensorDireito.getColor().getColor() == COR_INTERSECCAO
-	//		|| colorSensorEsquerdo.getColor().getColor() == COR_INTERSECCAO;
+	analisarCores();
+	return ultimaCorDireita == COR_LINHA && ultimaCorEsquerda == COR_LINHA;
     }
 
     public boolean estaSobreLinha() {
@@ -403,7 +404,16 @@ public class Robo {
     }
 
     private boolean estaSobreObjetivo() {
-	return colorSensor.getColor().getColor() == COR_OBJETIVO;
+	analisarCores();
+	return ultimaCorDireita == COR_OBJETIVO && ultimaCorEsquerda == COR_OBJETIVO;
+    }
+
+    private void analisarCores() {
+	if (moveu) {
+	    moveu = false;
+	    ultimaCorDireita = colorSensorDireito.getColor().getColor();
+	    ultimaCorEsquerda = colorSensorEsquerdo.getColor().getColor();
+	}
     }
 
 }

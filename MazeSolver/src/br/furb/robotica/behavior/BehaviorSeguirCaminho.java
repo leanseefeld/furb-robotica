@@ -28,7 +28,6 @@ public class BehaviorSeguirCaminho implements Behavior {
     @Override
     public boolean takeControl() {
 	Debug.println("S.takeControl");
-	//	Debug.step("Com. " + robo.mapeamentoEstaCompleto());
 	return robo.estaSeguindoCaminho();
     }
 

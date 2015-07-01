@@ -9,11 +9,11 @@ import br.furb.robotica.Robo;
  * 
  * @author Gustavo
  */
-public class BehaviorMontarTrajeto implements Behavior {
+public class BehaviorMontarCaminho implements Behavior {
 
     private Robo robo;
 
-    public BehaviorMontarTrajeto(Robo robo) {
+    public BehaviorMontarCaminho(Robo robo) {
 	this.robo = robo;
     }
 
