@@ -9,32 +9,29 @@ import lejos.nxt.Motor;
 import lejos.nxt.NXTRegulatedMotor;
 import lejos.nxt.SensorPort;
 import lejos.robotics.Color;
-import lejos.robotics.subsumption.Arbitrator;
-import lejos.robotics.subsumption.Behavior;
 import util.Pilha;
-import br.furb.robotica.behavior.BehaviorAnalizarPosicao;
-import br.furb.robotica.behavior.BehaviorMontarCaminho;
-import br.furb.robotica.behavior.BehaviorSeguirCaminho;
 
 /**
  * Classe de inicialização do robô.
  */
 public class Robo {
 
-    private static final int VELOCIDADE = 500;
-    private static final int _90GRAUS_RODAS = 400;
+    private static final int PASSOS_ANALISE_LINHA = 4;
+    private static final int ROTACAO_ANALISE_LINHA = 30;
+    private static final int VELOCIDADE = 200;
+    private static final int _90GRAUS_RODAS = 250;
 
     private static final int DISTANCIA_INSPECAO = 100;
     private static final int DISTANCIA_AJUSTE = 10;
-    private static final int DISTANCIA_PASSO = 10;
+    private static final int DISTANCIA_PASSO = 40;
     // TODO: Não pode ser branca pq senão vai confundir com o fundo (fora da linha)
-    private static final int COR_OBJETIVO = Color.WHITE;
+    private static final int COR_OBJETIVO = Color.RED;
     private static final int COR_LINHA = Color.BLACK;
 
     private Sentido sentidoAtual;
     private final GerenciadorNos gerenciadorNos;
     private Pilha<Passo> caminho;
-    private Stack<No> nosNaoVisitados;
+    private final Stack<No> nosNaoVisitados;
     private final ColorSensor colorSensorDireito = new ColorSensor(SensorPort.S3);
     private final ColorSensor colorSensorEsquerdo = new ColorSensor(SensorPort.S4);
     private final NXTRegulatedMotor motorDireito = Motor.B;
@@ -49,39 +46,68 @@ public class Robo {
     private int ultimaCorEsquerda;
 
     public static void main(String[] args) {
-	System.out.println("ENTER    -> Executa");
-	System.out.println("[outro]  -> Depura");
-	Debug.debug = Button.waitForAnyPress() != Button.ENTER.getId();
+	try {
+	    System.out.println("ENTER    -> Executa");
+	    System.out.println("[outro]  -> Depura");
+	    Debug.debug = Button.waitForAnyPress() != Button.ENTER.getId();
 
-	Robo robo = new Robo();
+	    Robo robo = new Robo();
+	    robo.analisarPosicao();
+	    Debug.debug = false;
 
-	Behavior seguirCaminho = new BehaviorSeguirCaminho(robo);
-	Behavior montarCaminho = new BehaviorMontarCaminho(robo);
-	Behavior analizarPosicao = new BehaviorAnalizarPosicao(robo);
+	    boolean mapeamentoEstaCompleto = false;
+	    while (!mapeamentoEstaCompleto) {
+		Debug.step("a");
+		if (robo.estaSobreInterseccao()) {
+		    Debug.step("b");
+		    robo.analisarPosicao();
+		}
+		
+		Debug.step("c");
+		mapeamentoEstaCompleto = robo.mapeamentoEstaCompleto();
+		Debug.step("d");
+		boolean estaSeguindoCaminho = robo.estaSeguindoCaminho();
+		Debug.step("e");
 
-	Behavior[] comportamentos = { seguirCaminho, montarCaminho, analizarPosicao };
-	Arbitrator arb = new Arbitrator(comportamentos, true);
-	arb.start();
+		if (!mapeamentoEstaCompleto && !estaSeguindoCaminho) {
+		    Debug.step("f");
 
-	System.out.println("O mapeamento está completo");
+		    robo.montarCaminhoAteProximaPosicao();
+		    Debug.step("g");
+		    robo.moverProximaPosicao();
+		    Debug.step("h");
 
-	if (robo.getDestino() == null) {
-	    System.out.println("Destino não encontrado.");
-	} else {
-	    System.out.println("Pressione ENTER para ir a posicao original");
+		} else if (estaSeguindoCaminho) {
+		    Debug.step("i");
+		    robo.moverProximaPosicao();
+		}
+		Debug.step("j");
+	    }
+	    Debug.step("k");
+
+	    System.out.println("O mapeamento está completo");
+
+	    if (robo.getDestino() == null) {
+		System.out.println("Destino não encontrado.");
+	    } else {
+		System.out.println("Pressione ENTER para ir a posicao original");
+		Button.ENTER.waitForPressAndRelease();
+
+		robo.moveParaInicio();
+
+		System.out.println("Pressione ENTER para seguir o menor caminho");
+		Button.ENTER.waitForPressAndRelease();
+
+		robo.moverParaDestino();
+
+		System.out.println("Objetivo alcançado");
+	    }
 	    Button.ENTER.waitForPressAndRelease();
-
-	    robo.moveParaInicio();
-
-	    System.out.println("Pressione ENTER para seguir o menor caminho");
-	    Button.ENTER.waitForPressAndRelease();
-
-	    robo.moverParaDestino();
-
-	    System.out.println("Objetivo alcançado");
+	    System.out.println("FIM");
+	} catch (Throwable t) {
+	    Debug.throwUp();
+	    throw t;
 	}
-	Button.ENTER.waitForPressAndRelease();
-	System.out.println("FIM");
     }
 
     public No getDestino() {
@@ -102,6 +128,7 @@ public class Robo {
 
 	this.noInicial = noAtual;
 	this.nosNaoVisitados.push(this.noInicial);
+	this.sentidoAtual = Sentido.NORTE;
 	this.sentidoInicial = this.sentidoAtual;
     }
 
@@ -109,37 +136,58 @@ public class Robo {
      * Pega informações da posição atual do robô.
      */
     public void analisarPosicao() {
+	Debug.debug = false;
+	Debug.step("a1");
 	if (noAtual.isVisitado()) {
+	    Debug.step("b1");
 	    return;
 	}
+	Debug.step("c1");
 	noAtual.setVisitado(true);
 
+	Debug.step("d1");
 	if (estaSobreObjetivo()) {
+	    Debug.step("Robo:125");
 	    this.noDestino = this.noAtual;
 	    return;
 	}
+	Debug.step("e1");
 
 	List<Sentido> ladosAExplorar = new ArrayList<>(4);
-	for (Sentido lado : Sentido.values()) {
-	    No vizinho = noAtual.getVizinho(lado);
+	Debug.step("f1");
+	for (Sentido sentido : Sentido.values()) {
+	    Debug.step("g1:" + sentido);
+	    No vizinho = noAtual.getVizinho(sentido);
+	    Debug.step("h1");
 	    if (vizinho == null) {
-		No vizinhoNaoConexo = gerenciadorNos.getVizinho(noAtual, lado, false);
+		Debug.step("i1");
+		No vizinhoNaoConexo = gerenciadorNos.getVizinho(noAtual, sentido, false);
+		Debug.step("j1:" + vizinhoNaoConexo);
 		if (vizinhoNaoConexo == null || !vizinhoNaoConexo.isVisitado()) {
-		    ladosAExplorar.add(lado);
+		    Debug.step("k1");
+		    ladosAExplorar.add(sentido);
 		}
 	    }
 	}
-
+	Debug.debug = true;
+	Debug.step("l1");
 	for (Sentido sentido : ladosAExplorar) {
+	    Debug.step("m1");
 	    virarPara(sentido);
+	    Debug.step("n1");
 	    this.sentidoAtual = sentido;
 	    avancar(DISTANCIA_INSPECAO);
+	    Debug.step("o1");
 	    if (estaSobreLinha()) {
+		Debug.step("p1");
 		No vizinho = gerenciadorNos.getVizinho(noAtual, sentido, true);
 		nosNaoVisitados.push(vizinho);
 	    }
+	    Debug.step("q1");
 	    retroceder(DISTANCIA_INSPECAO);
 	}
+	Debug.step("r1");
+	Debug.toggle();
     }
 
     /**
@@ -150,6 +198,7 @@ public class Robo {
      * @return
      */
     private Lado getLado(Sentido sentidoAtual, Sentido sentidoDesejado) {
+	Debug.step("f1,atual=" + sentidoAtual + ",desejado=" + sentidoDesejado);
 	int quantidadeGirar = sentidoAtual.ordinal() - sentidoDesejado.ordinal();
 	Lado lado = null;
 
@@ -275,6 +324,7 @@ public class Robo {
 	Sentido novoSentido = proximaPosicao.getSentidoOrigem();
 	virarPara(novoSentido);
 	seguirLinha();
+	this.noAtual = proximaPosicao.getNo();
     }
 
     private void seguirLinha() {
@@ -282,7 +332,7 @@ public class Robo {
 	    if (ultimaCorEsquerda == COR_LINHA) {
 		motorDireito.rotate(DISTANCIA_AJUSTE);
 	    } else if (ultimaCorDireita == COR_LINHA) {
-		motorEsquerdo.rotate(10);
+		motorEsquerdo.rotate(DISTANCIA_AJUSTE);
 	    }
 	    avancar(DISTANCIA_PASSO);
 	}
@@ -292,22 +342,26 @@ public class Robo {
      * Exibe a posição e o lado atual do robo
      */
     public void printPosicaoAtual() {
-	Debug.println("Posicao Atual: " + this.noAtual.toString());
-	Debug.println("Lado Atual: " + this.sentidoAtual.name());
+	Debug.println("pa: " + this.noAtual.toString());
+	Debug.println("la: " + this.sentidoAtual.name());
     }
 
     /**
      * Gira o robo no para o lado desejado
      * 
-     * @param ladoDestino
+     * @param sentidoDestino
      *            lado para o qual virar
      */
-    private void virarPara(Sentido ladoDestino) {
-	Lado lado = getLado(sentidoAtual, ladoDestino);
+    private void virarPara(Sentido sentidoDestino) {
+	Debug.step("a5");
+	Lado lado = getLado(sentidoAtual, sentidoDestino);
+	Debug.step("b5");
 
 	//Se girar pra frente, não faz nada
-	if (lado == Lado.FRENTE)
+	if (lado == Lado.FRENTE) {
+	    Debug.step("c5");
 	    return;
+	}
 
 	//Se girar para traz, gira duas vezes para a direita e assim faz 180º
 	//Se não, gira para o lado desejado
@@ -316,7 +370,8 @@ public class Robo {
 	} else {
 	    girar(lado, _90GRAUS_RODAS);
 	}
-	this.sentidoAtual = ladoDestino;
+	this.sentidoAtual = sentidoDestino;
+	Debug.step("d5");
 
 	//	int quantidadeGirar = ladoDestino.ordinal() - this.sentidoAtual.ordinal();
 	//	if (quantidadeGirar == 0) {
@@ -370,6 +425,7 @@ public class Robo {
     }
 
     public boolean estaSobreInterseccao() {
+	Debug.step("cores");
 	analisarCores();
 	return ultimaCorDireita == COR_LINHA && ultimaCorEsquerda == COR_LINHA;
     }
@@ -377,15 +433,15 @@ public class Robo {
     public boolean estaSobreLinha() {
 	boolean encontrouLinha = false;
 	int quantidadeGirar;
-	for (quantidadeGirar = 0; quantidadeGirar < 10; quantidadeGirar++) {
-	    girar(Lado.DIREITA, 5);
+	for (quantidadeGirar = 0; quantidadeGirar < PASSOS_ANALISE_LINHA; quantidadeGirar++) {
+	    girar(Lado.DIREITA, ROTACAO_ANALISE_LINHA);
 	    if (existeSensorSobreLinha()) {
 		encontrouLinha = true;
 		break;
 	    }
 	}
 	for (; quantidadeGirar >= 0; quantidadeGirar--) {
-	    girar(Lado.ESQUERDA, 5);
+	    girar(Lado.ESQUERDA, ROTACAO_ANALISE_LINHA);
 	}
 	return encontrouLinha;
 
@@ -411,8 +467,8 @@ public class Robo {
     private void analisarCores() {
 	if (moveu) {
 	    moveu = false;
-	    ultimaCorDireita = colorSensorDireito.getColor().getColor();
-	    ultimaCorEsquerda = colorSensorEsquerdo.getColor().getColor();
+	    ultimaCorDireita = colorSensorDireito.getColorID();
+	    ultimaCorEsquerda = colorSensorEsquerdo.getColorID();
 	}
     }
 
