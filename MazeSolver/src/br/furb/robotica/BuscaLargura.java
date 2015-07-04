@@ -15,7 +15,8 @@ public class BuscaLargura {
 	naoVisitados.push(new Passo(origem, null, null));
 
 	Passo passoAtual = null;
-	while ((passoAtual = (Passo) naoVisitados.pop()) != null) {
+	while (!naoVisitados.isEmpty()) {
+	    passoAtual = (Passo) naoVisitados.pop();
 	    No noAtual = passoAtual.getNo();
 	    if (noAtual == destino) {
 		break;
@@ -23,7 +24,7 @@ public class BuscaLargura {
 
 	    for (Sentido sentido : Sentido.values()) {
 		No vizinho = noAtual.getVizinho(sentido);
-		if (vizinho != null && vizinho.isVisitado() && !visitados.contains(vizinho)) {
+		if (vizinho != null && !visitados.contains(vizinho)) {
 		    naoVisitados.push(new Passo(vizinho, passoAtual, sentido));
 		}
 	    }
@@ -36,9 +37,9 @@ public class BuscaLargura {
 	}
 
 	Pilha<Passo> caminho = new PilhaImpl<>();
-	caminho.empilhar(passoAtual);
-	while ((passoAtual = passoAtual.getPai()) != null) {
+	while (passoAtual.getPai() != null) {
 	    caminho.empilhar(passoAtual);
+	    passoAtual = passoAtual.getPai();
 	}
 	return caminho;
     }
