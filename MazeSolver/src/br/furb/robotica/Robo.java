@@ -62,7 +62,7 @@ public class Robo {
 		    Debug.step("b");
 		    robo.analisarPosicao();
 		}
-		
+
 		Debug.step("c");
 		mapeamentoEstaCompleto = robo.mapeamentoEstaCompleto();
 		Debug.step("d");
@@ -270,7 +270,6 @@ public class Robo {
      */
     public No getPosicaoAtual() {
 	return this.noAtual;
-	//	return this.mapa.getInfoPosicao(this.coordenadaAtual);
     }
 
     /**
@@ -372,32 +371,6 @@ public class Robo {
 	}
 	this.sentidoAtual = sentidoDestino;
 	Debug.step("d5");
-
-	//	int quantidadeGirar = ladoDestino.ordinal() - this.sentidoAtual.ordinal();
-	//	if (quantidadeGirar == 0) {
-	//	    return;
-	//	}
-	//
-	//	// Se for 3, muda para 1 e muda a direção da rotação
-	//	// se for 4, fica parado
-	//	if (Math.abs(quantidadeGirar) > 2) {
-	//	    quantidadeGirar = -(quantidadeGirar % 2);
-	//	}
-	//
-	//	// Obs: Se quantidadeGirar for positiva, irá girar para direita
-	//	// se for negativa, irá ser para a esquerda
-	//	Motor.A.rotate(-(quantidadeGirar * _90GRAUS_RODAS));
-	//	Motor.B.rotate((quantidadeGirar * _90GRAUS_RODAS), true);
-	//
-	//	if (this.sentidoAtual != ladoDestino) {
-	//	    Debug.print("Novo sentido " + ladoDestino.name());
-	//	    if (quantidadeGirar > 0) {
-	//		Debug.println(" - GIROU " + (quantidadeGirar * 90) + "º à direita");
-	//	    } else {
-	//		Debug.println(" - GIROU " + (quantidadeGirar * 90 * -1) + "º à esquerda");
-	//	    }
-	//	    this.sentidoAtual = ladoDestino;
-	//	}
     }
 
     /**
@@ -444,19 +417,6 @@ public class Robo {
 	    girar(Lado.ESQUERDA, ROTACAO_ANALISE_LINHA);
 	}
 	return encontrouLinha;
-
-	//	if (colorSensor.getColorID() == COR_LINHA) {
-	//	    return true;
-	//	}
-	//	Motor.A.rotate(DISTANCIA_INSPECAO);
-	//	boolean estaSobreLinha = colorSensor.getColorID() == COR_LINHA;
-	//	Motor.A.rotate(-DISTANCIA_INSPECAO);
-	//	if (!estaSobreLinha) {
-	//	    Motor.B.rotate(DISTANCIA_INSPECAO);
-	//	    estaSobreLinha = colorSensor.getColorID() == COR_LINHA;
-	//	    Motor.B.rotate(-DISTANCIA_INSPECAO);
-	//	}
-	//	return estaSobreLinha;
     }
 
     private boolean estaSobreObjetivo() {
