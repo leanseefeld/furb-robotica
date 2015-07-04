@@ -5,34 +5,50 @@ import lejos.nxt.Button;
 public class Debug {
 
     public static boolean debug = false;
+    private static StringBuilder sb = new StringBuilder();
 
     public static void print(String message) {
-	if (debug) {
-	    System.out.print(message);
+	if (true) {
+	    doPrint(message);
 	}
     }
 
     public static void println() {
-	if (debug) {
-	    System.out.println();
+	if (true) {
+	    doPrint();
 	}
     }
 
     public static void println(String message) {
-	if (debug) {
-	    System.out.println(message);
+	if (true) {
+	    doPrint(message);
 	}
     }
 
     public static void step(String message) {
-	if (debug) {
-	    System.out.println(message);
-	    Button.ENTER.waitForPressAndRelease();
+	if (true) {
+	    doPrint(message);
+	    //	    Button.ENTER.waitForPressAndRelease();
 	}
     }
 
     public static void toggle() {
-	debug = !debug;
+//	debug = !debug;
+    }
+
+    private static void doPrint() {
+	System.out.println();
+    }
+
+    private static void doPrint(String message) {
+	System.out.println(message);
+	sb.append(message).append("|");
+    }
+
+    public static void throwUp() {
+//	System.out.println(sb.substring(Math.max(0, sb.length() - 20)));
+	System.out.println(sb.toString());
+	Button.ENTER.waitForPressAndRelease();
     }
 
 }
