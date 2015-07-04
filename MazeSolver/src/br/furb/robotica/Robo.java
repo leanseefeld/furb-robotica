@@ -8,7 +8,6 @@ import lejos.nxt.ColorSensor;
 import lejos.nxt.Motor;
 import lejos.nxt.NXTRegulatedMotor;
 import lejos.nxt.SensorPort;
-import lejos.robotics.Color;
 import util.Pilha;
 
 /**
@@ -16,17 +15,18 @@ import util.Pilha;
  */
 public class Robo {
 
-    private static final int PASSOS_ANALISE_LINHA = 4;
+    private static final int PASSOS_ANALISE_LINHA = 3;
     private static final int ROTACAO_ANALISE_LINHA = 30;
-    private static final int VELOCIDADE = 200;
-    private static final int _90GRAUS_RODAS = 250;
+    private static final int VELOCIDADE = 220;
+    private static final int _90GRAUS_RODAS = 220;
 
     private static final int DISTANCIA_INSPECAO = 100;
-    private static final int DISTANCIA_AJUSTE = 10;
-    private static final int DISTANCIA_PASSO = 40;
+    private static final int DISTANCIA_AJUSTE = 40;
+    private static final int DISTANCIA_PASSO = 20;
     // TODO: Não pode ser branca pq senão vai confundir com o fundo (fora da linha)
-    private static final int COR_OBJETIVO = Color.RED;
-    private static final int COR_LINHA = Color.BLACK;
+    //    private static final int COR_OBJETIVO = Color.RED;
+    private static final int LIMIAR_PRETO = 150;
+    private static final int PASSOS_IGNORADOS = 3;
 
     private Sentido sentidoAtual;
     private final GerenciadorNos gerenciadorNos;
@@ -47,8 +47,8 @@ public class Robo {
 
     public static void main(String[] args) {
 	try {
-	    System.out.println("ENTER    -> Executa");
-	    System.out.println("[outro]  -> Depura");
+	    System.out.println("ENTER   -> Executa");
+	    System.out.println("[outro] -> Depura");
 	    Debug.debug = Button.waitForAnyPress() != Button.ENTER.getId();
 
 	    Robo robo = new Robo();
@@ -119,8 +119,6 @@ public class Robo {
 	Motor.B.setSpeed(VELOCIDADE);
 
 	this.nosNaoVisitados = new Stack<>();
-	this.colorSensorDireito.setFloodlight(true);
-	this.colorSensorEsquerdo.setFloodlight(true);
 
 	this.gerenciadorNos = new GerenciadorNos();
 	this.noAtual = new No(0, 0);
@@ -247,7 +245,7 @@ public class Robo {
 
     private boolean existeSensorSobreLinha() {
 	analisarCores();
-	return ultimaCorDireita == COR_LINHA || ultimaCorEsquerda == COR_LINHA;
+	return ultimaCorDireita < LIMIAR_PRETO || ultimaCorEsquerda < LIMIAR_PRETO;
     }
 
     public boolean analisouPosicao() {
@@ -327,13 +325,15 @@ public class Robo {
     }
 
     private void seguirLinha() {
-	while (!estaSobreInterseccao() && !estaSobreObjetivo()) {
-	    if (ultimaCorEsquerda == COR_LINHA) {
+	int passosTomados = 0;
+	while (passosTomados < PASSOS_IGNORADOS || !estaSobreInterseccao() && !estaSobreObjetivo()) {
+	    if (ultimaCorEsquerda < LIMIAR_PRETO) {
 		motorDireito.rotate(DISTANCIA_AJUSTE);
-	    } else if (ultimaCorDireita == COR_LINHA) {
+	    } else if (ultimaCorDireita < LIMIAR_PRETO) {
 		motorEsquerdo.rotate(DISTANCIA_AJUSTE);
 	    }
 	    avancar(DISTANCIA_PASSO);
+	    passosTomados++;
 	}
     }
 
@@ -400,35 +400,40 @@ public class Robo {
     public boolean estaSobreInterseccao() {
 	Debug.step("cores");
 	analisarCores();
-	return ultimaCorDireita == COR_LINHA && ultimaCorEsquerda == COR_LINHA;
+	return ultimaCorDireita < LIMIAR_PRETO && ultimaCorEsquerda < LIMIAR_PRETO;
     }
 
     public boolean estaSobreLinha() {
 	boolean encontrouLinha = false;
 	int quantidadeGirar;
-	for (quantidadeGirar = 0; quantidadeGirar < PASSOS_ANALISE_LINHA; quantidadeGirar++) {
+	girar(Lado.ESQUERDA, PASSOS_ANALISE_LINHA * ROTACAO_ANALISE_LINHA);
+	for (quantidadeGirar = -PASSOS_ANALISE_LINHA; quantidadeGirar <= PASSOS_ANALISE_LINHA; quantidadeGirar++) {
 	    girar(Lado.DIREITA, ROTACAO_ANALISE_LINHA);
 	    if (existeSensorSobreLinha()) {
 		encontrouLinha = true;
 		break;
 	    }
 	}
-	for (; quantidadeGirar >= 0; quantidadeGirar--) {
-	    girar(Lado.ESQUERDA, ROTACAO_ANALISE_LINHA);
+	if (quantidadeGirar > 0) {
+	    girar(Lado.ESQUERDA, ROTACAO_ANALISE_LINHA * quantidadeGirar);
+	} else if (quantidadeGirar < 0) {
+	    girar(Lado.DIREITA, ROTACAO_ANALISE_LINHA * -quantidadeGirar);
 	}
 	return encontrouLinha;
     }
 
     private boolean estaSobreObjetivo() {
-	analisarCores();
-	return ultimaCorDireita == COR_OBJETIVO && ultimaCorEsquerda == COR_OBJETIVO;
+	//	analisarCores();
+	// TODO fazer análise de cor
+	//	return ultimaCorDireita == COR_OBJETIVO && ultimaCorEsquerda == COR_OBJETIVO;
+	return false;
     }
 
     private void analisarCores() {
 	if (moveu) {
 	    moveu = false;
-	    ultimaCorDireita = colorSensorDireito.getColorID();
-	    ultimaCorEsquerda = colorSensorEsquerdo.getColorID();
+	    ultimaCorDireita = colorSensorDireito.getLightValue();
+	    ultimaCorEsquerda = colorSensorEsquerdo.getLightValue();
 	}
     }
 
