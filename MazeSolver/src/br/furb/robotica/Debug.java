@@ -8,32 +8,24 @@ public class Debug {
     private static StringBuilder sb = new StringBuilder();
 
     public static void print(String message) {
-	if (true) {
-	    doPrint(message);
-	}
+	doPrint(message);
     }
 
     public static void println() {
-	if (true) {
-	    doPrint();
-	}
+	doPrint();
     }
 
     public static void println(String message) {
-	if (true) {
-	    doPrint(message);
-	}
+	doPrint(message);
     }
 
     public static void step(String message) {
-	if (true) {
-	    doPrint(message);
-	    //	    Button.ENTER.waitForPressAndRelease();
-	}
+	doPrint(message);
+	//	    Button.ENTER.waitForPressAndRelease();
     }
 
     public static void toggle() {
-//	debug = !debug;
+	//	debug = !debug;
     }
 
     private static void doPrint() {
@@ -41,12 +33,14 @@ public class Debug {
     }
 
     private static void doPrint(String message) {
-	System.out.println(message);
+	if (debug) {
+	    System.out.println(message);
+	}
 	sb.append(message).append("|");
     }
 
     public static void throwUp() {
-//	System.out.println(sb.substring(Math.max(0, sb.length() - 20)));
+	//	System.out.println(sb.substring(Math.max(0, sb.length() - 20)));
 	System.out.println(sb.toString());
 	Button.ENTER.waitForPressAndRelease();
     }
