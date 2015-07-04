@@ -13,7 +13,7 @@ public class GerenciadorNos {
     }
 
     private static int normalizeKey(int index) {
-	return index < 0 ? Integer.MAX_VALUE - index : index;
+	return index < 0 ? Integer.MAX_VALUE + index : index;
     }
 
     private Map<Integer, No> getLinhas(int x) {
