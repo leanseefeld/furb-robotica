@@ -144,7 +144,6 @@ public class Robo {
 	Debug.step("d1");
 	if (estaSobreObjetivo()) {
 	    Debug.step("Robo:125");
-	    this.noDestino = this.noAtual;
 	    return;
 	}
 	Debug.step("e1");
@@ -427,6 +426,7 @@ public class Robo {
 	boolean estaSobreObjetivo = colorSensorDireito.getColorID() == COR_OBJETIVO
 		|| colorSensorEsquerdo.getColorID() == COR_OBJETIVO;
 	if (estaSobreObjetivo) {
+	    this.noDestino = this.noAtual;
 	    System.out.println("Objetivo em " + noAtual);
 	}
 	return estaSobreObjetivo;
