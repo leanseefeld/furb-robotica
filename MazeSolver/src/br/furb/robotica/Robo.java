@@ -288,6 +288,7 @@ public class Robo {
      */
     private void moveParaInicio() {
 	moverPeloMenorCaminho(noInicial);
+	virarPara(sentidoInicial);
     }
 
     /**
@@ -302,7 +303,6 @@ public class Robo {
 	while (estaSeguindoCaminho()) {
 	    moverProximaPosicao();
 	}
-	virarPara(sentidoInicial);
     }
 
     /**
@@ -322,7 +322,7 @@ public class Robo {
 
     private void seguirLinha() {
 	int passosTomados = 0;
-	
+
 	while (passosTomados < PASSOS_IGNORADOS || !estaSobreInterseccao() && !estaSobreObjetivo()) {
 	    analisarCores();
 	    if (ultimaCorEsquerda < LIMIAR_PRETO) {
