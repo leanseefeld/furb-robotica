@@ -316,8 +316,8 @@ public class Robo {
 	System.out.println("Indo para " + proximaPosicao.getNo());
 	Sentido novoSentido = proximaPosicao.getSentidoOrigem();
 	virarPara(novoSentido);
-	seguirLinha();
 	this.noAtual = proximaPosicao.getNo();
+	seguirLinha();
     }
 
     private void seguirLinha() {
