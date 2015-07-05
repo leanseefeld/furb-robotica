@@ -400,7 +400,11 @@ public class Robo {
     public boolean estaSobreInterseccao() {
 	Debug.step("cores");
 	analisarCores();
-	return ultimaCorDireita < LIMIAR_PRETO && ultimaCorEsquerda < LIMIAR_PRETO;
+	if (ultimaCorDireita < LIMIAR_PRETO && ultimaCorEsquerda < LIMIAR_PRETO) {
+	    analisarPosicao();
+	    return true;
+	}
+	return false;
     }
 
     public boolean estaSobreLinha() {
