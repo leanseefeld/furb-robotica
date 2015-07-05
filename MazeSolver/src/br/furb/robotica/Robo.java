@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Stack;
 import lejos.nxt.Button;
 import lejos.nxt.ColorSensor;
+import lejos.nxt.ColorSensor.Color;
 import lejos.nxt.Motor;
 import lejos.nxt.NXTRegulatedMotor;
 import lejos.nxt.SensorPort;
@@ -18,13 +19,12 @@ public class Robo {
     private static final int PASSOS_ANALISE_LINHA = 3;
     private static final int ROTACAO_ANALISE_LINHA = 30;
     private static final int VELOCIDADE = 220;
-    private static final int _90GRAUS_RODAS = 220;
+    private static final int _90GRAUS_RODAS = 270;
 
     private static final int DISTANCIA_INSPECAO = 100;
-    private static final int DISTANCIA_AJUSTE = 40;
+    private static final int DISTANCIA_AJUSTE = 60;
     private static final int DISTANCIA_PASSO = 20;
-    // TODO: Não pode ser branca pq senão vai confundir com o fundo (fora da linha)
-    //    private static final int COR_OBJETIVO = Color.RED;
+    private static final int COR_OBJETIVO = Color.RED;
     private static final int LIMIAR_PRETO = 150;
     private static final int PASSOS_IGNORADOS = 3;
 
@@ -53,7 +53,6 @@ public class Robo {
 
 	    Robo robo = new Robo();
 	    robo.analisarPosicao();
-	    Debug.debug = false;
 
 	    boolean mapeamentoEstaCompleto = false;
 	    while (!mapeamentoEstaCompleto) {
@@ -134,7 +133,6 @@ public class Robo {
      * Pega informações da posição atual do robô.
      */
     public void analisarPosicao() {
-	Debug.debug = false;
 	Debug.step("a1");
 	if (noAtual.isVisitado()) {
 	    Debug.step("b1");
@@ -167,7 +165,6 @@ public class Robo {
 		}
 	    }
 	}
-	Debug.debug = true;
 	Debug.step("l1");
 	for (Sentido sentido : ladosAExplorar) {
 	    Debug.step("m1");
@@ -185,7 +182,6 @@ public class Robo {
 	    retroceder(DISTANCIA_INSPECAO);
 	}
 	Debug.step("r1");
-	Debug.toggle();
     }
 
     /**
@@ -318,6 +314,7 @@ public class Robo {
 	printPosicaoAtual();
 
 	proximaPosicao = caminho.pegar();
+	System.out.println("Indo para " + proximaPosicao.getNo());
 	Sentido novoSentido = proximaPosicao.getSentidoOrigem();
 	virarPara(novoSentido);
 	seguirLinha();
@@ -326,7 +323,9 @@ public class Robo {
 
     private void seguirLinha() {
 	int passosTomados = 0;
+	
 	while (passosTomados < PASSOS_IGNORADOS || !estaSobreInterseccao() && !estaSobreObjetivo()) {
+	    analisarCores();
 	    if (ultimaCorEsquerda < LIMIAR_PRETO) {
 		motorDireito.rotate(DISTANCIA_AJUSTE);
 	    } else if (ultimaCorDireita < LIMIAR_PRETO) {
@@ -335,6 +334,8 @@ public class Robo {
 	    avancar(DISTANCIA_PASSO);
 	    passosTomados++;
 	}
+	// avanca um pouco depois de achar uma interseccao ou objetivo pois os sensores estão à frente das rodas
+	avancar(DISTANCIA_PASSO * 2);
     }
 
     /**
@@ -423,10 +424,12 @@ public class Robo {
     }
 
     private boolean estaSobreObjetivo() {
-	//	analisarCores();
-	// TODO fazer análise de cor
-	//	return ultimaCorDireita == COR_OBJETIVO && ultimaCorEsquerda == COR_OBJETIVO;
-	return false;
+	boolean estaSobreObjetivo = colorSensorDireito.getColorID() == COR_OBJETIVO
+		|| colorSensorEsquerdo.getColorID() == COR_OBJETIVO;
+	if (estaSobreObjetivo) {
+	    System.out.println("Objetivo em " + noAtual);
+	}
+	return estaSobreObjetivo;
     }
 
     private void analisarCores() {

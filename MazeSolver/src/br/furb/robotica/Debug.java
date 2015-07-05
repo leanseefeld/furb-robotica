@@ -21,11 +21,11 @@ public class Debug {
 
     public static void step(String message) {
 	doPrint(message);
-	//	    Button.ENTER.waitForPressAndRelease();
+//	Button.ENTER.waitForPressAndRelease();
     }
 
     public static void toggle() {
-	//	debug = !debug;
+	debug = !debug;
     }
 
     private static void doPrint() {
