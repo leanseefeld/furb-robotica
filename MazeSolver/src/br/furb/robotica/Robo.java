@@ -268,7 +268,21 @@ public class Robo {
      * @return
      */
     public boolean mapeamentoEstaCompleto() {
-	return this.nosNaoVisitados.isEmpty();
+	if (!nosNaoVisitados.isEmpty()) {
+	    No no;
+	    boolean empty;
+	    boolean visitado;
+	    do {
+		no = nosNaoVisitados.pop();
+		visitado = no.isVisitado();
+		if (!visitado) {
+		    nosNaoVisitados.push(no);
+		}
+		empty = nosNaoVisitados.isEmpty();
+	    } while (!empty && visitado);
+	    return empty;
+	}
+	return true;
     }
 
     /**
