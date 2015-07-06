@@ -52,15 +52,11 @@ public class Robo {
 	    Debug.debug = Button.waitForAnyPress() != Button.ENTER.getId();
 
 	    Robo robo = new Robo();
-	    robo.analisarPosicao();
 
 	    boolean mapeamentoEstaCompleto = false;
 	    while (!mapeamentoEstaCompleto) {
 		Debug.step("a");
-		if (robo.estaSobreInterseccao()) {
-		    Debug.step("b");
-		    robo.analisarPosicao();
-		}
+		robo.analisarPosicao();
 
 		Debug.step("c");
 		mapeamentoEstaCompleto = robo.mapeamentoEstaCompleto();
@@ -143,7 +139,8 @@ public class Robo {
 
 	Debug.step("d1");
 	if (estaSobreObjetivo()) {
-	    Debug.step("Robo:125");
+	    this.noDestino = this.noAtual;
+	    System.out.println("Objetivo: " + noAtual);
 	    return;
 	}
 	Debug.step("e1");
@@ -316,8 +313,8 @@ public class Robo {
 	System.out.println("Indo para " + proximaPosicao.getNo());
 	Sentido novoSentido = proximaPosicao.getSentidoOrigem();
 	virarPara(novoSentido);
-	this.noAtual = proximaPosicao.getNo();
 	seguirLinha();
+	this.noAtual = proximaPosicao.getNo();
     }
 
     private void seguirLinha() {
@@ -400,11 +397,7 @@ public class Robo {
     public boolean estaSobreInterseccao() {
 	Debug.step("cores");
 	analisarCores();
-	if (ultimaCorDireita < LIMIAR_PRETO && ultimaCorEsquerda < LIMIAR_PRETO) {
-	    analisarPosicao();
-	    return true;
-	}
-	return false;
+	return ultimaCorDireita < LIMIAR_PRETO && ultimaCorEsquerda < LIMIAR_PRETO;
     }
 
     public boolean estaSobreLinha() {
@@ -427,13 +420,7 @@ public class Robo {
     }
 
     private boolean estaSobreObjetivo() {
-	boolean estaSobreObjetivo = colorSensorDireito.getColorID() == COR_OBJETIVO
-		|| colorSensorEsquerdo.getColorID() == COR_OBJETIVO;
-	if (estaSobreObjetivo) {
-	    this.noDestino = this.noAtual;
-	    System.out.println("Objetivo em " + noAtual);
-	}
-	return estaSobreObjetivo;
+	return colorSensorDireito.getColorID() == COR_OBJETIVO || colorSensorEsquerdo.getColorID() == COR_OBJETIVO;
     }
 
     private void analisarCores() {
