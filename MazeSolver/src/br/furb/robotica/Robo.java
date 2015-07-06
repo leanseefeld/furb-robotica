@@ -309,8 +309,8 @@ public class Robo {
 	moverPeloMenorCaminho(noDestino);
     }
 
-    private void moverPeloMenorCaminho(No objetivo) {
-	this.caminho = BuscaLargura.getMenorCaminho(noAtual, noInicial);
+    private void moverPeloMenorCaminho(No destino) {
+	this.caminho = BuscaLargura.getMenorCaminho(noAtual, destino);
 	while (estaSeguindoCaminho()) {
 	    moverProximaPosicao();
 	}
