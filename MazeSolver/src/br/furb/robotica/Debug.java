@@ -36,7 +36,7 @@ public class Debug {
 	if (debug) {
 	    System.out.println(message);
 	}
-	sb.append(message).append("|");
+//	sb.append(message).append("|");
     }
 
     public static void throwUp() {
