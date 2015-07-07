@@ -32,12 +32,23 @@ public class GerenciadorNos {
 	linhas.put(normalizeKey(no.getY()), no);
     }
 
-    public No getVizinho(No noOrigem, Sentido lado, boolean criar) {
-	Debug.step("a2");
+    /**
+     * Encontra o vizinho do {@code noOrigem} no sentido informado.
+     * 
+     * @param noOrigem
+     *            nó sendo analizado
+     * @param sentido
+     *            sentido a ser analizado
+     * @param criarOuLigar
+     *            {@code true} para criar o vizinho caso este seja nulo e/ou para ligar
+     *            {@code noOrigem} com o vizinho no sentido informado.
+     * @return
+     */
+    public No getVizinho(No noOrigem, Sentido sentido, boolean criarOuLigar) {
 	int x = noOrigem.getX();
 	int y = noOrigem.getY();
 
-	switch (lado) {
+	switch (sentido) {
 	    case SUL:
 		y--;
 		break;
@@ -51,21 +62,17 @@ public class GerenciadorNos {
 		x--;
 		break;
 	}
-	Debug.step("b2");
 
 	Map<Integer, No> linha = getLinhas(x);
 	No vizinho = linha.get(normalizeKey(y));
-	Debug.step("e2:" + vizinho);
-	if (vizinho == null && criar) {
-	    Debug.step("f2");
-	    vizinho = new No(x, y);
-	    Debug.step("g2");
-	    vizinho.setVizinho(lado.getOposto(), noOrigem);
-	    Debug.step("h2");
-	    noOrigem.setVizinho(lado, vizinho);
-	    Debug.step("i2");
-	    linha.put(normalizeKey(y), vizinho);
-	    Debug.step("j2");
+
+	if (criarOuLigar) {
+	    if (vizinho == null) {
+		vizinho = new No(x, y);
+		linha.put(normalizeKey(y), vizinho);
+	    }
+	    vizinho.setVizinho(sentido.getOposto(), noOrigem);
+	    noOrigem.setVizinho(sentido, vizinho);
 	}
 
 	return vizinho;
