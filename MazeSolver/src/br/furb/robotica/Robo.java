@@ -19,13 +19,13 @@ public class Robo {
     private static final int PASSOS_ANALISE_LINHA = 3;
     private static final int ROTACAO_ANALISE_LINHA = 30;
     private static final int VELOCIDADE = 220;
-    private static final int _90GRAUS_RODAS = 270;
+    private static final int _90GRAUS_RODAS = 220;
 
-    private static final int DISTANCIA_INSPECAO = 100;
-    private static final int DISTANCIA_AJUSTE = 60;
+    private static final int DISTANCIA_INSPECAO = 150;
+    private static final int DISTANCIA_AJUSTE = 35;
     private static final int DISTANCIA_PASSO = 20;
     private static final int COR_OBJETIVO = Color.RED;
-    private static final int LIMIAR_PRETO = 150;
+    private static final int LIMIAR_PRETO = 125;
     private static final int PASSOS_IGNORADOS = 3;
 
     private Sentido sentidoAtual;
@@ -85,12 +85,12 @@ public class Robo {
 	    if (robo.getDestino() == null) {
 		System.out.println("Destino não encontrado.");
 	    } else {
-		System.out.println("Pressione ENTER para ir a posicao original");
+		System.out.println("ENTER para ir a origem");
 		Button.ENTER.waitForPressAndRelease();
 
 		robo.moveParaInicio();
 
-		System.out.println("Pressione ENTER para seguir o menor caminho");
+		System.out.println("ENTER para ir ao destino");
 		Button.ENTER.waitForPressAndRelease();
 
 		robo.moverParaDestino();
@@ -98,7 +98,6 @@ public class Robo {
 		System.out.println("Objetivo alcançado");
 	    }
 	    Button.ENTER.waitForPressAndRelease();
-	    System.out.println("FIM");
 	} catch (Throwable t) {
 	    Debug.throwUp();
 	    throw t;
@@ -163,18 +162,14 @@ public class Robo {
 	}
 	Debug.step("l1");
 	for (Sentido sentido : ladosAExplorar) {
-	    Debug.step("m1");
 	    virarPara(sentido);
-	    Debug.step("n1");
 	    this.sentidoAtual = sentido;
 	    avancar(DISTANCIA_INSPECAO);
-	    Debug.step("o1");
 	    if (estaSobreLinha()) {
 		Debug.step("p1");
 		No vizinho = gerenciadorNos.getVizinho(noAtual, sentido, true);
 		nosNaoVisitados.push(vizinho);
 	    }
-	    Debug.step("q1");
 	    retroceder(DISTANCIA_INSPECAO);
 	}
 	Debug.step("r1");
@@ -334,18 +329,23 @@ public class Robo {
     private void seguirLinha() {
 	int passosTomados = 0;
 
+	final int passo = DISTANCIA_PASSO / 2;
 	while (passosTomados < PASSOS_IGNORADOS || !estaSobreInterseccao() && !estaSobreObjetivo()) {
 	    analisarCores();
 	    if (ultimaCorEsquerda < LIMIAR_PRETO) {
-		motorDireito.rotate(DISTANCIA_AJUSTE);
+		motorEsquerdo.rotate(passo, true);
+		motorDireito.rotate(passo + DISTANCIA_AJUSTE);
 	    } else if (ultimaCorDireita < LIMIAR_PRETO) {
-		motorEsquerdo.rotate(DISTANCIA_AJUSTE);
+		motorDireito.rotate(passo, true);
+		motorEsquerdo.rotate(passo + DISTANCIA_AJUSTE);
+	    } else {
+		avancar(DISTANCIA_PASSO);
 	    }
-	    avancar(DISTANCIA_PASSO);
 	    passosTomados++;
+	    moveu = true;
 	}
 	// avanca um pouco depois de achar uma interseccao ou objetivo pois os sensores estão à frente das rodas
-	avancar(DISTANCIA_PASSO * 2);
+	avancar(DISTANCIA_PASSO * 6);
     }
 
     /**
@@ -409,7 +409,6 @@ public class Robo {
     }
 
     public boolean estaSobreInterseccao() {
-	Debug.step("cores");
 	analisarCores();
 	return ultimaCorDireita < LIMIAR_PRETO && ultimaCorEsquerda < LIMIAR_PRETO;
     }
@@ -442,6 +441,7 @@ public class Robo {
 	    moveu = false;
 	    ultimaCorDireita = colorSensorDireito.getLightValue();
 	    ultimaCorEsquerda = colorSensorEsquerdo.getLightValue();
+	    System.out.println("D=" + ultimaCorDireita + ";E=" + ultimaCorEsquerda);
 	}
     }
 
