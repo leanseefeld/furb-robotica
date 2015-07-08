@@ -25,7 +25,7 @@ public class Robo {
     private static final int DISTANCIA_AJUSTE = 35;
     private static final int DISTANCIA_PASSO = 20;
     private static final int COR_OBJETIVO = Color.RED;
-    private static final int LIMIAR_PRETO = 125;
+    private static final int LIMIAR_PRETO = 150;
     private static final int PASSOS_IGNORADOS = 3;
 
     private Sentido sentidoAtual;
@@ -418,6 +418,9 @@ public class Robo {
 	int quantidadeGirar;
 	girar(Lado.ESQUERDA, PASSOS_ANALISE_LINHA * ROTACAO_ANALISE_LINHA);
 	for (quantidadeGirar = -PASSOS_ANALISE_LINHA; quantidadeGirar <= PASSOS_ANALISE_LINHA; quantidadeGirar++) {
+	    if (quantidadeGirar == 0) {
+		quantidadeGirar = 1; // 0 não conta aqui
+	    }
 	    girar(Lado.DIREITA, ROTACAO_ANALISE_LINHA);
 	    if (existeSensorSobreLinha()) {
 		encontrouLinha = true;
